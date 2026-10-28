@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dev Utility Hub</title>
+<meta name="description" content="폐쇄망용 오프라인 개발자 올인원 유틸리티 (단일 HTML)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6fde'/%3E%3Ctext x='16' y='21.5' font-family='Consolas,monospace' font-size='15' font-weight='700' text-anchor='middle' fill='white'%3E%7B%7D%3C/text%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   Dev Utility Hub — 오프라인 단일 HTML 개발 도구 모음
+   외부 CDN / 웹폰트 / 원격 요청 없음 (HTTP 테스터에서 사용자가 보내는 요청 제외)
+   ============================================================ */
+:root {
+  --bg: #f5f6f8; --bg-elev: #ffffff; --bg-sunk: #f0f2f5; --bg-hover: #e9ecf1;
+  --border: #dde1e7; --border-strong: #c5cbd4;
+  --text: #1c2230; --text-dim: #5a6474; --text-faint: #8b94a3;
+  --accent: #2f6fde; --accent-hover: #255fc4; --accent-weak: #e7eefc; --accent-text: #ffffff;
+  --ok: #1d8a4c; --ok-weak: #e2f3e9; --warn: #a96500; --warn-weak: #fcf0da; --err: #c73636; --err-weak: #fbe6e6; --info: #2f6fde; --info-weak: #e7eefc;
+  --add-bg: #e3f5e8; --add-hl: #a9e0b9; --del-bg: #fde9e9; --del-hl: #f3b4b4; --mod-bg: #fff6dc;
+  --syn-key: #8a35b8; --syn-str: #17803d; --syn-num: #b05300; --syn-bool: #0a5fc2; --syn-null: #8b94a3; --syn-punct: #6b7383;
+  --syn-kw: #0a5fc2; --syn-tag: #b3261e; --syn-attr: #8a35b8; --syn-comment: #8b94a3; --syn-fn: #8a5a00;
+  --mark: #ffe58a; --mark2: #c9e4ff; --mark-cur: #ffb347;
+  --sel: rgba(47, 111, 222, .25); --focus: rgba(47, 111, 222, .45);
+  --info-line: #bcd0f5; --warn-line: #ecc98a; --err-line: #efb3b3; --ok-line: #a9dbbd;
+  --shadow: 0 6px 24px rgba(16, 24, 40, .14);
+  --radius: 8px;
+  --font: "Pretendard", "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
+  --mono: "D2Coding", "D2 Coding", Consolas, "JetBrains Mono", "Cascadia Mono", Menlo, "Malgun Gothic", monospace;
+  --code-size: 13px; --code-lh: 20px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #121519; --bg-elev: #1a1e24; --bg-sunk: #15181d; --bg-hover: #242a32;
+  --border: #2a3039; --border-strong: #3a424e;
+  --text: #e3e7ed; --text-dim: #a2abb8; --text-faint: #6f7987;
+  --accent: #5b93f0; --accent-hover: #74a5f4; --accent-weak: #1f2c44; --accent-text: #0b1220;
+  --ok: #4cc27f; --ok-weak: #15301f; --warn: #e3a33b; --warn-weak: #33270f; --err: #f06a6a; --err-weak: #3a1a1a; --info: #5b93f0; --info-weak: #1f2c44;
+  --add-bg: #15301f; --add-hl: #22603a; --del-bg: #3a1a1c; --del-hl: #7a2c30; --mod-bg: #332b12;
+  --syn-key: #d29cf5; --syn-str: #8fd18f; --syn-num: #f0a35e; --syn-bool: #74a9f7; --syn-null: #7f8a99; --syn-punct: #8f99a8;
+  --syn-kw: #74a9f7; --syn-tag: #f28b82; --syn-attr: #d29cf5; --syn-comment: #6f7987; --syn-fn: #e5c07b;
+  --mark: #6b5a12; --mark2: #1f4a73; --mark-cur: #a8620f;
+  --sel: rgba(91, 147, 240, .35); --focus: rgba(91, 147, 240, .55);
+  --info-line: #2e4672; --warn-line: #5e4515; --err-line: #6a2a2a; --ok-line: #24553a;
+  --shadow: 0 8px 28px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+code, kbd, .mono { font-family: var(--mono); }
+kbd { font-size: 11px; padding: 1px 5px; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--bg-elev); color: var(--text-dim); }
+::selection { background: var(--sel); }
+.hidden, [hidden] { display: none !important; }
+.sp { flex: 1; }
+.dim { color: var(--text-dim); }
+.faint { color: var(--text-faint); }
+.nowrap { white-space: nowrap; }
+
+/* ---------- App layout ---------- */
+#app { display: grid; grid-template-columns: 236px minmax(0, 1fr); height: 100vh; }
+#sidebar { display: flex; flex-direction: column; background: var(--bg-elev); border-right: 1px solid var(--border); min-height: 0; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px; cursor: pointer; user-select: none; }
+.brand-logo { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; display: grid; place-items: center; font: 700 14px var(--mono); flex: none; }
+.brand-name { font-weight: 700; font-size: 14px; line-height: 1.2; }
+.brand-sub { font-size: 11px; color: var(--text-faint); display: flex; align-items: center; gap: 5px; }
+.brand-sub .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); display: inline-block; }
+.search-btn { margin: 4px 12px 8px; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border); background: var(--bg-sunk); border-radius: 7px; color: var(--text-faint); cursor: pointer; text-align: left; }
+.search-btn:hover { border-color: var(--border-strong); }
+.search-btn .sp { flex: 1; }
+#nav { overflow-y: auto; flex: 1; padding: 0 8px 12px; }
+.nav-group { margin-top: 10px; }
+.nav-group-title { font-size: 11px; font-weight: 700; color: var(--text-faint); letter-spacing: .02em; padding: 4px 8px; text-transform: uppercase; }
+.nav-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 5px 8px; border: 0; background: none; border-radius: 6px; cursor: pointer; text-align: left; color: var(--text); }
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item.on { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+.abbr { flex: none; width: 30px; height: 20px; border-radius: 5px; display: grid; place-items: center; font: 700 9.5px/1 var(--mono); background: var(--bg-sunk); border: 1px solid var(--border); color: var(--text-dim); letter-spacing: -.02em; }
+.nav-item.on .abbr { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.side-foot { border-top: 1px solid var(--border); padding: 8px 10px; display: flex; gap: 6px; align-items: center; }
+
+#main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+#topbar { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--bg-elev); min-height: 54px; }
+#menuBtn { display: none; }
+#toolTitle { font-size: 16px; font-weight: 700; margin: 0; white-space: nowrap; }
+#toolDesc { color: var(--text-dim); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#view { flex: 1; min-height: 0; overflow: auto; padding: 14px 18px 18px; }
+.tool { display: flex; flex-direction: column; gap: 10px; min-height: 100%; }
+.tool.fill { height: 100%; }
+
+/* ---------- Controls ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 30px; padding: 0 11px; border: 1px solid var(--border-strong); background: var(--bg-elev); border-radius: 6px; cursor: pointer; white-space: nowrap; color: var(--text); }
+.btn:hover { background: var(--bg-hover); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.danger { color: var(--err); }
+.btn.sm { height: 24px; padding: 0 8px; font-size: 12px; border-radius: 5px; }
+.btn.xs { height: 22px; padding: 0 6px; font-size: 11.5px; border-radius: 5px; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--text-dim); }
+.btn.ghost:hover { background: var(--bg-hover); color: var(--text); }
+.btn.icon { width: 30px; padding: 0; }
+.inp, select.inp { height: 30px; padding: 0 9px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--bg-elev); min-width: 0; }
+.inp:focus, textarea:focus, select:focus { outline: 2px solid var(--focus); outline-offset: -1px; }
+.inp.sm { height: 24px; font-size: 12px; padding: 0 7px; }
+.inp.mono { font-family: var(--mono); }
+textarea.inp { height: auto; padding: 7px 9px; resize: vertical; font-family: var(--mono); font-size: 12.5px; }
+label.chk { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; user-select: none; color: var(--text-dim); }
+label.chk:hover { color: var(--text); }
+label.chk input { margin: 0; accent-color: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.toolbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+.toolbar .lbl { color: var(--text-dim); font-size: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > span { font-size: 12px; color: var(--text-dim); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; background: var(--bg-elev); }
+.seg button { border: 0; background: none; height: 28px; padding: 0 10px; cursor: pointer; color: var(--text-dim); border-right: 1px solid var(--border); }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--bg-hover); color: var(--text); }
+.seg button.on { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab { border: 0; background: none; padding: 7px 12px; cursor: pointer; color: var(--text-dim); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab .cnt { font-size: 11px; color: var(--text-faint); margin-left: 3px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 10px; font-size: 11.5px; font-weight: 600; background: var(--bg-sunk); color: var(--text-dim); border: 1px solid var(--border); white-space: nowrap; }
+.badge.ok { background: var(--ok-weak); color: var(--ok); border-color: transparent; }
+.badge.warn { background: var(--warn-weak); color: var(--warn); border-color: transparent; }
+.badge.err { background: var(--err-weak); color: var(--err); border-color: transparent; }
+.badge.info { background: var(--info-weak); color: var(--info); border-color: transparent; }
+.card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); }
+.card-pad { padding: 12px 14px; }
+.card h3 { margin: 0 0 8px; font-size: 13px; }
+.note { padding: 8px 12px; border-radius: 7px; background: var(--info-weak); color: var(--text); font-size: 12px; border: 1px solid var(--info-line); }
+.note.warn { background: var(--warn-weak); border-color: var(--warn-line); }
+.note.err { background: var(--err-weak); border-color: var(--err-line); }
+.note.ok { background: var(--ok-weak); border-color: var(--ok-line); }
+.note b { font-weight: 700; }
+.msg-ok { color: var(--ok); } .msg-err { color: var(--err); } .msg-warn { color: var(--warn); } .msg-info { color: var(--text-dim); }
+
+/* ---------- Pane (editor) ---------- */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; flex: 1; min-height: 340px; }
+.split.v { grid-template-columns: minmax(0, 1fr); }
+.split.s3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
+.pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; }
+.pane.drop { outline: 2px dashed var(--accent); outline-offset: -4px; }
+.pane-head { display: flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; min-height: 32px; border-bottom: 1px solid var(--border); background: var(--bg-sunk); }
+.pane-title { font-weight: 600; font-size: 12px; white-space: nowrap; }
+.pane-extra { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.pane-acts { display: flex; align-items: center; gap: 1px; }
+.pane-body { flex: 1; display: flex; min-height: 0; position: relative; }
+.pane-foot { display: flex; gap: 8px; align-items: center; padding: 2px 10px; min-height: 24px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-faint); background: var(--bg-sunk); }
+.pane-foot .msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pane-foot .msg a { cursor: pointer; text-decoration: underline; }
+.gutter { flex: none; overflow: hidden; position: relative; background: var(--bg-sunk); border-right: 1px solid var(--border); color: var(--text-faint); font: var(--code-size)/var(--code-lh) var(--mono); text-align: right; user-select: none; min-width: 38px; }
+.gutter-inner { padding: 8px 8px 40px 6px; white-space: pre; will-change: transform; }
+.gutter-mark { position: absolute; left: 0; right: 0; height: var(--code-lh); background: var(--err-weak); border-left: 3px solid var(--err); pointer-events: none; }
+textarea.code { flex: 1; min-width: 0; border: 0; resize: none; outline: none; background: transparent; color: var(--text); padding: 8px 10px 40px; font: var(--code-size)/var(--code-lh) var(--mono); white-space: pre; overflow: auto; tab-size: 4; }
+textarea.code.wrap { white-space: pre-wrap; word-break: break-all; }
+textarea.code::placeholder { color: var(--text-faint); white-space: pre-wrap; }
+.code-scroll { flex: 1; overflow: auto; display: flex; align-items: flex-start; min-width: 0; }
+.code-scroll .gutter { position: sticky; left: 0; z-index: 1; min-height: 100%; overflow: visible; }
+.code-scroll .gutter-inner { will-change: auto; }
+pre.code { margin: 0; flex: 1; padding: 8px 10px 40px; font: var(--code-size)/var(--code-lh) var(--mono); white-space: pre; tab-size: 4; color: var(--text); min-width: 0; }
+pre.code.wrap { white-space: pre-wrap; word-break: break-all; }
+.pane-empty { color: var(--text-faint); padding: 14px; font-size: 12.5px; white-space: pre-wrap; }
+.pane-view { flex: 1; overflow: auto; min-width: 0; }
+
+/* syntax */
+.t-key { color: var(--syn-key); } .t-str { color: var(--syn-str); } .t-num { color: var(--syn-num); } .t-bool { color: var(--syn-bool); }
+.t-null { color: var(--syn-null); font-style: italic; } .t-p { color: var(--syn-punct); } .t-kw { color: var(--syn-kw); font-weight: 600; }
+.t-tag { color: var(--syn-tag); } .t-attr { color: var(--syn-attr); } .t-com { color: var(--syn-comment); font-style: italic; } .t-fn { color: var(--syn-fn); }
+.t-var { color: var(--syn-num); font-weight: 600; } .t-err { color: var(--err); font-weight: 600; } .t-warn { color: var(--warn); font-weight: 600; }
+.t-ok { color: var(--ok); } .t-dim { color: var(--text-faint); }
+mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
+.mk.cur { background: var(--mark-cur); }
+
+/* ---------- Tables ---------- */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tbl th, .tbl td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tbl th { font-weight: 600; color: var(--text-dim); background: var(--bg-sunk); position: sticky; top: 0; z-index: 1; font-size: 12px; }
+.tbl td.mono, .tbl .mono { font-family: var(--mono); font-size: 12px; word-break: break-all; }
+.tbl tr:hover td { background: var(--bg-hover); }
+.tbl td.k { color: var(--text-dim); white-space: nowrap; width: 1%; }
+.tbl-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); }
+.tbl-wrap .tbl tr:last-child td { border-bottom: 0; }
+.copy-cell { cursor: pointer; }
+.copy-cell:hover { text-decoration: underline dotted; }
+
+/* key-value editor */
+.kv { width: 100%; border-collapse: collapse; }
+.kv td { padding: 2px 3px; border-bottom: 1px solid var(--border); }
+.kv td:first-child { width: 26px; text-align: center; }
+.kv td:last-child { width: 30px; }
+.kv input[type=text] { width: 100%; height: 27px; border: 1px solid transparent; background: transparent; padding: 0 6px; border-radius: 4px; font-family: var(--mono); font-size: 12.5px; }
+.kv input[type=text]:hover { border-color: var(--border); }
+.kv input[type=text]:focus { border-color: var(--accent); background: var(--bg-elev); outline: none; }
+.kv tr.off input[type=text] { color: var(--text-faint); text-decoration: line-through; }
+.kv th { font-size: 11.5px; color: var(--text-faint); text-align: left; padding: 3px 9px; font-weight: 600; }
+
+/* ---------- Popups ---------- */
+#toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 1000; pointer-events: none; align-items: center; }
+.toast { background: #1f2430; color: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: var(--shadow); font-size: 12.5px; animation: toastIn .18s ease-out; max-width: 80vw; }
+.toast.err { background: #b32d2d; } .toast.ok { background: #1b7a44; } .toast.warn { background: #9a5c00; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(6px); } }
+.menu { position: fixed; z-index: 900; min-width: 180px; max-width: 320px; max-height: 60vh; overflow: auto; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; }
+.menu-item { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 10px; border-radius: 5px; cursor: pointer; color: var(--text); white-space: nowrap; }
+.menu-item:hover, .menu-item.on { background: var(--bg-hover); }
+.menu-item .abbr { width: 28px; }
+.menu-sep { height: 1px; background: var(--border); margin: 4px 2px; }
+.menu-label { font-size: 11px; color: var(--text-faint); padding: 4px 10px 2px; font-weight: 600; }
+.overlay { position: fixed; inset: 0; background: rgba(10, 14, 20, .45); z-index: 800; display: flex; align-items: flex-start; justify-content: center; padding: 8vh 16px 16px; }
+.modal { background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: var(--shadow); width: min(720px, 100%); max-height: 84vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal.wide { width: min(1000px, 100%); }
+.modal-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.modal-head h2 { margin: 0; font-size: 15px; }
+.modal-body { padding: 14px 16px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.modal-foot { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.palette { width: min(620px, 100%); }
+.palette input { border: 0; border-bottom: 1px solid var(--border); padding: 14px 16px; font-size: 15px; outline: none; background: transparent; width: 100%; }
+.palette-list { overflow: auto; max-height: 56vh; padding: 6px; }
+.palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
+.palette-item.on { background: var(--accent-weak); }
+.palette-item .pd { color: var(--text-faint); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-item .pg { margin-left: auto; font-size: 11px; color: var(--text-faint); white-space: nowrap; }
+
+/* ---------- Home ---------- */
+.home { max-width: 1180px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.hero { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.hero h1 { margin: 0; font-size: 22px; }
+.hero p { margin: 4px 0 0; color: var(--text-dim); }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; }
+.gcard { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.gcard h3 { margin: 0 0 8px; font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+.gtool { display: flex; align-items: flex-start; gap: 10px; width: 100%; border: 0; background: none; padding: 6px; border-radius: 7px; cursor: pointer; text-align: left; color: var(--text); }
+.gtool:hover { background: var(--bg-hover); }
+.gtool b { display: block; font-weight: 600; font-size: 13px; }
+.gtool small { display: block; color: var(--text-faint); font-size: 11.5px; line-height: 1.4; }
+.gtool .abbr { margin-top: 1px; }
+.env-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- JSON tree ---------- */
+.jt { font: var(--code-size)/var(--code-lh) var(--mono); padding: 6px 4px 30px; }
+.jt-row { display: flex; align-items: baseline; gap: 4px; padding: 0 6px 0 0; border-radius: 4px; cursor: default; white-space: nowrap; }
+.jt-row:hover { background: var(--bg-hover); }
+.jt-row.sel { background: var(--accent-weak); }
+.jt-row.hit { background: var(--mark); }
+.jt-tog { width: 14px; flex: none; text-align: center; color: var(--text-faint); cursor: pointer; font-size: 10px; }
+.jt-key { color: var(--syn-key); }
+.jt-idx { color: var(--text-faint); }
+.jt-meta { color: var(--text-faint); font-size: 11.5px; }
+.jt-val { overflow: hidden; text-overflow: ellipsis; }
+.jt-kids { padding-left: 16px; border-left: 1px dotted var(--border-strong); margin-left: 6px; }
+.jt-path { display: flex; gap: 6px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--border); background: var(--bg-sunk); font-family: var(--mono); font-size: 12px; min-height: 32px; flex-wrap: wrap; }
+.jt-path code { color: var(--accent); word-break: break-all; }
+
+/* ---------- Diff ---------- */
+.diff { font: var(--code-size)/var(--code-lh) var(--mono); }
+.diff table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.diff td { padding: 0 8px; white-space: pre-wrap; word-break: break-all; vertical-align: top; }
+.diff td.ln { width: 46px; text-align: right; color: var(--text-faint); user-select: none; background: var(--bg-sunk); padding: 0 6px; font-size: 12px; }
+.diff td.sg { width: 18px; text-align: center; user-select: none; color: var(--text-faint); padding: 0; }
+.diff tr.add td.c, .diff td.c.add { background: var(--add-bg); }
+.diff tr.del td.c, .diff td.c.del { background: var(--del-bg); }
+.diff td.c.empty { background: repeating-linear-gradient(-45deg, transparent 0 5px, var(--bg-sunk) 5px 10px); }
+.diff ins { background: var(--add-hl); text-decoration: none; border-radius: 2px; }
+.diff del { background: var(--del-hl); text-decoration: none; border-radius: 2px; }
+.diff tr.fold td { background: var(--bg-sunk); color: var(--text-faint); text-align: center; cursor: pointer; font-family: var(--font); font-size: 12px; padding: 3px; }
+.diff tr.fold:hover td { color: var(--accent); }
+.diff tr.cur td.c { outline: 1px solid var(--accent); outline-offset: -1px; }
+
+/* ---------- Log ---------- */
+.log-list { font: 12.5px/19px var(--mono); }
+.log-e { border-bottom: 1px solid var(--border); padding: 3px 8px 3px 6px; display: grid; grid-template-columns: 18px auto 58px minmax(0, 1fr); gap: 0 8px; align-items: baseline; }
+.log-e:hover { background: var(--bg-hover); }
+.log-e .tg { cursor: pointer; color: var(--text-faint); text-align: center; user-select: none; }
+.log-e .ts { color: var(--text-faint); white-space: nowrap; font-size: 12px; }
+.log-e .lv { font-size: 10.5px; font-weight: 700; text-align: center; border-radius: 4px; padding: 0 3px; }
+.log-e .m { white-space: pre-wrap; word-break: break-all; min-width: 0; }
+.log-e .more { grid-column: 4; white-space: pre; overflow-x: auto; color: var(--text-dim); font-size: 12px; margin-top: 2px; padding: 4px 6px; background: var(--bg-sunk); border-radius: 4px; }
+.lv-ERROR, .lv-FATAL, .lv-SEVERE { background: var(--err-weak); color: var(--err); }
+.lv-WARN, .lv-WARNING { background: var(--warn-weak); color: var(--warn); }
+.lv-INFO { background: var(--info-weak); color: var(--info); }
+.lv-DEBUG, .lv-TRACE, .lv-FINE, .lv-FINER, .lv-FINEST, .lv-CONFIG, .lv-NONE { background: var(--bg-sunk); color: var(--text-faint); }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border-radius: 13px; border: 1px solid var(--border-strong); background: var(--bg-elev); cursor: pointer; font-size: 12px; user-select: none; }
+.chip.off { opacity: .45; text-decoration: line-through; }
+.chip b { font-weight: 700; }
+
+/* ---------- Stack trace ---------- */
+.st { font: 12.5px/20px var(--mono); padding: 8px 12px 30px; }
+.st-ex { margin: 6px 0 2px; }
+.st-ex .ty { color: var(--err); font-weight: 700; }
+.st-ex.caused .lbl { color: var(--warn); font-weight: 700; }
+.st-fr { padding-left: 24px; white-space: pre; }
+.st-fr.app { color: var(--text); font-weight: 600; background: var(--accent-weak); border-radius: 3px; }
+.st-fr.fw { color: var(--text-faint); }
+.st-fold { padding-left: 24px; color: var(--text-faint); cursor: pointer; font-style: italic; }
+.st-fold:hover { color: var(--accent); }
+.st-root { border: 1px solid var(--err-line); background: var(--err-weak); border-radius: 8px; padding: 10px 12px; margin: 4px 12px 0; font-size: 12.5px; }
+.st-root .mono { word-break: break-all; }
+
+/* ---------- HTTP ---------- */
+.http-line { display: flex; gap: 6px; align-items: center; }
+.http-line .method { width: 104px; font-weight: 700; font-family: var(--mono); }
+.http-line .url { flex: 1; font-family: var(--mono); height: 34px; }
+.http-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; flex: 1; min-height: 420px; }
+.http-cols > .card { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.tab-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.tab-body .pane { flex: 1; min-height: 200px; }
+.status-pill { font: 700 12px var(--mono); padding: 2px 8px; border-radius: 5px; }
+.m-GET { color: #1d8a4c; } .m-POST { color: #a96500; } .m-PUT { color: #2f6fde; } .m-PATCH { color: #8a35b8; } .m-DELETE { color: #c73636; } .m-HEAD, .m-OPTIONS { color: var(--text-dim); }
+.hist-item { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; }
+.hist-item:hover { background: var(--bg-hover); }
+.hist-item .u { font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.hist-item .mth { font: 700 11px var(--mono); width: 54px; flex: none; }
+.side-panel { width: 300px; flex: none; display: flex; flex-direction: column; min-height: 0; }
+
+/* ---------- OpenAPI ---------- */
+.op { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--bg-elev); overflow: hidden; }
+.op-head { display: flex; gap: 10px; align-items: center; padding: 7px 10px; cursor: pointer; }
+.op-head:hover { background: var(--bg-hover); }
+.op-m { font: 700 11.5px var(--mono); width: 62px; text-align: center; padding: 2px 0; border-radius: 4px; color: #fff; flex: none; }
+.op-m.get { background: #1d8a4c; } .op-m.post { background: #c98200; } .op-m.put { background: #2f6fde; } .op-m.patch { background: #8a35b8; } .op-m.delete { background: #c73636; } .op-m.other { background: #6b7383; }
+.op-path { font-family: var(--mono); font-weight: 600; word-break: break-all; }
+.op-sum { color: var(--text-dim); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.op-body { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.op-dep .op-path { text-decoration: line-through; }
+
+/* ---------- Misc ---------- */
+.kvlist { display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg-elev); }
+.kvlist > div { padding: 6px 10px; border-bottom: 1px solid var(--border); min-width: 0; }
+.kvlist > div:nth-last-child(-n+3) { border-bottom: 0; }
+.kvlist .k { color: var(--text-dim); font-size: 12px; background: var(--bg-sunk); white-space: nowrap; }
+.kvlist .v { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+.kvlist .a { display: flex; align-items: center; padding: 3px 6px; }
+.stat-row { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--text-dim); }
+.stat-row b { color: var(--text); font-family: var(--mono); font-weight: 600; }
+.section-title { font-size: 12px; font-weight: 700; color: var(--text-dim); margin: 2px 0 0; }
+.regex-view { font: var(--code-size)/var(--code-lh) var(--mono); white-space: pre-wrap; word-break: break-all; padding: 8px 10px 30px; }
+.regex-view .mk.alt { background: var(--mark2); }
+.preview-frame { border: 0; width: 100%; flex: 1; background: #fff; min-height: 300px; }
+.img-preview { max-width: 100%; max-height: 360px; border: 1px solid var(--border); border-radius: 6px; background: repeating-conic-gradient(var(--bg-sunk) 0 25%, transparent 0 50%) 50% / 16px 16px; }
+.empty-state { padding: 30px; text-align: center; color: var(--text-faint); }
+.findings .f { display: flex; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); align-items: baseline; font-size: 12.5px; }
+.findings .f:last-child { border-bottom: 0; }
+
+@media (max-width: 960px) {
+  .split, .http-cols, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .split > .pane { min-height: 260px; }
+  .side-panel { width: 100%; }
+}
+@media (max-width: 760px) {
+  #app { grid-template-columns: minmax(0, 1fr); }
+  #sidebar { position: fixed; z-index: 700; inset: 0 auto 0 0; width: 260px; transform: translateX(-102%); transition: transform .18s; box-shadow: var(--shadow); }
+  body.nav-open #sidebar { transform: none; }
+  #menuBtn { display: inline-flex; }
+  #view { padding: 10px 12px 16px; }
+  #topbar { padding: 8px 12px; }
+  #toolDesc { display: none; }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media print { #sidebar, #topbar { display: none; } #app { display: block; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand" data-home>
+      <div class="brand-logo">{}</div>
+      <div><div class="brand-name">Dev Utility Hub</div><div class="brand-sub"><span class="dot"></span>오프라인 · 설치 불필요</div></div>
+    </div>
+    <button class="search-btn" id="openPalette" type="button"><span>⌕ 기능 검색…</span><span class="sp"></span><kbd>Ctrl K</kbd></button>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <button class="btn sm ghost" id="themeBtn" type="button" title="테마 전환">◐ 테마</button>
+      <span class="sp"></span>
+      <button class="btn sm ghost" id="settingsBtn" type="button" title="설정">⚙ 설정</button>
+    </div>
+  </aside>
+  <main id="main">
+    <header id="topbar">
+      <button class="btn icon ghost" id="menuBtn" type="button" title="메뉴">☰</button>
+      <h1 id="toolTitle">홈</h1>
+      <div id="toolDesc"></div>
+      <span class="sp"></span>
+      <div id="toolActions" class="row"></div>
+    </header>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="toast"></div>
+<script>
+(function () {
+'use strict';
+/* =====================================================================
+ * Core: 유틸리티 · 저장소 · 공통 UI 컴포넌트 · 라우팅
+ * ===================================================================== */
+const VERSION = '1.0.0';
+const DU = window.DU = {};
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ESC_MAP[c]);
+function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+function refs(root) { const r = {}; root.querySelectorAll('[data-ref]').forEach(e => { r[e.dataset.ref] = e; }); return r; }
+function on(el, ev, fn, opt) { el.addEventListener(ev, fn, opt); return el; }
+function debounce(fn, ms) { let t; return function (...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+function pad(n, w = 2) { return String(n).padStart(w, '0'); }
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+function fmtNum(n) { return Number(n).toLocaleString('ko-KR'); }
+function countLines(s) { if (!s) return 0; let n = 1, i = -1; while ((i = s.indexOf('\n', i + 1)) !== -1) n++; return n; }
+function lineColOf(src, pos) {
+  let line = 1, last = -1;
+  for (let i = src.indexOf('\n'); i !== -1 && i < pos; i = src.indexOf('\n', i + 1)) { line++; last = i; }
+  return { line, col: pos - last };
+}
+function offsetOfLine(src, line) {
+  let pos = 0;
+  for (let l = 1; l < line; l++) { const i = src.indexOf('\n', pos); if (i < 0) return src.length; pos = i + 1; }
+  return pos;
+}
+const utf8Enc = new TextEncoder();
+const utf8 = s => utf8Enc.encode(s);
+function decodeUtf8(bytes, fatal = false) { return new TextDecoder('utf-8', { fatal }).decode(bytes); }
+function bytesToHex(b, sep = '') { let o = []; for (let i = 0; i < b.length; i++) o.push(b[i].toString(16).padStart(2, '0')); return o.join(sep); }
+function hexToBytes(hex) {
+  const clean = hex.replace(/0x/gi, '').replace(/[^0-9a-fA-F]/g, '');
+  if (clean.length % 2) throw new Error('16진수 자릿수가 홀수입니다');
+  const out = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.substr(i * 2, 2), 16);
+  return out;
+}
+function bytesToB64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function b64ToBytes(b64) {
+  let s = String(b64).replace(/[\s\r\n]/g, '').replace(/-/g, '+').replace(/_/g, '/');
+  s = s.replace(/=+$/, '');
+  if (/[^A-Za-z0-9+/]/.test(s)) throw new Error('Base64에 사용할 수 없는 문자가 있습니다');
+  if (s.length % 4 === 1) throw new Error('Base64 길이가 올바르지 않습니다');
+  while (s.length % 4) s += '=';
+  const bin = atob(s); const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+/** 바이트 → 문자열 (BOM / UTF-8 / EUC-KR 자동 감지) */
+function decodeBytes(bytes, enc = 'auto') {
+  if (enc && enc !== 'auto') return { text: new TextDecoder(enc).decode(bytes), encoding: enc };
+  if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return { text: decodeUtf8(bytes.subarray(3)), encoding: 'utf-8 (BOM)' };
+  if (bytes[0] === 0xFF && bytes[1] === 0xFE) return { text: new TextDecoder('utf-16le').decode(bytes.subarray(2)), encoding: 'utf-16le' };
+  if (bytes[0] === 0xFE && bytes[1] === 0xFF) return { text: new TextDecoder('utf-16be').decode(bytes.subarray(2)), encoding: 'utf-16be' };
+  try { return { text: decodeUtf8(bytes, true), encoding: 'utf-8' }; } catch (e) { /* not utf-8 */ }
+  try { return { text: new TextDecoder('euc-kr').decode(bytes), encoding: 'euc-kr (cp949)' }; } catch (e) { /* unsupported */ }
+  return { text: decodeUtf8(bytes), encoding: 'utf-8 (손상)' };
+}
+async function readFileText(file, enc = 'auto') { return decodeBytes(new Uint8Array(await file.arrayBuffer()), enc); }
+
+/** CP949(EUC-KR) 인코더: 브라우저 TextDecoder로 역매핑 테이블을 만들어 사용 */
+let _cp949 = null;
+function cp949Map() {
+  if (_cp949) return _cp949;
+  const m = new Map(); const dec = new TextDecoder('euc-kr'); const buf = new Uint8Array(2);
+  for (let a = 0x81; a <= 0xFE; a++) {
+    for (let b = 0x41; b <= 0xFE; b++) {
+      if ((b > 0x5A && b < 0x61) || (b > 0x7A && b < 0x81)) continue;
+      buf[0] = a; buf[1] = b;
+      const ch = dec.decode(buf);
+      if (ch.length === 1 && ch !== '�' && !m.has(ch)) m.set(ch, (a << 8) | b);
+    }
+  }
+  return (_cp949 = m);
+}
+function encodeCp949(str) {
+  const m = cp949Map(); const out = []; const bad = [];
+  for (const ch of str) {
+    const c = ch.codePointAt(0);
+    if (c < 0x80) { out.push(c); continue; }
+    const v = m.get(ch);
+    if (v == null) { out.push(0x3F); bad.push(ch); } else out.push(v >> 8, v & 0xFF);
+  }
+  return { bytes: new Uint8Array(out), unmappable: bad };
+}
+function encodeText(str, enc) {
+  if (/^(euc-kr|cp949|ms949|x-windows-949)$/i.test(enc)) return encodeCp949(str).bytes;
+  if (/^(iso-8859-1|latin1)$/i.test(enc)) { const o = new Uint8Array(str.length); for (let i = 0; i < str.length; i++) o[i] = str.charCodeAt(i) & 0xFF; return o; }
+  return utf8(str);
+}
+
+/* ---------- 저장소 (localStorage) ---------- */
+const store = {
+  pfx: 'devhub:',
+  get(k, d) { try { const v = localStorage.getItem(this.pfx + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(this.pfx + k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(this.pfx + k); } catch (e) { /* ignore */ } },
+  keys() { const o = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(this.pfx)) o.push(k.slice(this.pfx.length)); } } catch (e) { /* ignore */ } return o; },
+  clear(prefix = '') { this.keys().filter(k => k.startsWith(prefix)).forEach(k => this.del(k)); },
+  size() { let n = 0; try { this.keys().forEach(k => { n += (localStorage.getItem(this.pfx + k) || '').length * 2; }); } catch (e) { /* ignore */ } return n; },
+};
+const settings = Object.assign({ theme: 'auto', autosave: true, indent: '2' }, store.get('settings', {}));
+function saveSettings() { store.set('settings', settings); }
+const MAX_PERSIST = 300 * 1024;
+/** 입력값 자동 저장 (설정에서 끌 수 있음) */
+function persistGet(key, def) { return settings.autosave ? store.get('in:' + key, def) : def; }
+function persistSet(key, val) {
+  if (!settings.autosave) return;
+  if (typeof val === 'string' && val.length > MAX_PERSIST) { store.del('in:' + key); return; }
+  store.set('in:' + key, val);
+}
+/** input/select/checkbox 값 유지 */
+function bindPersist(el, key, onLoad) {
+  const isChk = el.type === 'checkbox';
+  const v = persistGet(key, undefined);
+  if (v !== undefined) { if (isChk) el.checked = !!v; else el.value = v; if (onLoad) onLoad(); }
+  on(el, isChk ? 'change' : 'input', () => persistSet(key, isChk ? el.checked : el.value));
+  if (!isChk && el.tagName === 'SELECT') on(el, 'change', () => persistSet(key, el.value));
+  return el;
+}
+
+/* ---------- 토스트 / 클립보드 / 다운로드 ---------- */
+function toast(msg, type = '', ms = 2200) {
+  const t = h(`<div class="toast ${type}"></div>`); t.textContent = msg;
+  $('#toast').appendChild(t); setTimeout(() => t.remove(), ms);
+}
+async function copyText(text, label) {
+  let ok = false;
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) { /* fallback */ }
+  if (!ok) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+  }
+  toast(ok ? (label || '복사했습니다') : '복사 실패 — 직접 선택해 복사하세요', ok ? 'ok' : 'err', 1400);
+  return ok;
+}
+function download(name, data, mime = 'text/plain;charset=utf-8') {
+  const blob = data instanceof Blob ? data : new Blob([data], { type: mime });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function pickFile(accept = '', multiple = false) {
+  return new Promise(res => {
+    const i = document.createElement('input'); i.type = 'file'; i.accept = accept; i.multiple = multiple;
+    i.onchange = () => res(multiple ? Array.from(i.files) : i.files[0]);
+    i.click();
+  });
+}
+
+/* ---------- 팝업 메뉴 / 모달 ---------- */
+let _menu = null;
+function closeMenu() { if (_menu) { _menu.remove(); _menu = null; } }
+/** items: [{label, abbr?, onClick, sep?, header?}] */
+function openMenu(anchor, items) {
+  closeMenu();
+  const m = h('<div class="menu" role="menu"></div>');
+  items.forEach(it => {
+    if (it.sep) { m.appendChild(h('<div class="menu-sep"></div>')); return; }
+    if (it.header) { const l = h('<div class="menu-label"></div>'); l.textContent = it.header; m.appendChild(l); return; }
+    const b = h(`<button class="menu-item" type="button">${it.abbr ? `<span class="abbr">${esc(it.abbr)}</span>` : ''}<span></span></button>`);
+    b.lastChild.textContent = it.label;
+    on(b, 'click', e => { e.stopPropagation(); closeMenu(); it.onClick(); });
+    m.appendChild(b);
+  });
+  document.body.appendChild(m); _menu = m;
+  const r = anchor.getBoundingClientRect(); const mw = m.offsetWidth, mh = m.offsetHeight;
+  let x = r.left, y = r.bottom + 4;
+  if (x + mw > innerWidth - 8) x = Math.max(8, r.right - mw);
+  if (y + mh > innerHeight - 8) y = Math.max(8, r.top - mh - 4);
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+  return m;
+}
+on(document, 'mousedown', e => { if (_menu && !_menu.contains(e.target)) closeMenu(); });
+
+function openModal({ title, body, wide, foot, onClose }) {
+  const ov = h(`<div class="overlay"><div class="modal${wide ? ' wide' : ''}" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2></h2><span class="sp"></span><button class="btn icon ghost" data-x type="button" title="닫기">✕</button></div>
+    <div class="modal-body"></div></div></div>`);
+  $('h2', ov).textContent = title;
+  const mb = $('.modal-body', ov);
+  if (typeof body === 'string') mb.innerHTML = body; else if (body) mb.appendChild(body);
+  if (foot) { const f = h('<div class="modal-foot"></div>'); f.appendChild(foot); $('.modal', ov).appendChild(f); }
+  const close = () => { ov.remove(); document.removeEventListener('keydown', kd, true); if (onClose) onClose(); };
+  const kd = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', kd, true);
+  on(ov, 'mousedown', e => { if (e.target === ov) close(); });
+  on($('[data-x]', ov), 'click', close);
+  document.body.appendChild(ov);
+  return { el: ov, body: mb, close };
+}
+
+/* ---------- 구문 강조 ---------- */
+const HL_LIMIT = 600 * 1024;
+const HL = {
+  json(s) {
+    const re = /("(?:[^"\\\n]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false)\b|\b(null)\b|([{}[\],])/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(s))) {
+      out += esc(s.slice(last, m.index));
+      if (m[1]) out += m[2] ? `<span class="t-key">${esc(m[1])}</span><span class="t-p">${esc(m[2])}</span>` : `<span class="t-str">${esc(m[1])}</span>`;
+      else if (m[3]) out += `<span class="t-num">${m[3]}</span>`;
+      else if (m[4]) out += `<span class="t-bool">${m[4]}</span>`;
+      else if (m[5]) out += `<span class="t-null">null</span>`;
+      else out += `<span class="t-p">${esc(m[6])}</span>`;
+      last = re.lastIndex;
+    }
+    return out + esc(s.slice(last));
+  },
+  xml(s) {
+    const re = /(<!--[\s\S]*?-->)|(<!\[CDATA\[[\s\S]*?\]\]>)|(<[?!][^>]*>)|(<\/?)([\w:.-]+)((?:\s+[\w:.-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)(\s*)(\/?>)|(&[#\w]+;)/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(s))) {
+      out += esc(s.slice(last, m.index));
+      if (m[1]) out += `<span class="t-com">${esc(m[1])}</span>`;
+      else if (m[2]) out += `<span class="t-str">${esc(m[2])}</span>`;
+      else if (m[3]) out += `<span class="t-com">${esc(m[3])}</span>`;
+      else if (m[5]) {
+        const attrs = esc(m[6] || '').replace(/([\w:.-]+)(\s*=\s*)?(&quot;.*?&quot;|&#39;.*?&#39;|[^\s&]+)?/g,
+          (a, n, eq, v) => v && eq ? `<span class="t-attr">${n}</span>${eq}<span class="t-str">${v}</span>` : `<span class="t-attr">${n}</span>${eq || ''}${v || ''}`);
+        out += `<span class="t-p">${esc(m[4])}</span><span class="t-tag">${esc(m[5])}</span>${attrs}${m[7]}<span class="t-p">${esc(m[8])}</span>`;
+      } else if (m[9]) out += `<span class="t-num">${esc(m[9])}</span>`;
+      last = re.lastIndex;
+    }
+    return out + esc(s.slice(last));
+  },
+  sql(s) {
+    const re = /(--[^\n]*|\/\*[\s\S]*?\*\/)|('(?:[^']|'')*'?)|("(?:[^"]|"")*"?)|(#\{[^}]*\}|\$\{[^}]*\}|\?|:[A-Za-z_]\w*)|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_][\w$#]*)\b(\s*\()?/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(s))) {
+      out += esc(s.slice(last, m.index));
+      if (m[1]) out += `<span class="t-com">${esc(m[1])}</span>`;
+      else if (m[2]) out += `<span class="t-str">${esc(m[2])}</span>`;
+      else if (m[3]) out += `<span class="t-attr">${esc(m[3])}</span>`;
+      else if (m[4]) out += `<span class="t-var">${esc(m[4])}</span>`;
+      else if (m[5]) out += `<span class="t-num">${m[5]}</span>`;
+      else if (m[6]) {
+        const up = m[6].toUpperCase();
+        if (m[7] && !SQL_KEYWORDS.has(up)) out += `<span class="t-fn">${esc(m[6])}</span>${esc(m[7])}`;
+        else out += (SQL_KEYWORDS.has(up) ? `<span class="t-kw">${esc(m[6])}</span>` : esc(m[6])) + esc(m[7] || '');
+      }
+      last = re.lastIndex;
+    }
+    return out + esc(s.slice(last));
+  },
+  props(s) {
+    return s.split('\n').map(l => {
+      if (/^\s*[#!]/.test(l)) return `<span class="t-com">${esc(l)}</span>`;
+      const m = /^(\s*)((?:\\.|[^=:\s\\])+)(\s*[=:]\s*|\s+)?(.*)$/.exec(l);
+      if (!m) return esc(l);
+      return esc(m[1]) + `<span class="t-key">${esc(m[2])}</span>` + `<span class="t-p">${esc(m[3] || '')}</span>` + `<span class="t-str">${esc(m[4])}</span>`;
+    }).join('\n');
+  },
+  yaml(s) {
+    return s.split('\n').map(l => {
+      if (/^\s*#/.test(l)) return `<span class="t-com">${esc(l)}</span>`;
+      const m = /^(\s*(?:- )*)([^:#'"\s][^:#]*?|"[^"]*"|'[^']*')(:)(\s.*|$)/.exec(l);
+      if (m) return esc(m[1]) + `<span class="t-key">${esc(m[2])}</span><span class="t-p">:</span>` + HL._yv(m[4]);
+      const d = /^(\s*- )(.*)$/.exec(l);
+      if (d) return esc(d[1]) + HL._yv(d[2]);
+      return esc(l);
+    }).join('\n');
+  },
+  _yv(v) {
+    const t = v.trim();
+    if (!t) return esc(v);
+    if (/^(true|false|null|~)$/i.test(t)) return `<span class="t-bool">${esc(v)}</span>`;
+    if (/^-?\d+(\.\d+)?$/.test(t)) return `<span class="t-num">${esc(v)}</span>`;
+    return `<span class="t-str">${esc(v)}</span>`;
+  },
+};
+const SQL_KEYWORDS = new Set(('SELECT FROM WHERE AND OR NOT IN IS NULL LIKE BETWEEN EXISTS AS ON JOIN INNER LEFT RIGHT FULL OUTER CROSS NATURAL GROUP BY ORDER HAVING UNION ALL ' +
+  'DISTINCT INSERT INTO VALUES UPDATE SET DELETE MERGE USING MATCHED WHEN THEN ELSE END CASE WITH ASC DESC LIMIT OFFSET FETCH FIRST NEXT ROWS ROW ONLY ' +
+  'CONNECT START PRIOR NOCYCLE SIBLINGS OVER PARTITION CREATE TABLE ALTER DROP TRUNCATE INDEX VIEW SEQUENCE PRIMARY KEY FOREIGN REFERENCES DEFAULT CONSTRAINT ' +
+  'UNIQUE CHECK ADD COLUMN MODIFY RENAME TO GRANT REVOKE COMMIT ROLLBACK SAVEPOINT MINUS INTERSECT EXCEPT ANY SOME ESCAPE TRUE FALSE IF BEGIN DECLARE ' +
+  'PROCEDURE FUNCTION RETURN RETURNS RETURNING TRIGGER FOR EACH LOOP WHILE EXIT CURSOR OPEN CLOSE IMMEDIATE EXECUTE NOWAIT WAIT SKIP LOCKED PIVOT UNPIVOT ' +
+  'LATERAL APPLY RECURSIVE WINDOW RANGE PRECEDING FOLLOWING UNBOUNDED CURRENT NULLS LAST KEEP DENSE_RANK WITHIN SIBLINGS DUAL ROWNUM ROWID LEVEL SYSDATE SYSTIMESTAMP ' +
+  'COUNT SUM AVG MIN MAX NVL NVL2 DECODE COALESCE NULLIF TO_CHAR TO_DATE TO_NUMBER TO_TIMESTAMP SUBSTR INSTR LENGTH LENGTHB TRIM LTRIM RTRIM UPPER LOWER REPLACE ' +
+  'LPAD RPAD ROUND TRUNC CEIL FLOOR MOD ABS CAST CONVERT CONCAT ROW_NUMBER RANK LAG LEAD LISTAGG REGEXP_LIKE REGEXP_SUBSTR REGEXP_REPLACE ADD_MONTHS MONTHS_BETWEEN ' +
+  'LAST_DAY NOW EXTRACT INTERVAL DATE TIMESTAMP CHAR VARCHAR VARCHAR2 NUMBER INTEGER INT CLOB BLOB').split(/\s+/));
+
+/* ---------- 에디터 패널 (Pane) ----------
+ * opts: title, placeholder, readonly, lang(json|xml|sql|props|yaml), wrap, persist(key),
+ *       actions(['open','copy','clear','download','send','wrap']), filename, onInput, sendFrom(tool id)
+ */
+function Pane(o) {
+  o = Object.assign({ title: '', placeholder: '', readonly: false, lang: null, wrap: false, persist: null, actions: null, filename: 'output.txt', onInput: null, lines: true }, o);
+  const acts = o.actions || (o.readonly ? ['wrap', 'copy', 'download', 'send'] : ['open', 'wrap', 'copy', 'clear']);
+  const el = h(`<div class="pane">
+    <div class="pane-head"><span class="pane-title"></span><span class="pane-extra" data-ref="extra"></span><span class="sp"></span><span class="pane-acts" data-ref="acts"></span></div>
+    <div class="pane-body" data-ref="body"></div>
+    <div class="pane-foot"><span data-ref="stat"></span><span class="sp"></span><span class="msg" data-ref="msg"></span></div></div>`);
+  const r = refs(el);
+  $('.pane-title', el).textContent = o.title;
+  let text = '', wrap = !!o.wrap, lang = o.lang, ta = null, pre = null, gut, gutIn, mark = null, lastLines = -1, inputCb = o.onInput ? [o.onInput] : [];
+  if (!o.readonly) {
+    gut = h('<div class="gutter"><div class="gutter-inner">1</div></div>'); gutIn = gut.firstChild;
+    ta = h('<textarea class="code" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>');
+    ta.placeholder = o.placeholder;
+    r.body.append(gut, ta);
+    on(ta, 'scroll', () => { gutIn.style.transform = `translateY(${-ta.scrollTop}px)`; if (mark) mark.style.transform = `translateY(${-ta.scrollTop}px)`; });
+    const persistSave = o.persist ? debounce(() => persistSet('pane:' + o.persist, ta.value), 500) : null;
+    on(ta, 'input', () => { text = ta.value; refresh(); clearMark(); if (persistSave) persistSave(); inputCb.forEach(f => f(text)); });
+    on(ta, 'keydown', e => {
+      if (e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        const s = ta.selectionStart, en = ta.selectionEnd;
+        if (s === en && !e.shiftKey) { ta.setRangeText('  ', s, en, 'end'); }
+        else {
+          const ls = ta.value.lastIndexOf('\n', s - 1) + 1; const block = ta.value.slice(ls, en);
+          const nb = e.shiftKey ? block.replace(/^( {1,2}|\t)/gm, '') : block.replace(/^/gm, '  ');
+          ta.setRangeText(nb, ls, en, 'select');
+        }
+        ta.dispatchEvent(new Event('input'));
+      }
+    });
+  } else {
+    const sc = h('<div class="code-scroll"><div class="gutter"><div class="gutter-inner"></div></div><pre class="code"></pre></div>');
+    r.body.appendChild(sc); gut = sc.firstChild; gutIn = gut.firstChild; pre = sc.lastChild;
+    pre.dataset.empty = '1';
+  }
+  const btns = {
+    open: ['열기', '파일 열기 (드래그 앤 드롭 가능)', async () => { const f = await pickFile(); if (f) loadFile(f); }],
+    wrap: ['줄바꿈', '자동 줄바꿈 전환', () => setWrap(!wrap)],
+    copy: ['복사', '전체 복사', () => { if (!api.get()) return toast('복사할 내용이 없습니다', 'warn'); copyText(api.get()); }],
+    clear: ['지우기', '내용 지우기', () => { api.set(''); inputCb.forEach(f => f('')); if (ta) ta.focus(); }],
+    download: ['저장', '파일로 저장', () => { if (!api.get()) return toast('저장할 내용이 없습니다', 'warn'); download(o.filename, api.get()); }],
+    send: ['보내기 ▾', '다른 도구로 보내기', ev => sendMenu(ev.currentTarget, () => api.get(), o.sendFrom)],
+  };
+  acts.forEach(a => {
+    const d = btns[a]; if (!d) return;
+    const b = h(`<button class="btn xs ghost" type="button"></button>`); b.textContent = d[0]; b.title = d[1];
+    if (a === 'wrap') b.dataset.wrapBtn = '1';
+    on(b, 'click', d[2]); r.acts.appendChild(b);
+  });
+  async function loadFile(f) {
+    if (f.size > 50 * 1048576 && !confirm(`${fmtBytes(f.size)} 파일입니다. 브라우저가 느려질 수 있습니다. 계속할까요?`)) return;
+    const { text: t, encoding } = await readFileText(f);
+    api.set(t); inputCb.forEach(fn => fn(t));
+    if (o.persist) persistSet('pane:' + o.persist, t);
+    toast(`${f.name} (${fmtBytes(f.size)}, ${encoding})`, 'ok');
+  }
+  if (!o.readonly) {
+    on(el, 'dragover', e => { e.preventDefault(); el.classList.add('drop'); });
+    on(el, 'dragleave', e => { if (!el.contains(e.relatedTarget)) el.classList.remove('drop'); });
+    on(el, 'drop', e => { e.preventDefault(); el.classList.remove('drop'); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+  }
+  function setWrap(w) {
+    wrap = w; (ta || pre).classList.toggle('wrap', w); gut.classList.toggle('hidden', w || !o.lines);
+    const b = $('[data-wrap-btn]', el); if (b) b.classList.toggle('on', w);
+    if (b) b.style.color = w ? 'var(--accent)' : '';
+  }
+  function refresh() {
+    const n = countLines(text) || 1;
+    if (o.lines && n !== lastLines) {
+      lastLines = n; let s = ''; for (let i = 1; i <= n; i++) s += i + '\n';
+      gutIn.textContent = s;
+    }
+    r.stat.textContent = text ? `${fmtNum(text.length)}자 · ${fmtNum(n)}줄` : '';
+  }
+  function clearMark() { if (mark) { mark.remove(); mark = null; } }
+  const api = {
+    el, ta, pre, extra: r.extra, foot: r.msg,
+    get: () => (ta ? ta.value : text),
+    set(t, opt = {}) {
+      text = t == null ? '' : String(t);
+      if (opt.lang !== undefined) lang = opt.lang;
+      if (ta) { ta.value = text; ta.scrollTop = 0; }
+      else {
+        delete pre.dataset.empty;
+        if (!text && o.placeholder) { pre.innerHTML = `<span class="t-dim">${esc(o.placeholder)}</span>`; }
+        else if (lang && HL[lang] && text.length <= HL_LIMIT) pre.innerHTML = HL[lang](text);
+        else pre.textContent = text;
+        pre.parentNode.scrollTop = 0;
+      }
+      clearMark(); refresh();
+      return api;
+    },
+    setHTML(html, raw) { text = raw; pre.innerHTML = html; clearMark(); refresh(); return api; },
+    setTitle(t) { $('.pane-title', el).textContent = t; return api; },
+    status(msg, type = 'info', html = false) {
+      r.msg.className = 'msg msg-' + type;
+      if (html) r.msg.innerHTML = msg; else r.msg.textContent = msg || '';
+      r.msg.title = r.msg.textContent;
+      return api;
+    },
+    /** 오류 위치 표시 및 이동 */
+    markError(line, col) {
+      clearMark();
+      if (!ta || !line) return;
+      mark = h('<div class="gutter-mark"></div>');
+      mark.style.top = (8 + (line - 1) * 20) + 'px';
+      mark.style.transform = `translateY(${-ta.scrollTop}px)`;
+      gut.appendChild(mark);
+    },
+    goto(line, col = 1) {
+      if (!ta) return;
+      const off = offsetOfLine(ta.value, line) + Math.max(0, col - 1);
+      ta.focus(); ta.setSelectionRange(off, Math.min(off + 1, ta.value.length));
+      ta.scrollTop = Math.max(0, (line - 1) * 20 - ta.clientHeight / 2);
+    },
+    onInput(fn) { inputCb.push(fn); return api; },
+    focus() { (ta || pre).focus(); },
+    setPlaceholder(p) { o.placeholder = p; if (ta) ta.placeholder = p; },
+    loadFile,
+  };
+  if (o.persist && ta) { const v = persistGet('pane:' + o.persist, ''); if (v) { ta.value = v; text = v; } }
+  if (pre && o.placeholder) pre.innerHTML = `<span class="t-dim">${esc(o.placeholder)}</span>`;
+  setWrap(wrap); refresh();
+  return api;
+}
+
+/** 오류 메시지 + "위치로 이동" 링크 */
+function paneError(pane, err, src) {
+  if (err && err.line) {
+    pane.status('', 'err');
+    const a = h(`<span>✕ ${esc(err.message)} — <a>줄 ${err.line}, 열 ${err.col}</a></span>`);
+    on($('a', a), 'click', () => pane.goto(err.line, err.col));
+    pane.foot.appendChild(a); pane.foot.title = err.message;
+    pane.markError(err.line, err.col);
+  } else pane.status('✕ ' + (err && err.message || err), 'err');
+}
+
+/* ---------- Key-Value 표 편집기 ---------- */
+function KVTable({ rows = [], keyPh = '키', valPh = '값', onChange, check = true }) {
+  const el = h(`<div><table class="kv"><thead><tr><th></th><th>${esc(keyPh)}</th><th>${esc(valPh)}</th><th></th></tr></thead><tbody></tbody></table></div>`);
+  const tb = $('tbody', el);
+  let data = [];
+  function row(rw) {
+    const tr = h(`<tr><td>${check ? '<input type="checkbox">' : ''}</td><td><input type="text"></td><td><input type="text"></td><td><button class="btn xs ghost" type="button" title="삭제">✕</button></td></tr>`);
+    const [cb] = $$('input[type=checkbox]', tr); const [k, v] = $$('input[type=text]', tr);
+    k.placeholder = keyPh; v.placeholder = valPh; k.value = rw.k || ''; v.value = rw.v || '';
+    if (cb) cb.checked = rw.on !== false;
+    tr.classList.toggle('off', rw.on === false);
+    const upd = () => {
+      rw.k = k.value; rw.v = v.value; if (cb) rw.on = cb.checked; tr.classList.toggle('off', rw.on === false);
+      if (data[data.length - 1] === rw && (rw.k || rw.v)) { const n = { on: true, k: '', v: '' }; data.push(n); tb.appendChild(row(n)); }
+      if (onChange) onChange(api.get());
+    };
+    on(k, 'input', upd); on(v, 'input', upd); if (cb) on(cb, 'change', upd);
+    on($('button', tr), 'click', () => {
+      const i = data.indexOf(rw); if (i < 0) return;
+      if (i === data.length - 1) { k.value = v.value = ''; upd(); return; }
+      data.splice(i, 1); tr.remove(); if (onChange) onChange(api.get());
+    });
+    return tr;
+  }
+  const api = {
+    el,
+    get: () => data.filter(r => r.k || r.v).map(r => ({ on: r.on !== false, k: r.k, v: r.v })),
+    active: () => data.filter(r => r.k && r.on !== false),
+    set(rs) {
+      data = (rs || []).map(r => ({ on: r.on !== false, k: r.k || '', v: r.v == null ? '' : String(r.v) }));
+      data.push({ on: true, k: '', v: '' });
+      tb.innerHTML = ''; data.forEach(r => tb.appendChild(row(r)));
+      return api;
+    },
+  };
+  api.set(rows);
+  return api;
+}
+
+/* ---------- 탭 ---------- */
+function Tabs(items, onSwitch) {
+  // items: [{id, label}] -> returns {el, set(id), cur, setLabel}
+  const el = h('<div class="tabs" role="tablist"></div>');
+  const btn = {};
+  items.forEach(it => {
+    const b = h('<button class="tab" type="button" role="tab"></button>'); b.textContent = it.label; b.dataset.id = it.id;
+    on(b, 'click', () => api.set(it.id)); el.appendChild(b); btn[it.id] = b;
+  });
+  const api = {
+    el, cur: null,
+    set(id, silent) { api.cur = id; Object.values(btn).forEach(b => b.classList.toggle('on', b.dataset.id === id)); if (!silent && onSwitch) onSwitch(id); return api; },
+    setLabel(id, html) { if (btn[id]) btn[id].innerHTML = html; },
+  };
+  return api;
+}
+function Seg(items, value, onChange) {
+  const el = h('<div class="seg"></div>');
+  items.forEach(([v, label]) => {
+    const b = h('<button type="button"></button>'); b.textContent = label; b.dataset.v = v;
+    on(b, 'click', () => { api.set(v); if (onChange) onChange(v); }); el.appendChild(b);
+  });
+  const api = { el, value, set(v) { api.value = v; $$('button', el).forEach(b => b.classList.toggle('on', b.dataset.v === String(v))); return api; } };
+  api.set(value);
+  return api;
+}
+
+/* ---------- 도구 레지스트리 / 라우팅 ---------- */
+const GROUPS = [
+  { id: 'json', name: 'JSON' },
+  { id: 'http', name: 'HTTP · API' },
+  { id: 'encode', name: '인코딩 · 보안' },
+  { id: 'format', name: '포매터' },
+  { id: 'text', name: '텍스트' },
+  { id: 'java', name: 'Java · 서버' },
+  { id: 'time', name: '시간 · 스케줄' },
+];
+const TOOLS = []; const TOOL_MAP = {};
+let currentTool = null;
+function defineTool(t) { t.keywords = t.keywords || ''; TOOLS.push(t); TOOL_MAP[t.id] = t; }
+
+/** 다른 도구로 보내기 메뉴 */
+function sendMenu(anchor, getText, fromId) {
+  const text = getText();
+  if (!text) { toast('보낼 내용이 없습니다', 'warn'); return; }
+  const items = [];
+  GROUPS.forEach(g => {
+    const ts = TOOLS.filter(t => t.group === g.id && t.inputs && t.id !== fromId);
+    if (!ts.length) return;
+    items.push({ header: g.name });
+    ts.forEach(t => Object.entries(t.inputs).forEach(([slot, label]) => {
+      items.push({ abbr: t.abbr, label: `${t.name}${label && Object.keys(t.inputs).length > 1 ? ' · ' + label : ''}`, onClick: () => sendTo(t.id, slot, text) });
+    }));
+  });
+  openMenu(anchor, items);
+}
+function sendTo(id, slot, text) {
+  const t = TOOL_MAP[id]; if (!t) return;
+  openTool(id);
+  if (t.inst && t.inst.receive) t.inst.receive(slot, text);
+  toast(`${t.name}(으)로 보냈습니다`, 'ok', 1400);
+}
+DU.sendTo = sendTo;
+
+function renderNav() {
+  const nav = $('#nav'); nav.innerHTML = '';
+  GROUPS.forEach(g => {
+    const ts = TOOLS.filter(t => t.group === g.id); if (!ts.length) return;
+    const gEl = h(`<div class="nav-group"><div class="nav-group-title">${esc(g.name)}</div></div>`);
+    ts.forEach(t => {
+      const b = h(`<button class="nav-item" type="button" data-id="${t.id}"><span class="abbr">${esc(t.abbr)}</span><span></span></button>`);
+      b.lastChild.textContent = t.name; b.title = t.desc;
+      on(b, 'click', () => { location.hash = '#/' + t.id; document.body.classList.remove('nav-open'); });
+      gEl.appendChild(b);
+    });
+    nav.appendChild(gEl);
+  });
+}
+function setHeader(title, desc) { $('#toolTitle').textContent = title; $('#toolDesc').textContent = desc || ''; document.title = title === '홈' ? 'Dev Utility Hub' : `${title} · Dev Utility Hub`; }
+function openTool(id) {
+  const t = TOOL_MAP[id];
+  if (!t) { showHome(); return; }
+  if (!t.root) {
+    t.root = h(`<div class="tool" data-tool="${t.id}"></div>`);
+    if (t.fill) t.root.classList.add('fill');
+    $('#view').appendChild(t.root);
+    try { t.inst = t.init(t.root) || {}; }
+    catch (e) { console.error(e); t.root.innerHTML = `<div class="note err">도구 초기화 오류: ${esc(e.message)}</div>`; t.inst = {}; }
+  }
+  $$('#view > *').forEach(n => n.classList.toggle('hidden', n !== t.root));
+  $$('.nav-item').forEach(n => n.classList.toggle('on', n.dataset.id === id));
+  setHeader(t.name, t.desc);
+  const acts = $('#toolActions'); acts.innerHTML = '';
+  if (t.help) {
+    const hb = h('<button class="btn sm ghost" type="button">? 도움말</button>');
+    on(hb, 'click', () => openModal({ title: t.name + ' 도움말', body: `<div style="line-height:1.7">${t.help}</div>` }));
+    acts.appendChild(hb);
+  }
+  currentTool = t;
+  if (location.hash !== '#/' + id) history.replaceState(null, '', '#/' + id);
+  const rec = store.get('recent', []).filter(x => x !== id); rec.unshift(id); store.set('recent', rec.slice(0, 8));
+  if (t.inst.onShow) t.inst.onShow();
+}
+DU.openTool = openTool;
+function route() {
+  const id = (location.hash.match(/^#\/([\w-]+)/) || [])[1];
+  if (id && TOOL_MAP[id]) openTool(id); else showHome();
+}
+
+/* ---------- 홈 ---------- */
+let homeEl = null;
+function showHome() {
+  currentTool = null;
+  if (!homeEl) { homeEl = h('<div class="home"></div>'); $('#view').appendChild(homeEl); }
+  $$('#view > *').forEach(n => n.classList.toggle('hidden', n !== homeEl));
+  $$('.nav-item').forEach(n => n.classList.remove('on'));
+  setHeader('홈', '설치 없이 HTML 파일 하나로 동작하는 개발자용 올인원 유틸리티');
+  $('#toolActions').innerHTML = '';
+  if (location.hash && location.hash !== '#/') history.replaceState(null, '', location.pathname + location.search);
+  const recent = store.get('recent', []).filter(id => TOOL_MAP[id]).slice(0, 6);
+  const sc = window.isSecureContext;
+  homeEl.innerHTML = `
+    <div class="hero"><div><h1>Dev Utility Hub</h1>
+      <p>JSON · HTTP · 인코딩 · 포매터 · 로그 분석 도구 ${TOOLS.length}종. 데이터는 이 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</p></div>
+      <span class="sp"></span><button class="btn" data-pal type="button">⌕ 기능 검색 <kbd>Ctrl K</kbd></button></div>
+    ${recent.length ? `<div class="gcard"><h3>최근 사용</h3><div class="grid3">${recent.map(id => toolCard(TOOL_MAP[id])).join('')}</div></div>` : ''}
+    <div class="home-grid">${GROUPS.map(g => {
+      const ts = TOOLS.filter(t => t.group === g.id);
+      return ts.length ? `<div class="gcard"><h3>${esc(g.name)} <span class="badge">${ts.length}</span></h3>${ts.map(toolCard).join('')}</div>` : '';
+    }).join('')}</div>
+    <div class="gcard"><h3>실행 환경</h3><div class="env-list">
+      <span class="badge ${location.protocol === 'file:' ? 'info' : ''}">${esc(location.protocol === 'file:' ? '로컬 파일(file://)' : location.origin)}</span>
+      <span class="badge ${sc ? 'ok' : 'warn'}">보안 컨텍스트 ${sc ? '예' : '아니오 (일부 기능은 대체 구현 사용)'}</span>
+      <span class="badge ${window.crypto && crypto.subtle ? 'ok' : 'warn'}">WebCrypto ${window.crypto && crypto.subtle ? '사용 가능' : '없음 → 순수 JS 해시 사용'}</span>
+      <span class="badge">저장 데이터 ${fmtBytes(store.size())}</span>
+      <span class="badge">v${VERSION}</span>
+    </div>
+    <p class="dim" style="margin:8px 0 0;font-size:12px">단축키: <kbd>Ctrl</kbd>+<kbd>K</kbd> 기능 검색 · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 현재 도구 실행 · 패널에 파일을 끌어다 놓으면 열립니다 (UTF-8 / EUC-KR 자동 감지).</p></div>`;
+  $$('[data-tool-link]', homeEl).forEach(b => on(b, 'click', () => { location.hash = '#/' + b.dataset.toolLink; }));
+  on($('[data-pal]', homeEl), 'click', openPalette);
+}
+function toolCard(t) {
+  return `<button class="gtool" type="button" data-tool-link="${t.id}"><span class="abbr">${esc(t.abbr)}</span><span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span></button>`;
+}
+
+/* ---------- 명령 팔레트 (Ctrl+K) ---------- */
+function fuzzyScore(q, text) {
+  q = q.toLowerCase(); text = text.toLowerCase();
+  if (!q) return 1;
+  const idx = text.indexOf(q); if (idx >= 0) return 100 - idx;
+  let ti = 0, score = 0;
+  for (const ch of q) { const f = text.indexOf(ch, ti); if (f < 0) return 0; score += f === ti ? 3 : 1; ti = f + 1; }
+  return score;
+}
+function openPalette() {
+  if ($('.palette')) return;
+  const extra = [
+    { id: '@home', name: '홈', abbr: '⌂', desc: '대시보드로 이동', run: () => { location.hash = ''; showHome(); } },
+    { id: '@theme', name: '테마 전환 (라이트/다크)', abbr: '◐', desc: '화면 테마 변경', run: cycleTheme },
+    { id: '@settings', name: '설정', abbr: '⚙', desc: '자동 저장 · 저장 데이터 삭제', run: openSettings },
+  ];
+  const all = TOOLS.map(t => ({ id: t.id, name: t.name, abbr: t.abbr, desc: t.desc, group: (GROUPS.find(g => g.id === t.group) || {}).name, kw: t.keywords, run: () => { location.hash = '#/' + t.id; } })).concat(extra);
+  const box = h('<div class="modal palette"><input type="text" placeholder="도구 이름 · 키워드 검색 (예: base64, 이스케이프, cron, 로그)"><div class="palette-list"></div></div>');
+  const ov = h('<div class="overlay"></div>'); ov.appendChild(box); document.body.appendChild(ov);
+  const inp = $('input', box), list = $('.palette-list', box);
+  let items = [], sel = 0;
+  const close = () => ov.remove();
+  function render() {
+    const q = inp.value.trim();
+    items = all.map(a => ({ a, s: Math.max(fuzzyScore(q, a.name) * 2, fuzzyScore(q, a.kw || '') , fuzzyScore(q, a.desc || '') * 0.5, fuzzyScore(q, a.id)) }))
+      .filter(x => x.s > 0).sort((x, y) => y.s - x.s).map(x => x.a);
+    sel = clamp(sel, 0, Math.max(0, items.length - 1));
+    list.innerHTML = items.length ? items.map((a, i) => `<div class="palette-item${i === sel ? ' on' : ''}" data-i="${i}"><span class="abbr">${esc(a.abbr)}</span><b>${esc(a.name)}</b><span class="pd">${esc(a.desc || '')}</span><span class="pg">${esc(a.group || '')}</span></div>`).join('') : '<div class="empty-state">검색 결과 없음</div>';
+    const cur = $('.palette-item.on', list); if (cur) cur.scrollIntoView({ block: 'nearest' });
+  }
+  function go(i) { const a = items[i]; if (!a) return; close(); a.run(); }
+  on(inp, 'input', () => { sel = 0; render(); });
+  on(inp, 'keydown', e => {
+    if (e.key === 'ArrowDown') { sel = Math.min(items.length - 1, sel + 1); render(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { sel = Math.max(0, sel - 1); render(); e.preventDefault(); }
+    else if (e.key === 'Enter') { go(sel); e.preventDefault(); }
+    else if (e.key === 'Escape') close();
+  });
+  on(list, 'click', e => { const it = e.target.closest('.palette-item'); if (it) go(+it.dataset.i); });
+  on(ov, 'mousedown', e => { if (e.target === ov) close(); });
+  render(); inp.focus();
+}
+
+/* ---------- 테마 / 설정 ---------- */
+function applyTheme() {
+  const dark = settings.theme === 'dark' || (settings.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  $('#themeBtn').textContent = settings.theme === 'auto' ? '◐ 자동' : dark ? '☾ 다크' : '☀ 라이트';
+}
+function cycleTheme() {
+  settings.theme = { auto: 'light', light: 'dark', dark: 'auto' }[settings.theme] || 'auto';
+  saveSettings(); applyTheme();
+  toast('테마: ' + { auto: '시스템 설정 따름', light: '라이트', dark: '다크' }[settings.theme]);
+}
+function openSettings() {
+  const body = h(`<div style="display:flex;flex-direction:column;gap:12px">
+    <label class="chk"><input type="checkbox" data-ref="auto"> 입력 내용 자동 저장 (새로고침해도 복원)</label>
+    <div class="note">자동 저장은 이 PC 브라우저의 localStorage에만 저장됩니다. <b>JWT 토큰, HTTP 인증 정보, HTTP 응답 본문은 자동 저장하지 않습니다.</b> 공용 PC라면 자동 저장을 끄세요.</div>
+    <div class="row"><span class="dim">테마</span><select class="inp" data-ref="theme"><option value="auto">시스템 설정 따름</option><option value="light">라이트</option><option value="dark">다크</option></select></div>
+    <div class="row"><span class="dim">저장된 데이터: <b data-ref="size"></b></span><span class="sp"></span>
+      <button class="btn sm" data-ref="clrIn" type="button">입력 내용만 삭제</button>
+      <button class="btn sm danger" data-ref="clrAll" type="button">모든 저장 데이터 삭제</button></div>
+    <div class="row"><button class="btn sm" data-ref="exp" type="button">설정 · 환경변수 · 저장된 요청 내보내기</button><button class="btn sm" data-ref="imp" type="button">가져오기</button></div>
+    <div class="faint" style="font-size:12px">Dev Utility Hub v${VERSION} · 외부 라이브러리 / CDN / 웹폰트를 사용하지 않는 단일 HTML 파일입니다.</div></div>`);
+  const r = refs(body);
+  r.auto.checked = settings.autosave; r.theme.value = settings.theme;
+  const upd = () => { r.size.textContent = fmtBytes(store.size()); };
+  upd();
+  on(r.auto, 'change', () => { settings.autosave = r.auto.checked; saveSettings(); if (!settings.autosave) store.clear('in:'); upd(); });
+  on(r.theme, 'change', () => { settings.theme = r.theme.value; saveSettings(); applyTheme(); });
+  on(r.clrIn, 'click', () => { store.clear('in:'); upd(); toast('입력 내용을 삭제했습니다 (새로고침 후 반영)'); });
+  on(r.clrAll, 'click', () => { if (!confirm('환경변수, 저장된 요청, 히스토리를 포함한 모든 저장 데이터를 삭제할까요?')) return; store.clear(''); upd(); toast('모두 삭제했습니다'); });
+  on(r.exp, 'click', () => {
+    const data = {}; store.keys().filter(k => !k.startsWith('in:')).forEach(k => { data[k] = store.get(k); });
+    download('devhub-settings.json', JSON.stringify({ app: 'devhub', version: VERSION, data }, null, 2), 'application/json');
+  });
+  on(r.imp, 'click', async () => {
+    const f = await pickFile('.json'); if (!f) return;
+    try {
+      const j = JSON.parse((await readFileText(f)).text);
+      if (!j || j.app !== 'devhub' || !j.data) throw new Error('Dev Utility Hub 설정 파일이 아닙니다');
+      Object.entries(j.data).forEach(([k, v]) => store.set(k, v));
+      toast('가져왔습니다. 새로고침합니다.', 'ok'); setTimeout(() => location.reload(), 800);
+    } catch (e) { toast(e.message, 'err'); }
+  });
+  openModal({ title: '설정', body });
+}
+
+/* ---------- 공통 헬퍼 ---------- */
+function sampleBtn(label, fn) { const b = h('<button class="btn sm ghost" type="button"></button>'); b.textContent = label || '예제'; on(b, 'click', fn); return b; }
+function chk(label, key, def = false, title = '') {
+  const l = h(`<label class="chk"><input type="checkbox"> <span></span></label>`); l.lastChild.textContent = label; if (title) l.title = title;
+  const c = l.firstChild; c.checked = def; if (key) bindPersist(c, key);
+  return { el: l, input: c, get: () => c.checked, set: v => { c.checked = v; } };
+}
+function sel(options, key, def, title = '') {
+  const s = h('<select class="inp sm"></select>'); if (title) s.title = title;
+  options.forEach(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; const op = document.createElement('option'); op.value = v; op.textContent = l; s.appendChild(op); });
+  if (def !== undefined) s.value = def;
+  if (key) bindPersist(s, key);
+  return s;
+}
+function btn(label, fn, cls = '', title = '') {
+  const b = h(`<button class="btn ${cls}" type="button"></button>`); b.textContent = label; if (title) b.title = title; if (fn) on(b, 'click', fn); return b;
+}
+function copyBtn(get, label = '복사') { return btn(label, () => { const v = typeof get === 'function' ? get() : get; if (v) copyText(String(v)); }, 'xs ghost'); }
+/** 값 목록 (키 / 값 / 복사) */
+function kvList(rows) {
+  const el = h('<div class="kvlist"></div>');
+  rows.forEach(([k, v, opt = {}]) => {
+    const kd = h('<div class="k"></div>'); kd.textContent = k;
+    const vd = h('<div class="v"></div>'); if (opt.html) vd.innerHTML = v; else vd.textContent = v == null ? '' : v;
+    const ad = h('<div class="a"></div>');
+    if (opt.copy !== false && v !== '' && v != null) ad.appendChild(copyBtn(opt.raw != null ? opt.raw : (opt.html ? vd.textContent : String(v))));
+    el.append(kd, vd, ad);
+  });
+  return el;
+}
+DU.util = { esc, decodeBytes, encodeCp949, b64ToBytes, bytesToB64, hexToBytes, bytesToHex, lineColOf, countLines };
+
+/* =====================================================================
+ * JSON 엔진 — 자체 파서
+ *  - 오류 위치(줄/열) + 한국어 원인 안내
+ *  - 키 순서 그대로 유지 (JS 객체의 정수 키 재정렬 문제 없음)
+ *  - 큰 숫자(Java Long 등 2^53 초과) 원본 그대로 유지
+ *  - 관대한 모드: 주석, 후행 쉼표, 작은따옴표, 따옴표 없는 키, True/False/None
+ * AST: {T:'O', p:[[key,node]...]} | {T:'A', v:[node]} | {T:'S', v} | {T:'N', v:raw} | {T:'B', v} | {T:'Z'}
+ * ===================================================================== */
+const JSONX = (() => {
+  class JsonError extends Error {
+    constructor(msg, pos, src) { super(msg); this.pos = pos; const lc = lineColOf(src, pos); this.line = lc.line; this.col = lc.col; }
+  }
+  const NUM_STRICT = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  const NUM_LOOSE = /[+-]?(?:0[xX][0-9a-fA-F]+|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)/y;
+  const IDENT = /[A-Za-z_$\u00C0-\uFFFF][\w$\u00C0-\uFFFF-]*/y;
+  const SAFE = 9007199254740991;
+
+  function parse(src, opt = {}) {
+    const lenient = !!opt.lenient;
+    const n = src.length; let i = 0;
+    const warnings = []; const stats = { bigNums: 0, dupKeys: 0, maxDepth: 0, nodes: 0 };
+    const err = (msg, at = i) => { throw new JsonError(msg, Math.min(at, n), src); };
+    const show = c => c === undefined ? '입력 끝' : c === '\n' ? '줄바꿈' : c === ' ' ? '공백' : `'${c}'`;
+    function ws() {
+      for (;;) {
+        const c = src.charCodeAt(i);
+        if (c === 32 || c === 10 || c === 13 || c === 9) { i++; continue; }
+        if (c === 0xFEFF || c === 0xA0 || c === 0x3000 || c === 0x2028 || c === 0x2029) {
+          if (lenient || (c === 0xFEFF && i === 0)) { i++; continue; }
+          err(c === 0xFEFF ? 'BOM(U+FEFF) 문자가 중간에 있습니다' : `JSON에서 허용되지 않는 공백 문자(U+${c.toString(16).toUpperCase().padStart(4, '0')})가 있습니다. 복사 과정에서 섞인 특수 공백일 수 있습니다`);
+        }
+        if (c === 47 && (src[i + 1] === '/' || src[i + 1] === '*')) {
+          if (!lenient) err('JSON은 주석을 지원하지 않습니다 (관대한 파싱으로 복구 가능)');
+          if (src[i + 1] === '/') { const e = src.indexOf('\n', i); i = e < 0 ? n : e + 1; }
+          else { const e = src.indexOf('*/', i + 2); if (e < 0) err('닫히지 않은 /* 주석'); i = e + 2; }
+          continue;
+        }
+        if (c === 35 && lenient) { const e = src.indexOf('\n', i); i = e < 0 ? n : e + 1; continue; }
+        return;
+      }
+    }
+    function value(depth) {
+      if (depth > stats.maxDepth) stats.maxDepth = depth;
+      if (depth > 3000) err('중첩 깊이가 너무 깊습니다 (3000단계 초과)');
+      ws(); stats.nodes++;
+      const c = src[i];
+      if (c === '{') return obj(depth);
+      if (c === '[') return arr(depth);
+      if (c === '"') return { T: 'S', v: str() };
+      if (c === "'") { if (lenient) return { T: 'S', v: str() }; err('JSON 문자열은 큰따옴표(")로 감싸야 합니다. 작은따옴표(\')는 사용할 수 없습니다'); }
+      if (c === '-' || (c >= '0' && c <= '9') || (lenient && (c === '+' || c === '.'))) return num();
+      if (src.startsWith('true', i)) { i += 4; return { T: 'B', v: true }; }
+      if (src.startsWith('false', i)) { i += 5; return { T: 'B', v: false }; }
+      if (src.startsWith('null', i)) { i += 4; return { T: 'Z' }; }
+      if (c === undefined) err('값이 필요한데 입력이 끝났습니다');
+      IDENT.lastIndex = i; const m = IDENT.exec(src); const word = m ? m[0] : '';
+      if (lenient) {
+        const map = { True: true, False: false, TRUE: true, FALSE: false };
+        if (word in map) { i += word.length; return { T: 'B', v: map[word] }; }
+        if (word === 'None' || word === 'NULL' || word === 'Null' || word === 'undefined' || word === 'nil') { i += word.length; return { T: 'Z' }; }
+        if (word === 'NaN' || word === 'Infinity') { i += word.length; warnings.push(`${word}은(는) JSON 값이 아니라 null로 바꿨습니다`); return { T: 'Z' }; }
+      }
+      if (/^(True|False|TRUE|FALSE)$/.test(word)) err(`불리언 값은 소문자 true / false 여야 합니다 (발견: ${word})`);
+      if (/^(None|NULL|Null|undefined|nil)$/.test(word)) err(`null 값은 소문자 null 이어야 합니다 (발견: ${word})`);
+      if (word === 'NaN' || word === 'Infinity') err(`${word}은(는) JSON에서 사용할 수 없습니다`);
+      if (c === '}' || c === ']') err(`값이 필요한 위치에 ${show(c)}가 있습니다 (후행 쉼표 확인)`);
+      if (word) err(`따옴표 없는 문자열 '${word.slice(0, 30)}'은(는) 사용할 수 없습니다. 큰따옴표로 감싸세요`);
+      err(`예상하지 못한 문자 ${show(c)}`);
+    }
+    function obj(depth) {
+      const start = i; i++; const p = []; const seen = new Set(); let lastComma = -1;
+      ws();
+      if (src[i] === '}') { i++; return { T: 'O', p }; }
+      for (;;) {
+        ws();
+        let key; const kpos = i; const c = src[i];
+        if (c === '"' || (lenient && c === "'")) key = str();
+        else if (c === '}') { if (lenient) { i++; return { T: 'O', p }; } err('후행 쉼표(,)는 JSON에서 허용되지 않습니다', lastComma); }
+        else if (c === "'") err('JSON 키는 큰따옴표(")로 감싸야 합니다. 작은따옴표는 사용할 수 없습니다');
+        else if (c === undefined) err(`객체가 닫히지 않았습니다. '}'가 필요합니다 (객체 시작: ${lineColOf(src, start).line}줄)`);
+        else {
+          IDENT.lastIndex = i; const m = IDENT.exec(src);
+          if (m && lenient) { key = m[0]; i += key.length; }
+          else if (m) err(`키 '${m[0].slice(0, 30)}'를 큰따옴표로 감싸야 합니다`);
+          else if (lenient && /\d/.test(c)) { const mm = /\d+/y; mm.lastIndex = i; key = mm.exec(src)[0]; i += key.length; }
+          else err(`키(큰따옴표 문자열)가 필요한데 ${show(c)}가 있습니다`);
+        }
+        if (seen.has(key)) { stats.dupKeys++; if (warnings.length < 50) warnings.push(`중복 키 "${key}" (${lineColOf(src, kpos).line}줄) — 마지막 값이 우선 적용됩니다`); }
+        seen.add(key);
+        ws();
+        if (src[i] !== ':') {
+          if (src[i] === '=' && lenient) i++;
+          else err(`키 "${key.slice(0, 40)}" 뒤에 ':'가 필요한데 ${show(src[i])}가 있습니다`);
+        } else i++;
+        const v = value(depth + 1);
+        p.push([key, v]);
+        ws();
+        const d = src[i];
+        if (d === ',') { lastComma = i; i++; continue; }
+        if (d === '}') { i++; return { T: 'O', p }; }
+        if (d === undefined) err(`객체가 닫히지 않았습니다. '}'가 필요합니다 (객체 시작: ${lineColOf(src, start).line}줄)`);
+        if (lenient && (d === '"' || d === "'" || /[A-Za-z_$]/.test(d))) { warnings.push(`${lineColOf(src, i).line}줄: 빠진 쉼표를 보완했습니다`); continue; }
+        if (d === '"') err("',' 가 빠졌습니다. 앞 항목 뒤에 쉼표를 넣으세요");
+        if (d === ']') err("객체를 ']'로 닫았습니다. '}'가 필요합니다");
+        err(`',' 또는 '}'가 필요한데 ${show(d)}가 있습니다`);
+      }
+    }
+    function arr(depth) {
+      const start = i; i++; const v = []; let lastComma = -1;
+      ws();
+      if (src[i] === ']') { i++; return { T: 'A', v }; }
+      for (;;) {
+        ws();
+        if (src[i] === ']') { if (lenient) { i++; return { T: 'A', v }; } err('후행 쉼표(,)는 JSON에서 허용되지 않습니다', lastComma); }
+        if (src[i] === ',' && lenient) { v.push({ T: 'Z' }); lastComma = i; i++; continue; }
+        v.push(value(depth + 1));
+        ws();
+        const d = src[i];
+        if (d === ',') { lastComma = i; i++; continue; }
+        if (d === ']') { i++; return { T: 'A', v }; }
+        if (d === undefined) err(`배열이 닫히지 않았습니다. ']'가 필요합니다 (배열 시작: ${lineColOf(src, start).line}줄)`);
+        if (lenient && /["'{[\d\-tfn]/.test(d)) { warnings.push(`${lineColOf(src, i).line}줄: 빠진 쉼표를 보완했습니다`); continue; }
+        if (d === '}') err("배열을 '}'로 닫았습니다. ']'가 필요합니다");
+        err(`',' 또는 ']'가 필요한데 ${show(d)}가 있습니다 (쉼표 누락?)`);
+      }
+    }
+    function str() {
+      const q = src[i]; const start = i; i++;
+      let out = '', seg = i;
+      for (;;) {
+        if (i >= n) err('문자열이 닫히지 않았습니다 (따옴표 누락)', start);
+        const c = src[i];
+        if (c === q) { out += src.slice(seg, i); i++; return out; }
+        if (c === '\\') {
+          out += src.slice(seg, i);
+          const e = src[i + 1];
+          switch (e) {
+            case '"': out += '"'; break; case '\\': out += '\\'; break; case '/': out += '/'; break;
+            case 'b': out += '\b'; break; case 'f': out += '\f'; break; case 'n': out += '\n'; break;
+            case 'r': out += '\r'; break; case 't': out += '\t'; break;
+            case 'u': {
+              const hex = src.substr(i + 2, 4);
+              if (!/^[0-9a-fA-F]{4}$/.test(hex)) err(`잘못된 유니코드 이스케이프 '\\u${hex}' (16진수 4자리 필요)`);
+              out += String.fromCharCode(parseInt(hex, 16)); i += 4; break;
+            }
+            default:
+              if (lenient && e !== undefined) { out += e === '\n' ? '' : e; break; }
+              err(e === "'" ? "JSON에서 \\' 는 잘못된 이스케이프입니다 (작은따옴표는 이스케이프 없이 사용)" : `잘못된 이스케이프 시퀀스 '\\${e === undefined ? '' : e}'`);
+          }
+          i += 2; seg = i; continue;
+        }
+        if (c < ' ' && !lenient) err(c === '\n' ? '문자열 안에 실제 줄바꿈이 있습니다. \\n 으로 이스케이프해야 합니다' : c === '\t' ? '문자열 안에 탭 문자가 있습니다. \\t 로 이스케이프해야 합니다' : `문자열 안에 제어 문자(U+${c.charCodeAt(0).toString(16).padStart(4, '0')})가 있습니다`);
+        i++;
+      }
+    }
+    function num() {
+      const start = i;
+      NUM_STRICT.lastIndex = i; let m = NUM_STRICT.exec(src); let raw = m ? m[0] : '';
+      let next = src[i + raw.length];
+      if (lenient && (!m || /[.\deExX]/.test(next || ''))) {
+        NUM_LOOSE.lastIndex = i; const m2 = NUM_LOOSE.exec(src);
+        if (m2 && m2[0].length > raw.length) {
+          const v = Number(m2[0].replace(/^\+/, ''));
+          raw = Number.isFinite(v) ? String(v) : 'null';
+          i += m2[0].length;
+          if (raw === 'null') return { T: 'Z' };
+          return { T: 'N', v: raw };
+        }
+      }
+      if (!m || raw === '-') err(`숫자 형식이 올바르지 않습니다`);
+      if (raw === '0' || raw === '-0') { if (next >= '0' && next <= '9') err('숫자 앞에 0을 붙일 수 없습니다 (예: 012 → 12 또는 "012")', start); }
+      if (next === '.') err('소수점 뒤에 숫자가 필요합니다', i + raw.length);
+      if (next && /[\w$]/.test(next)) err(`숫자 뒤에 잘못된 문자 ${show(next)}가 있습니다. 문자열이라면 큰따옴표로 감싸세요`, start);
+      i += raw.length;
+      if (/^-?\d{16,}$/.test(raw) && Math.abs(Number(raw)) > SAFE) stats.bigNums++;
+      return { T: 'N', v: raw };
+    }
+    const root = value(0);
+    ws();
+    if (i < n) {
+      const c = src[i];
+      if (c === ',' ) err('최상위 값 뒤에 쉼표가 있습니다. 여러 값은 배열 [ ] 로 감싸야 합니다');
+      err(`JSON 값이 끝난 뒤에 불필요한 내용이 있습니다 (${show(c)}). 여러 JSON이 이어져 있다면 JSON Lines 형식일 수 있습니다`);
+    }
+    if (stats.bigNums) warnings.push(`JavaScript 안전 범위(2^53)를 넘는 정수 ${stats.bigNums}개 — 원본 자릿수를 그대로 유지했습니다`);
+    return { node: root, warnings, stats };
+  }
+
+  function quote(s, ascii) {
+    let r = JSON.stringify(s);
+    if (ascii) r = r.replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+    return r;
+  }
+  const isPrim = nd => nd.T !== 'O' && nd.T !== 'A';
+  function cmpKey(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+
+  /** opt: indent(number|'\t'|0), sortKeys, ascii, inline(짧은 배열·객체를 한 줄로) */
+  function stringify(node, opt = {}) {
+    const ind = !opt.indent ? '' : opt.indent === '\t' ? '\t' : ' '.repeat(+opt.indent);
+    const out = [];
+    function compact(nd) { const o = []; w(nd, '', o, true); return o.join(''); }
+    function w(nd, cur, o, flat) {
+      switch (nd.T) {
+        case 'O': {
+          let ps = nd.p; if (!ps.length) { o.push('{}'); return; }
+          if (opt.sortKeys) ps = ps.slice().sort((a, b) => cmpKey(a[0], b[0]));
+          if (!ind || flat) {
+            o.push('{');
+            ps.forEach(([k, v], j) => { if (j) o.push(flat && ind ? ', ' : ','); o.push(quote(k, opt.ascii), flat && ind ? ': ' : ':'); w(v, cur, o, flat); });
+            o.push('}'); return;
+          }
+          if (opt.inline && ps.length <= 6 && ps.every(([, v]) => isPrim(v))) {
+            const c = compact(nd); if (c.length + cur.length <= 100) { o.push(c); return; }
+          }
+          const ni = cur + ind; o.push('{\n');
+          ps.forEach(([k, v], j) => { o.push(ni, quote(k, opt.ascii), ': '); w(v, ni, o); o.push(j < ps.length - 1 ? ',\n' : '\n'); });
+          o.push(cur, '}'); return;
+        }
+        case 'A': {
+          const vs = nd.v; if (!vs.length) { o.push('[]'); return; }
+          if (!ind || flat) { o.push('['); vs.forEach((v, j) => { if (j) o.push(flat && ind ? ', ' : ','); w(v, cur, o, flat); }); o.push(']'); return; }
+          if (opt.inline && vs.every(isPrim)) {
+            const c = compact(nd); if (c.length + cur.length <= 100) { o.push(c); return; }
+          }
+          const ni = cur + ind; o.push('[\n');
+          vs.forEach((v, j) => { o.push(ni); w(v, ni, o); o.push(j < vs.length - 1 ? ',\n' : '\n'); });
+          o.push(cur, ']'); return;
+        }
+        case 'S': o.push(quote(nd.v, opt.ascii)); return;
+        case 'N': o.push(nd.v); return;
+        case 'B': o.push(nd.v ? 'true' : 'false'); return;
+        default: o.push('null');
+      }
+    }
+    w(node, '', out);
+    return out.join('');
+  }
+  function toJS(nd) {
+    switch (nd.T) {
+      case 'O': { const o = {}; nd.p.forEach(([k, v]) => { Object.defineProperty(o, k, { value: toJS(v), enumerable: true, writable: true, configurable: true }); }); return o; }
+      case 'A': return nd.v.map(toJS);
+      case 'S': return nd.v;
+      case 'N': return Number(nd.v);
+      case 'B': return nd.v;
+      default: return null;
+    }
+  }
+  function fromJS(v) {
+    if (v === null || v === undefined) return { T: 'Z' };
+    if (Array.isArray(v)) return { T: 'A', v: v.map(fromJS) };
+    switch (typeof v) {
+      case 'object': return { T: 'O', p: Object.keys(v).map(k => [k, fromJS(v[k])]) };
+      case 'string': return { T: 'S', v };
+      case 'number': return Number.isFinite(v) ? { T: 'N', v: String(v) } : { T: 'Z' };
+      case 'bigint': return { T: 'N', v: String(v) };
+      case 'boolean': return { T: 'B', v };
+      default: return { T: 'S', v: String(v) };
+    }
+  }
+  function typeName(nd) { return { O: '객체', A: '배열', S: '문자열', N: '숫자', B: '불리언', Z: 'null' }[nd.T]; }
+  function get(nd, key) { if (nd.T !== 'O') return undefined; for (let j = nd.p.length - 1; j >= 0; j--) if (nd.p[j][0] === key) return nd.p[j][1]; return undefined; }
+  /** 문자열로 들어있는 JSON을 실제 JSON으로 펼치기 */
+  function expandNested(nd, cnt = { n: 0 }) {
+    if (nd.T === 'O') nd.p.forEach(e => { e[1] = expandNested(e[1], cnt); });
+    else if (nd.T === 'A') nd.v = nd.v.map(x => expandNested(x, cnt));
+    else if (nd.T === 'S') {
+      const t = nd.v.trim();
+      if ((t[0] === '{' && t[t.length - 1] === '}') || (t[0] === '[' && t[t.length - 1] === ']')) {
+        try { const r = parse(t); cnt.n++; return expandNested(r.node, cnt); } catch (e) { /* 일반 문자열 */ }
+      }
+    }
+    return nd;
+  }
+  /** 느슨한 언이스케이프: \n \t \" \\ \uXXXX \' 등을 1단계 해제 (잘못된 시퀀스는 그대로 둠) */
+  function unescapeLoose(s) {
+    return s.replace(/\\(u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|.)/g, (m, e) => {
+      switch (e[0]) {
+        case 'n': return '\n'; case 'r': return '\r'; case 't': return '\t'; case 'b': return '\b'; case 'f': return '\f';
+        case '"': return '"'; case "'": return "'"; case '\\': return '\\'; case '/': return '/';
+        case 'u': return e.length === 5 ? String.fromCharCode(parseInt(e.slice(1), 16)) : m;
+        case 'x': return e.length === 3 ? String.fromCharCode(parseInt(e.slice(1), 16)) : m;
+        default: return m;
+      }
+    });
+  }
+  /** 이스케이프 1단계 해제: 바깥 따옴표가 있으면 제거 */
+  function unescapeOnce(s) {
+    const t = s.trim();
+    if (t.length >= 2 && t[0] === '"' && t[t.length - 1] === '"') {
+      try { const v = JSON.parse(t); if (typeof v === 'string') return v; } catch (e) { /* loose */ }
+      return unescapeLoose(t.slice(1, -1));
+    }
+    if (t.length >= 2 && t[0] === "'" && t[t.length - 1] === "'") return unescapeLoose(t.slice(1, -1));
+    return unescapeLoose(s);
+  }
+  /**
+   * 스마트 파싱: 일반 JSON → 그대로, 이스케이프된 JSON 문자열 → 단계별 자동 해제
+   * 반환: {node, levels, warnings, stats, text(최종 해석 대상)}
+   */
+  function smartParse(src, opt = {}) {
+    let text = src, levels = 0, firstErr = null;
+    for (let k = 0; k < 12; k++) {
+      try {
+        const r = parse(text, opt);
+        if (opt.autoUnescape !== false && r.node.T === 'S') {
+          const t = r.node.v.trim();
+          if (/^[{[]/.test(t) || /^"/.test(t)) { text = r.node.v; levels++; continue; }
+        }
+        return Object.assign(r, { levels, text });
+      } catch (e) {
+        if (!firstErr) firstErr = e;
+        if (opt.autoUnescape === false) throw e;
+        const t = text.trim();
+        if (/\\["\\nrtu\/]/.test(t) && /^[{["\\]/.test(t)) {
+          const next = unescapeOnce(t);
+          if (next !== t) { text = next; levels++; continue; }
+        }
+        throw levels ? Object.assign(e, { message: e.message + ` (이스케이프 ${levels}단계 해제 후)` }) : firstErr;
+      }
+    }
+    throw new Error('이스케이프 단계가 너무 많습니다');
+  }
+  function stats(nd) {
+    let nodes = 0, depth = 0, keys = 0;
+    (function walk(x, d) { nodes++; if (d > depth) depth = d; if (x.T === 'O') { keys += x.p.length; x.p.forEach(e => walk(e[1], d + 1)); } else if (x.T === 'A') x.v.forEach(c => walk(c, d + 1)); })(nd, 0);
+    return { nodes, depth, keys };
+  }
+  /** JSONPath 형식 경로 문자열 */
+  function pathStr(path) {
+    return '$' + path.map(k => typeof k === 'number' ? `[${k}]` : /^[A-Za-z_$][\w$]*$/.test(k) ? '.' + k : `['${k.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}']`).join('');
+  }
+  function jsPath(path) {
+    return path.map((k, j) => typeof k === 'number' ? `[${k}]` : /^[A-Za-z_$][\w$]*$/.test(k) ? (j ? '.' : '') + k : `[${JSON.stringify(k)}]`).join('') || '(root)';
+  }
+  return { parse, smartParse, stringify, toJS, fromJS, typeName, get, expandNested, unescapeLoose, unescapeOnce, quote, stats, pathStr, jsPath, JsonError };
+})();
+DU.JSONX = JSONX;
+
+/* ---------- JSONPath (AST 대상) ----------
+ * 지원: $ . .. * [n] [-1] [a,b] [s:e:step] ['key'] [?(@.a > 1 && @.b == 'x')] =~ /re/ .length
+ */
+const JSONPath = (() => {
+  function tokenizePath(expr) {
+    let i = 0; const s = expr.trim(); const segs = [];
+    if (s[0] === '$') i = 1; else if (s[0] !== '.' && s[0] !== '[') { /* 생략된 $ */ }
+    const nameRe = /[A-Za-z_$\u00C0-\uFFFF][\w$\-\u00C0-\uFFFF]*/y;
+    while (i < s.length) {
+      let desc = false;
+      if (s[i] === '.') {
+        if (s[i + 1] === '.') { desc = true; i += 2; } else i++;
+        if (s[i] === '*') { segs.push({ desc, sel: { k: 'wild' } }); i++; continue; }
+        if (s[i] === '[') { /* ..[ */ } else {
+          nameRe.lastIndex = i; const m = nameRe.exec(s);
+          if (!m) { const m2 = /\d+/y; m2.lastIndex = i; const mm = m2.exec(s); if (mm) { segs.push({ desc, sel: { k: 'name', names: [mm[0]] } }); i += mm[0].length; continue; } throw new Error(`경로 ${i + 1}번째 문자 근처가 올바르지 않습니다`); }
+          segs.push({ desc, sel: { k: 'name', names: [m[0]] } }); i += m[0].length; continue;
+        }
+      } else if (s[i] !== '[') {
+        if (segs.length === 0 && i === 0) { nameRe.lastIndex = i; const m = nameRe.exec(s); if (m) { segs.push({ desc: false, sel: { k: 'name', names: [m[0]] } }); i += m[0].length; continue; } }
+        throw new Error(`경로 ${i + 1}번째 문자 '${s[i]}'가 올바르지 않습니다`);
+      }
+      // bracket
+      const close = findClose(s, i);
+      const inner = s.slice(i + 1, close).trim(); i = close + 1;
+      segs.push({ desc, sel: parseBracket(inner) });
+    }
+    return segs;
+  }
+  function findClose(s, i) {
+    let depth = 0, q = null;
+    for (let j = i; j < s.length; j++) {
+      const c = s[j];
+      if (q) { if (c === '\\') j++; else if (c === q) q = null; continue; }
+      if (c === "'" || c === '"') q = c;
+      else if (c === '[' || c === '(') depth++;
+      else if (c === ']' || c === ')') { depth--; if (depth === 0 && c === ']') return j; }
+    }
+    throw new Error("']'가 닫히지 않았습니다");
+  }
+  function parseBracket(inner) {
+    if (inner === '*') return { k: 'wild' };
+    if (inner[0] === '?') {
+      let e = inner.slice(1).trim(); if (e[0] === '(' && e[e.length - 1] === ')') e = e.slice(1, -1);
+      return { k: 'filter', fn: compileFilter(e) };
+    }
+    if (/^-?\d*\s*:\s*-?\d*(\s*:\s*-?\d*)?$/.test(inner)) {
+      const [a, b, c] = inner.split(':').map(x => x.trim());
+      return { k: 'slice', start: a === '' ? null : +a, end: b === '' || b === undefined ? null : +b, step: c ? +c : 1 };
+    }
+    const parts = splitTop(inner, ',');
+    if (parts.every(p => /^-?\d+$/.test(p.trim()))) return { k: 'index', idx: parts.map(p => +p) };
+    return { k: 'name', names: parts.map(p => { p = p.trim(); if (/^(['"]).*\1$/.test(p)) return JSONX.unescapeLoose(p.slice(1, -1)); return p; }) };
+  }
+  function splitTop(s, sep) {
+    const out = []; let q = null, start = 0;
+    for (let j = 0; j < s.length; j++) {
+      const c = s[j];
+      if (q) { if (c === '\\') j++; else if (c === q) q = null; continue; }
+      if (c === "'" || c === '"') q = c; else if (c === sep) { out.push(s.slice(start, j)); start = j + 1; }
+    }
+    out.push(s.slice(start)); return out;
+  }
+  /* 필터 식: 간단한 재귀 하강 파서 */
+  function compileFilter(src) {
+    const toks = []; let i = 0;
+    const re = /\s*(?:(@|\$)((?:\.[A-Za-z_$\u00C0-\uFFFF][\w$\-\u00C0-\uFFFF]*|\[(?:'[^']*'|"[^"]*"|-?\d+|\*)\]|\.\*)*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(true|false|null)\b|(===|!==|==|!=|<=|>=|=~|&&|\|\||[<>!()])|(\/(?:[^/\\]|\\.)+\/[gimsuy]*))/y;
+    while (i < src.length) {
+      if (/^\s*$/.test(src.slice(i))) break;
+      re.lastIndex = i; const m = re.exec(src);
+      if (!m) throw new Error(`필터 식 오류: '${src.slice(i, i + 15)}'`);
+      i = re.lastIndex;
+      if (m[1]) toks.push({ t: 'path', root: m[1], segs: m[2] ? tokenizePath('$' + m[2]) : [] });
+      else if (m[3]) toks.push({ t: 'lit', v: JSONX.unescapeLoose(m[3].slice(1, -1)) });
+      else if (m[4]) toks.push({ t: 'lit', v: +m[4] });
+      else if (m[5]) toks.push({ t: 'lit', v: m[5] === 'true' ? true : m[5] === 'false' ? false : null });
+      else if (m[6]) toks.push({ t: 'op', v: m[6] });
+      else if (m[7]) { const k = m[7].lastIndexOf('/'); toks.push({ t: 'lit', v: new RegExp(m[7].slice(1, k), m[7].slice(k + 1)) }); }
+    }
+    let p = 0;
+    const peek = () => toks[p], take = () => toks[p++];
+    const isOp = v => peek() && peek().t === 'op' && peek().v === v;
+    function or() { let l = and(); while (isOp('||')) { take(); const r = and(); const a = l; l = c => truthy(a(c)) || truthy(r(c)); } return l; }
+    function and() { let l = cmp(); while (isOp('&&')) { take(); const r = cmp(); const a = l; l = c => truthy(a(c)) && truthy(r(c)); } return l; }
+    function cmp() {
+      const l = unary();
+      const t = peek();
+      if (t && t.t === 'op' && ['==', '!=', '===', '!==', '<', '<=', '>', '>=', '=~'].includes(t.v)) {
+        take(); const r = unary(); const op = t.v;
+        return c => compare(op, l(c), r(c));
+      }
+      return l;
+    }
+    function unary() { if (isOp('!')) { take(); const x = unary(); return c => !truthy(x(c)); } return prim(); }
+    function prim() {
+      const t = take();
+      if (!t) throw new Error('필터 식이 불완전합니다');
+      if (t.t === 'op' && t.v === '(') { const x = or(); if (!isOp(')')) throw new Error("')'가 필요합니다"); take(); return x; }
+      if (t.t === 'lit') return () => t.v;
+      if (t.t === 'path') return c => resolve(t.root === '@' ? c.cur : c.root, t.segs);
+      throw new Error(`필터 식에서 예상하지 못한 '${t.v}'`);
+    }
+    const fn = or();
+    if (p < toks.length) throw new Error(`필터 식 끝에 불필요한 '${toks[p].v || ''}'`);
+    return fn;
+  }
+  const MISSING = Symbol('missing');
+  function resolve(node, segs) {
+    let cur = [node];
+    for (const sg of segs) {
+      if (sg.sel.k === 'name' && sg.sel.names.length === 1 && sg.sel.names[0] === 'length' && cur.length === 1 && (cur[0].T === 'A' || cur[0].T === 'S') ) {
+        return cur[0].T === 'A' ? cur[0].v.length : cur[0].v.length;
+      }
+      cur = step(cur.map(n => ({ node: n, path: [] })), sg, null).map(x => x.node);
+      if (!cur.length) return MISSING;
+    }
+    const n = cur[0];
+    return n.T === 'O' || n.T === 'A' ? n : JSONX.toJS(n);
+  }
+  function truthy(v) { return !(v === MISSING || v === false || v === null || v === undefined || v === '' ); }
+  function compare(op, a, b) {
+    if (a === MISSING || b === MISSING) return op === '!=' || op === '!==' ? a !== b : false;
+    if (op === '=~') return b instanceof RegExp ? b.test(String(a)) : String(a).includes(String(b));
+    if (typeof a === 'object' && a) a = JSONX.stringify(a);
+    if (typeof b === 'object' && b && !(b instanceof RegExp)) b = JSONX.stringify(b);
+    switch (op) {
+      case '==': case '===': return a === b || (typeof a !== typeof b && a != null && b != null && String(a) === String(b) && op === '==');
+      case '!=': case '!==': return !compare(op === '!=' ? '==' : '===', a, b);
+      case '<': return a < b; case '<=': return a <= b; case '>': return a > b; case '>=': return a >= b;
+    }
+    return false;
+  }
+  function children(x) {
+    if (x.node.T === 'O') return x.node.p.map(([k, v]) => ({ node: v, path: x.path.concat(k) }));
+    if (x.node.T === 'A') return x.node.v.map((v, j) => ({ node: v, path: x.path.concat(j) }));
+    return [];
+  }
+  function descendants(x, out) { out.push(x); children(x).forEach(c => descendants(c, out)); return out; }
+  function step(list, sg, root) {
+    let base = list;
+    if (sg.desc) { base = []; list.forEach(x => descendants(x, base)); }
+    const out = [];
+    for (const x of base) {
+      const nd = x.node, sel = sg.sel;
+      if (sel.k === 'wild') out.push(...children(x));
+      else if (sel.k === 'name') {
+        if (nd.T === 'O') sel.names.forEach(nm => { const e = nd.p.filter(pp => pp[0] === nm).pop(); if (e) out.push({ node: e[1], path: x.path.concat(nm) }); });
+        else if (nd.T === 'A' && !sg.desc) sel.names.forEach(nm => { if (/^\d+$/.test(nm) && nd.v[+nm]) out.push({ node: nd.v[+nm], path: x.path.concat(+nm) }); });
+      } else if (sel.k === 'index') {
+        if (nd.T === 'A') sel.idx.forEach(ix => { const j = ix < 0 ? nd.v.length + ix : ix; if (nd.v[j]) out.push({ node: nd.v[j], path: x.path.concat(j) }); });
+      } else if (sel.k === 'slice') {
+        if (nd.T !== 'A') continue;
+        const len = nd.v.length, st = sel.step || 1;
+        const norm = (v, d) => v == null ? d : v < 0 ? Math.max(0, len + v) : Math.min(len, v);
+        if (st > 0) for (let j = norm(sel.start, 0); j < norm(sel.end, len); j += st) out.push({ node: nd.v[j], path: x.path.concat(j) });
+        else for (let j = sel.start == null ? len - 1 : norm(sel.start, len - 1); j > (sel.end == null ? -1 : norm(sel.end, -1)); j += st) if (nd.v[j]) out.push({ node: nd.v[j], path: x.path.concat(j) });
+      } else if (sel.k === 'filter') {
+        children(x).forEach(c => { if (truthy(sel.fn({ cur: c.node, root }))) out.push(c); });
+      }
+    }
+    return out;
+  }
+  function query(rootNode, expr) {
+    const segs = tokenizePath(expr);
+    let list = [{ node: rootNode, path: [] }];
+    for (const sg of segs) list = step(list, sg, rootNode);
+    return list;
+  }
+  return { query, compileFilter: e => { const f = compileFilter(e); return node => truthy(f({ cur: node, root: node })); } };
+})();
+DU.JSONPath = JSONPath;
+
+/* ---------- JSON 트리 뷰어 ---------- */
+function JsonTree(opts = {}) {
+  const el = h(`<div style="display:flex;flex-direction:column;min-height:0;flex:1">
+    <div class="jt-path"><span class="faint">경로</span><code data-ref="path">$</code><span class="sp"></span>
+      <button class="btn xs ghost" data-ref="cpPath" type="button" title="JSONPath 복사">경로</button>
+      <button class="btn xs ghost" data-ref="cpJs" type="button" title="JS/Java 접근식 복사">접근식</button>
+      <button class="btn xs ghost" data-ref="cpVal" type="button" title="선택 값 복사">값</button>
+      <span class="sep" style="width:1px;height:16px;background:var(--border)"></span>
+      <input class="inp sm" data-ref="q" placeholder="키 / 값 검색" style="width:150px">
+      <span class="faint" data-ref="qc" style="min-width:42px;text-align:center"></span>
+      <button class="btn xs ghost" data-ref="prev" type="button" title="이전">▲</button><button class="btn xs ghost" data-ref="next" type="button" title="다음">▼</button>
+      <button class="btn xs ghost" data-ref="exp" type="button">모두 펼치기</button><button class="btn xs ghost" data-ref="col" type="button">접기</button></div>
+    <div class="pane-view"><div class="jt" data-ref="tree"></div></div></div>`);
+  const r = refs(el);
+  let root = null, selPath = [], selNode = null, rowMap = new Map(), hits = [], hitIdx = -1;
+  const keyOf = path => JSON.stringify(path);
+  function preview(nd) {
+    switch (nd.T) {
+      case 'O': return `<span class="jt-meta">{${nd.p.length}}</span>`;
+      case 'A': return `<span class="jt-meta">[${nd.v.length}]</span>`;
+      case 'S': return `<span class="t-str">${esc(JSON.stringify(nd.v.length > 300 ? nd.v.slice(0, 300) + '…' : nd.v))}</span>`;
+      case 'N': return `<span class="t-num">${esc(nd.v)}</span>`;
+      case 'B': return `<span class="t-bool">${nd.v}</span>`;
+      default: return '<span class="t-null">null</span>';
+    }
+  }
+  function makeNode(key, nd, path) {
+    const wrap = document.createElement('div');
+    const row = document.createElement('div'); row.className = 'jt-row';
+    const container = nd.T === 'O' || nd.T === 'A';
+    const cnt = container ? (nd.T === 'O' ? nd.p.length : nd.v.length) : 0;
+    row.innerHTML = `<span class="jt-tog">${container && cnt ? '▸' : ''}</span>` +
+      (key === null ? '<span class="jt-meta">$</span>' : typeof key === 'number' ? `<span class="jt-idx">${key}</span>` : `<span class="jt-key">${esc(key)}</span>`) +
+      `<span class="t-p">:</span> <span class="jt-val">${preview(nd)}</span>`;
+    wrap.appendChild(row);
+    rowMap.set(keyOf(path), { row, wrap, nd, path });
+    row._info = { nd, path, wrap };
+    return wrap;
+  }
+  function expand(info, open) {
+    const { nd, path, wrap } = info; if (nd.T !== 'O' && nd.T !== 'A') return;
+    let kids = wrap.querySelector(':scope > .jt-kids');
+    const tog = wrap.firstChild.firstChild;
+    if (open === undefined) open = !kids || kids.classList.contains('hidden');
+    if (open && !kids) {
+      kids = document.createElement('div'); kids.className = 'jt-kids';
+      const frag = document.createDocumentFragment();
+      const items = nd.T === 'O' ? nd.p.map(([k, v]) => [k, v]) : nd.v.map((v, j) => [j, v]);
+      const LIMIT = 2000;
+      items.slice(0, LIMIT).forEach(([k, v]) => frag.appendChild(makeNode(k, v, path.concat(k))));
+      if (items.length > LIMIT) { const more = h(`<div class="jt-meta" style="padding:2px 18px">… ${fmtNum(items.length - LIMIT)}개 더 있음 (텍스트 보기 사용)</div>`); frag.appendChild(more); }
+      kids.appendChild(frag); wrap.appendChild(kids);
+    }
+    if (kids) kids.classList.toggle('hidden', !open);
+    if (tog.textContent) tog.textContent = open ? '▾' : '▸';
+  }
+  function expandDepth(info, depth, budget) {
+    if (depth <= 0 || budget.n <= 0) return;
+    const nd = info.nd; if (nd.T !== 'O' && nd.T !== 'A') return;
+    const cnt = nd.T === 'O' ? nd.p.length : nd.v.length; if (!cnt) return;
+    expand(info, true); budget.n -= cnt;
+    const kids = info.wrap.querySelector(':scope > .jt-kids');
+    for (const w of kids.children) if (w.firstChild && w.firstChild._info) expandDepth(w.firstChild._info, depth - 1, budget);
+  }
+  function select(info) {
+    $$('.jt-row.sel', r.tree).forEach(x => x.classList.remove('sel'));
+    rowMap.get(keyOf(info.path)).row.classList.add('sel');
+    selPath = info.path; selNode = info.nd;
+    r.path.textContent = JSONX.pathStr(selPath);
+    if (opts.onSelect) opts.onSelect(info);
+  }
+  function reveal(path) {
+    let info = rowMap.get(keyOf([]));
+    for (let j = 0; j < path.length; j++) {
+      expand(info, true);
+      info = rowMap.get(keyOf(path.slice(0, j + 1)));
+      if (!info) return null;
+    }
+    info.row.scrollIntoView({ block: 'center' });
+    return info;
+  }
+  on(r.tree, 'click', e => {
+    const row = e.target.closest('.jt-row'); if (!row) return;
+    const info = row._info;
+    if (e.target.classList.contains('jt-tog') || e.detail === 2) expand(info);
+    select(info);
+  });
+  on(r.tree, 'dblclick', e => e.preventDefault());
+  on(r.cpPath, 'click', () => copyText(JSONX.pathStr(selPath), 'JSONPath 복사: ' + JSONX.pathStr(selPath)));
+  on(r.cpJs, 'click', () => copyText(JSONX.jsPath(selPath)));
+  on(r.cpVal, 'click', () => { if (selNode) copyText(selNode.T === 'S' ? selNode.v : JSONX.stringify(selNode, { indent: 2 })); });
+  on(r.exp, 'click', () => {
+    const st = JSONX.stats(root);
+    if (st.nodes > 20000 && !confirm(`노드가 ${fmtNum(st.nodes)}개입니다. 모두 펼치면 느려질 수 있습니다. 계속할까요?`)) return;
+    expandDepth(rowMap.get(keyOf([])), 999, { n: 50000 });
+  });
+  on(r.col, 'click', () => { $$('.jt-kids', r.tree).forEach(k => k.classList.add('hidden')); $$('.jt-tog', r.tree).forEach(t => { if (t.textContent) t.textContent = '▸'; }); expand(rowMap.get(keyOf([])), true); });
+  function search() {
+    $$('.jt-row.hit', r.tree).forEach(x => x.classList.remove('hit'));
+    const q = r.q.value.trim().toLowerCase(); hits = []; hitIdx = -1;
+    if (!q || !root) { r.qc.textContent = ''; return; }
+    (function walk(nd, path) {
+      if (hits.length >= 5000) return;
+      const k = path.length ? String(path[path.length - 1]).toLowerCase() : '';
+      const v = nd.T === 'S' ? nd.v.toLowerCase() : nd.T === 'N' ? nd.v : nd.T === 'B' ? String(nd.v) : nd.T === 'Z' ? 'null' : '';
+      if ((typeof path[path.length - 1] === 'string' && k.includes(q)) || (v && v.includes(q))) hits.push(path);
+      if (nd.T === 'O') nd.p.forEach(([kk, vv]) => walk(vv, path.concat(kk)));
+      else if (nd.T === 'A') nd.v.forEach((vv, j) => walk(vv, path.concat(j)));
+    })(root, []);
+    r.qc.textContent = hits.length ? `0/${hits.length >= 5000 ? '5000+' : hits.length}` : '0건';
+    if (hits.length) go(1);
+  }
+  function go(d) {
+    if (!hits.length) return;
+    hitIdx = (hitIdx + d + hits.length) % hits.length;
+    $$('.jt-row.hit', r.tree).forEach(x => x.classList.remove('hit'));
+    const info = reveal(hits[hitIdx]);
+    if (info) { info.row.classList.add('hit'); select(info); }
+    r.qc.textContent = `${hitIdx + 1}/${hits.length}`;
+  }
+  on(r.q, 'input', debounce(search, 250));
+  on(r.q, 'keydown', e => { if (e.key === 'Enter') go(e.shiftKey ? -1 : 1); });
+  on(r.next, 'click', () => go(1)); on(r.prev, 'click', () => go(-1));
+  return {
+    el,
+    render(node) {
+      root = node; rowMap = new Map(); r.tree.innerHTML = ''; selPath = []; selNode = node; r.path.textContent = '$';
+      if (!node) { r.tree.innerHTML = '<div class="pane-empty">JSON을 입력하면 트리가 표시됩니다.</div>'; return; }
+      const w = makeNode(null, node, []); r.tree.appendChild(w);
+      expandDepth(w.firstChild._info, 2, { n: 3000 });
+      if (r.q.value.trim()) search();
+    },
+    reveal,
+  };
+}
+
+/* =====================================================================
+ * JSON 도구
+ * ===================================================================== */
+const SAMPLE_JSON = '{"success":true,"code":"0000","traceId":"a1b2c3d4","data":{"total":2,"users":[{"id":9007199254740993,"name":"홍길동","email":"hong@example.com","active":true,"roles":["ADMIN","USER"],"profile":"{\\"dept\\":\\"개발팀\\",\\"level\\":3}"},{"id":9007199254740995,"name":"김철수","email":null,"active":false,"roles":["USER"],"lastLogin":"2026-10-28T09:15:22+09:00"}]}}';
+function indentOpt(v) { return v === 'tab' ? '\t' : +v; }
+
+defineTool({
+  id: 'json-format', group: 'json', abbr: '{ }', name: 'JSON 포매터',
+  desc: '정렬 · 압축 · 검증 · 트리 · 이스케이프 자동 해제 · 큰 숫자 보존',
+  keywords: 'json pretty minify formatter validator tree viewer 정렬 압축 검증 트리 뷰어 beautify lint',
+  inputs: { input: '입력' }, fill: true,
+  help: `<b>입력 자동 감지</b> — 일반 JSON뿐 아니라 <code>"{\\"a\\":1}"</code>처럼 문자열로 이스케이프된 JSON, 이중·삼중 이스케이프도 자동으로 단계별 해제합니다.<br>
+    <b>중첩 JSON 펼치기</b> — 값 안에 문자열로 들어있는 JSON(<code>"profile":"{\\"dept\\":...}"</code>)을 실제 객체로 바꿉니다.<br>
+    <b>큰 숫자 보존</b> — Java Long ID처럼 2^53을 넘는 숫자도 자릿수가 바뀌지 않습니다. 키 순서도 원본 그대로 유지합니다.<br>
+    <b>관대한 파싱으로 복구</b> — 주석, 후행 쉼표, 작은따옴표, 따옴표 없는 키, True/None 등을 허용해 올바른 JSON으로 고칩니다.<br>
+    <b>트리</b> — 노드를 클릭하면 JSONPath(<code>$.data.users[0].name</code>)와 Java/JS 접근식을 복사할 수 있습니다.`,
+  init(root) {
+    let mode = persistGet('jf:mode', 'pretty');
+    const bar = h('<div class="toolbar"></div>');
+    const indent = sel([['2', '2칸'], ['4', '4칸'], ['tab', '탭']], 'jf:indent', '2', '들여쓰기');
+    const oSort = chk('키 정렬', 'jf:sort'), oUnesc = chk('이스케이프 자동 해제', 'jf:unesc', true, '문자열로 감싼(이스케이프된) JSON을 자동으로 풀어서 해석'),
+      oNested = chk('중첩 JSON 펼치기', 'jf:nested', false, '문자열 값 안의 JSON을 실제 객체로 변환'), oAscii = chk('비ASCII → \\uXXXX', 'jf:ascii'),
+      oInline = chk('짧은 배열 한 줄', 'jf:inline'), oLive = chk('실시간', 'jf:live', true, '입력하면 바로 변환');
+    bar.append(btn('정렬 (Pretty)', () => run('pretty'), 'primary', 'Ctrl+Enter'), btn('압축 (Minify)', () => run('minify')), btn('검증', () => run('validate')),
+      btn('관대한 파싱으로 복구', () => run('repair'), '', '주석·후행 쉼표·작은따옴표 등을 허용해 복구'),
+      h('<span class="sep"></span>'), indent, oSort.el, oUnesc.el, oNested.el, oAscii.el, oInline.el, h('<span class="sep"></span>'), oLive.el, h('<span class="sp"></span>'),
+      sampleBtn('예제', () => { inp.set(SAMPLE_JSON); run('pretty'); }));
+    const summary = h('<div class="stat-row" style="min-height:20px"></div>');
+    const split = h('<div class="split"></div>');
+    const inp = Pane({ title: '입력', persist: 'jf', placeholder: 'JSON을 붙여넣거나 파일을 끌어다 놓으세요.\n\n예) {"name":"홍길동"}\n    "{\\"name\\":\\"홍길동\\"}"  ← 이스케이프된 JSON도 가능', sendFrom: 'json-format' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', filename: 'result.json', sendFrom: 'json-format' });
+    const tree = JsonTree();
+    tree.el.classList.add('hidden');
+    out.el.insertBefore(tree.el, out.el.querySelector('.pane-foot'));
+    let view = 'text', lastNode = null, treeDirty = true;
+    const viewSeg = Seg([['text', '텍스트'], ['tree', '트리']], 'text', v => {
+      view = v; tree.el.classList.toggle('hidden', v !== 'tree'); out.el.querySelector('.pane-body').classList.toggle('hidden', v === 'tree');
+      if (v === 'tree' && treeDirty) { tree.render(lastNode); treeDirty = false; }
+    });
+    viewSeg.el.style.marginLeft = '8px';
+    out.extra.appendChild(viewSeg.el);
+    split.append(inp.el, out.el);
+    root.append(bar, split, summary);
+
+    function run(m = mode) {
+      if (m !== 'validate') { mode = m === 'repair' ? 'pretty' : m; persistSet('jf:mode', mode); }
+      const src = inp.get();
+      summary.innerHTML = '';
+      if (!src.trim()) { out.set(''); inp.status(''); out.status(''); lastNode = null; treeDirty = true; if (view === 'tree') { tree.render(null); treeDirty = false; } return; }
+      let r;
+      try { r = JSONX.smartParse(src, { lenient: m === 'repair', autoUnescape: oUnesc.get() }); }
+      catch (e) {
+        paneError(inp, e, src); out.status('입력에 오류가 있습니다', 'err');
+        const fix = btn('관대한 파싱으로 복구 시도', () => run('repair'), 'xs');
+        summary.append(h('<span class="badge err">유효하지 않은 JSON</span>'), fix);
+        return;
+      }
+      let node = r.node; const cnt = { n: 0 };
+      if (oNested.get()) node = JSONX.expandNested(node, cnt);
+      const st = JSONX.stats(node);
+      const badges = [`<span class="badge ok">✓ 유효한 JSON</span>`, `<span>타입 <b>${JSONX.typeName(node)}</b></span>`,
+        node.T === 'A' ? `<span>항목 <b>${fmtNum(node.v.length)}</b></span>` : node.T === 'O' ? `<span>최상위 키 <b>${fmtNum(node.p.length)}</b></span>` : '',
+        `<span>전체 키 <b>${fmtNum(st.keys)}</b></span>`, `<span>깊이 <b>${st.depth}</b></span>`, `<span>입력 <b>${fmtBytes(utf8(src).length)}</b></span>`];
+      if (r.levels) badges.push(`<span class="badge info">이스케이프 ${r.levels}단계 자동 해제</span>`);
+      if (cnt.n) badges.push(`<span class="badge info">중첩 JSON ${cnt.n}개 펼침</span>`);
+      if (m === 'repair') badges.push(`<span class="badge warn">관대한 파싱으로 복구됨</span>`);
+      r.warnings.slice(0, 5).forEach(w => badges.push(`<span class="badge warn" title="${esc(w)}">⚠ ${esc(w.length > 60 ? w.slice(0, 60) + '…' : w)}</span>`));
+      summary.innerHTML = badges.filter(Boolean).join('');
+      lastNode = node; treeDirty = true;
+      if (m !== 'validate' || !out.get()) {
+        const outMode = m === 'validate' ? mode : m;
+        const text = outMode === 'minify' ? JSONX.stringify(node, { sortKeys: oSort.get(), ascii: oAscii.get() })
+          : JSONX.stringify(node, { indent: indentOpt(indent.value), sortKeys: oSort.get(), ascii: oAscii.get(), inline: oInline.get() });
+        out.set(text);
+        out.status(outMode === 'minify' ? `압축 · ${fmtBytes(utf8(text).length)}` : `정렬 · ${fmtBytes(utf8(text).length)}`, 'info');
+      }
+      inp.status(m === 'repair' ? '복구 완료 — 결과를 확인하세요' : '✓ 유효한 JSON', 'ok');
+      if (view === 'tree') { tree.render(node); treeDirty = false; }
+    }
+    const live = debounce(() => { if (oLive.get() && inp.get().length < 3 * 1048576) run(); }, 350);
+    inp.onInput(live);
+    [indent, oSort.input, oUnesc.input, oNested.input, oAscii.input, oInline.input].forEach(c => on(c, 'change', () => run()));
+    if (inp.get()) run();
+    return { run: () => run('pretty'), receive(slot, text) { inp.set(text); run('pretty'); } };
+  },
+});
+
+defineTool({
+  id: 'json-escape', group: 'json', abbr: '\\"', name: 'JSON 이스케이프',
+  desc: '문자열 ↔ JSON 문자열 리터럴 · 이중 이스케이프 단계별 해제',
+  keywords: 'escape unescape stringify 이스케이프 언이스케이프 문자열 backslash 역슬래시 java string literal',
+  inputs: { input: '입력' }, fill: true,
+  init(root) {
+    const oQuote = chk('바깥 따옴표 포함', 'je:q', true), oAscii = chk('비ASCII → \\uXXXX', 'je:ascii');
+    const info = h('<span class="dim" style="font-size:12px"></span>');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('이스케이프 →', escape, 'primary', 'Ctrl+Enter'), btn('1단계 해제', once), btn('완전 해제 + JSON 정렬', full),
+      h('<span class="sep"></span>'), oQuote.el, oAscii.el, h('<span class="sp"></span>'), info,
+      sampleBtn('예제', () => { inp.set('"{\\\\\\"name\\\\\\":\\\\\\"홍길동\\\\\\",\\\\\\"age\\\\\\":30,\\\\\\"active\\\\\\":true}"'); full(); }));
+    const inp = Pane({ title: '입력', persist: 'je', placeholder: '이스케이프할 텍스트 또는 해제할 문자열을 입력하세요\n\n예) "{\\\\\\"name\\\\\\":\\\\\\"홍길동\\\\\\"}"   (이중 이스케이프)', sendFrom: 'json-escape' });
+    const out = Pane({ title: '결과', readonly: true, sendFrom: 'json-escape' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    function escape() {
+      let s = JSONX.quote(inp.get(), oAscii.get()); if (!oQuote.get()) s = s.slice(1, -1);
+      out.set(s, { lang: null }); info.textContent = `이스케이프 완료 · ${fmtNum(s.length)}자`;
+    }
+    function once() {
+      const s = JSONX.unescapeOnce(inp.get());
+      out.set(s, { lang: null }); info.textContent = '1단계 해제 완료 — 다시 누르려면 결과를 입력으로 보내세요';
+    }
+    function full() {
+      let s = inp.get(), lv = 0;
+      for (; lv < 12; lv++) {
+        try { const r = JSONX.parse(s.trim()); if (r.node.T !== 'S') { out.set(JSONX.stringify(r.node, { indent: 2 }), { lang: 'json' }); info.textContent = `${lv}단계 해제 후 JSON으로 정렬했습니다`; return; } } catch (e) { /* continue */ }
+        const nx = JSONX.unescapeOnce(s); if (nx === s) break; s = nx;
+      }
+      out.set(s, { lang: null }); info.textContent = `${lv}단계 해제 (JSON 아님)`;
+    }
+    return { run: escape, receive(slot, t) { inp.set(t); full(); } };
+  },
+});
+
+/* ---------- JSON Diff ---------- */
+const JsonDiff = (() => {
+  function canon(nd, opt) {
+    if (nd.T === 'O') return '{' + nd.p.filter(([k]) => !opt.ignore.has(k)).sort((a, b) => a[0] < b[0] ? -1 : 1).map(([k, v]) => JSON.stringify(k) + ':' + canon(v, opt)).join(',') + '}';
+    if (nd.T === 'A') { const xs = nd.v.map(x => canon(x, opt)); if (opt.ignoreOrder) xs.sort(); return '[' + xs.join(',') + ']'; }
+    if (nd.T === 'N' && opt.numeric) { const n = Number(nd.v); return Math.abs(n) <= 9007199254740991 ? String(n) : nd.v; }
+    return JSONX.stringify(nd);
+  }
+  function numEq(a, b, opt) {
+    if (a === b) return true;
+    if (!opt.numeric) return false;
+    const x = Number(a), y = Number(b);
+    if (Math.abs(x) > 9007199254740991 || Math.abs(y) > 9007199254740991) return a.replace(/\.0+$/, '') === b.replace(/\.0+$/, '');
+    return x === y;
+  }
+  function diff(a, b, opt, path = [], out = []) {
+    if (out.length > 5000) return out;
+    if (a.T !== b.T) { out.push({ op: 'type', path, a, b }); return out; }
+    switch (a.T) {
+      case 'O': {
+        const mb = new Map(b.p.map(e => [e[0], e[1]])); const ma = new Map(a.p.map(e => [e[0], e[1]]));
+        ma.forEach((va, k) => {
+          if (opt.ignore.has(k)) return;
+          if (!mb.has(k)) { if (!(opt.nullMissing && va.T === 'Z')) out.push({ op: 'del', path: path.concat(k), a: va }); }
+          else diff(va, mb.get(k), opt, path.concat(k), out);
+        });
+        mb.forEach((vb, k) => { if (!opt.ignore.has(k) && !ma.has(k) && !(opt.nullMissing && vb.T === 'Z')) out.push({ op: 'add', path: path.concat(k), b: vb }); });
+        return out;
+      }
+      case 'A': {
+        const key = opt.matchKey;
+        if (key && a.v.concat(b.v).every(x => x.T === 'O' && JSONX.get(x, key))) {
+          const kv = x => canon(JSONX.get(x, key), opt);
+          const mb = new Map(); b.v.forEach((x, j) => mb.set(kv(x), { x, j }));
+          const seen = new Set();
+          a.v.forEach((x, j) => {
+            const k = kv(x), m = mb.get(k);
+            if (!m) out.push({ op: 'del', path: path.concat(j), a: x, note: `${key}=${k}` });
+            else { seen.add(k); diff(x, m.x, opt, path.concat(j), out); }
+          });
+          b.v.forEach((x, j) => { if (!seen.has(kv(x))) out.push({ op: 'add', path: path.concat(j), b: x, note: `${key}=${kv(x)}` }); });
+          return out;
+        }
+        if (opt.ignoreOrder) {
+          const pool = new Map();
+          b.v.forEach((x, j) => { const c = canon(x, opt); if (!pool.has(c)) pool.set(c, []); pool.get(c).push(j); });
+          const leftover = [];
+          a.v.forEach((x, j) => { const c = canon(x, opt); const arr = pool.get(c); if (arr && arr.length) arr.shift(); else leftover.push(j); });
+          leftover.forEach(j => out.push({ op: 'del', path: path.concat(j), a: a.v[j] }));
+          pool.forEach(js => js.forEach(j => out.push({ op: 'add', path: path.concat(j), b: b.v[j] })));
+          return out;
+        }
+        const n = Math.min(a.v.length, b.v.length);
+        for (let j = 0; j < n; j++) diff(a.v[j], b.v[j], opt, path.concat(j), out);
+        for (let j = n; j < a.v.length; j++) out.push({ op: 'del', path: path.concat(j), a: a.v[j] });
+        for (let j = n; j < b.v.length; j++) out.push({ op: 'add', path: path.concat(j), b: b.v[j] });
+        return out;
+      }
+      case 'N': if (!numEq(a.v, b.v, opt)) out.push({ op: 'chg', path, a, b }); return out;
+      case 'S': if (opt.ignoreCase ? a.v.toLowerCase() !== b.v.toLowerCase() : a.v !== b.v) out.push({ op: 'chg', path, a, b }); return out;
+      case 'B': if (a.v !== b.v) out.push({ op: 'chg', path, a, b }); return out;
+      default: return out;
+    }
+  }
+  function normalize(nd, opt) {
+    if (nd.T === 'O') return { T: 'O', p: nd.p.filter(([k]) => !opt.ignore.has(k)).map(([k, v]) => [k, normalize(v, opt)]) };
+    if (nd.T === 'A') { const v = nd.v.map(x => normalize(x, opt)); if (opt.ignoreOrder) v.sort((x, y) => { const a = canon(x, opt), b = canon(y, opt); return a < b ? -1 : a > b ? 1 : 0; }); return { T: 'A', v }; }
+    return nd;
+  }
+  return { diff, normalize, canon };
+})();
+DU.JsonDiff = JsonDiff;
+
+defineTool({
+  id: 'json-diff', group: 'json', abbr: '{≠}', name: 'JSON 비교',
+  desc: '키 순서 · 공백과 무관하게 구조 비교 · 추가/삭제/변경 경로 표시',
+  keywords: 'json diff compare 비교 차이 api 응답 비교 structure',
+  inputs: { left: '왼쪽(기준)', right: '오른쪽(비교)' },
+  help: `키 순서와 공백은 무시하고 데이터가 같은지 비교합니다.<br>
+    <b>배열 매칭 키</b> — 배열의 객체를 순서가 아니라 <code>id</code> 같은 키로 짝지어 비교합니다 (순서가 바뀐 목록 응답 비교).<br>
+    <b>무시할 키</b> — <code>timestamp, traceId</code>처럼 매번 바뀌는 값을 쉼표로 지정하면 비교에서 제외합니다 (모든 깊이).<br>
+    HTTP 테스터의 <b>이전 응답과 비교</b> 버튼으로 바로 보낼 수 있습니다.`,
+  init(root) {
+    const oOrder = chk('배열 순서 무시', 'jd:order'), oNum = chk('숫자 값으로 비교 (1 = 1.0)', 'jd:num', true), oNull = chk('null = 키 없음', 'jd:null'), oCase = chk('문자열 대소문자 무시', 'jd:case');
+    const matchKey = bindPersist(h('<input class="inp sm mono" placeholder="예: id" style="width:90px" title="배열 요소(객체)를 이 키 값으로 짝지어 비교">'), 'jd:key');
+    const ignore = bindPersist(h('<input class="inp sm mono" placeholder="예: timestamp, traceId" style="width:190px">'), 'jd:ignore');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('비교', run, 'primary', 'Ctrl+Enter'), btn('⇄ 좌우 바꾸기', () => { const t = L.get(); L.set(R.get()); R.set(t); run(); }),
+      h('<span class="sep"></span>'), oOrder.el, h('<span class="lbl">배열 매칭 키</span>'), matchKey, h('<span class="lbl">무시할 키</span>'), ignore, oNum.el, oNull.el, oCase.el,
+      h('<span class="sp"></span>'), sampleBtn('예제', () => {
+        L.set('{"id":1,"name":"홍길동","roles":["ADMIN","USER"],"dept":{"code":"D01","name":"개발팀"},"items":[{"id":1,"qty":2},{"id":2,"qty":1}],"updatedAt":"2026-10-27"}');
+        R.set('{"name":"홍길동","id":1,"roles":["USER","ADMIN"],"dept":{"code":"D02","name":"개발팀"},"items":[{"id":2,"qty":5},{"id":1,"qty":2},{"id":3,"qty":1}],"email":"hong@example.com","updatedAt":"2026-10-28"}');
+        matchKey.value = 'id'; run();
+      }));
+    const L = Pane({ title: '왼쪽 (기준)', persist: 'jdL', placeholder: '기준 JSON', sendFrom: 'json-diff' });
+    const R = Pane({ title: '오른쪽 (비교 대상)', persist: 'jdR', placeholder: '비교할 JSON', sendFrom: 'json-diff' });
+    const split = h('<div class="split" style="min-height:260px;flex:0 0 38vh"></div>'); split.append(L.el, R.el);
+    const res = h('<div class="card" style="flex:1;display:flex;flex-direction:column;min-height:300px;overflow:hidden"></div>');
+    const head = h('<div class="row" style="padding:8px 10px;border-bottom:1px solid var(--border)"></div>');
+    const tabs = Tabs([{ id: 'list', label: '차이 목록' }, { id: 'text', label: '정규화 텍스트 비교' }], id => show(id));
+    tabs.el.style.borderBottom = '0';
+    const body = h('<div style="flex:1;overflow:auto;min-height:0"></div>');
+    res.append(head, h('<div style="padding:0 10px;border-bottom:1px solid var(--border)"></div>'), body);
+    res.children[1].appendChild(tabs.el);
+    root.append(bar, split, res);
+    let last = null;
+    tabs.set('list', true);
+    function opts() {
+      return { ignoreOrder: oOrder.get(), numeric: oNum.get(), nullMissing: oNull.get(), ignoreCase: oCase.get(), matchKey: matchKey.value.trim(),
+        ignore: new Set(ignore.value.split(',').map(s => s.trim()).filter(Boolean)) };
+    }
+    function parseSide(p, label) {
+      try { const r = JSONX.smartParse(p.get()); p.status('✓ 유효', 'ok'); return r.node; }
+      catch (e) { paneError(p, e); throw new Error(`${label} JSON 오류: ${e.message}${e.line ? ` (줄 ${e.line}, 열 ${e.col})` : ''}`); }
+    }
+    function run() {
+      if (!L.get().trim() || !R.get().trim()) { head.innerHTML = '<span class="dim">양쪽에 JSON을 입력하세요</span>'; body.innerHTML = ''; return; }
+      let a, b;
+      try { a = parseSide(L, '왼쪽'); b = parseSide(R, '오른쪽'); }
+      catch (e) { head.innerHTML = `<span class="badge err">${esc(e.message)}</span>`; body.innerHTML = ''; last = null; return; }
+      const o = opts(); const ds = JsonDiff.diff(a, b, o);
+      last = { a, b, o, ds };
+      const c = { add: 0, del: 0, chg: 0, type: 0 }; ds.forEach(d => c[d.op]++);
+      head.innerHTML = ds.length ? `<span class="badge err">차이 ${fmtNum(ds.length)}건</span><span class="badge ok">+ 추가 ${c.add}</span><span class="badge err">− 삭제 ${c.del}</span><span class="badge warn">~ 변경 ${c.chg}</span>${c.type ? `<span class="badge info">타입 변경 ${c.type}</span>` : ''}`
+        : '<span class="badge ok">✓ 두 JSON의 데이터가 같습니다</span><span class="dim">(키 순서 · 공백 · 설정한 옵션 무시)</span>';
+      show(tabs.cur);
+    }
+    const short = nd => { if (!nd) return ''; const s = JSONX.stringify(nd); return s.length > 300 ? s.slice(0, 300) + '…' : s; };
+    function show(id) {
+      if (!last) { body.innerHTML = ''; return; }
+      if (id === 'list') {
+        if (!last.ds.length) { body.innerHTML = '<div class="empty-state">차이가 없습니다</div>'; return; }
+        const lab = { add: ['ok', '추가'], del: ['err', '삭제'], chg: ['warn', '변경'], type: ['info', '타입'] };
+        body.innerHTML = `<table class="tbl"><thead><tr><th style="width:60px">구분</th><th>경로</th><th>왼쪽 (기준)</th><th>오른쪽 (비교)</th></tr></thead><tbody>${last.ds.map(d =>
+          `<tr><td><span class="badge ${lab[d.op][0]}">${lab[d.op][1]}</span></td><td class="mono copy-cell" title="클릭하여 경로 복사">${esc(JSONX.pathStr(d.path))}${d.note ? `<div class="faint">${esc(d.note)}</div>` : ''}</td>
+          <td class="mono">${d.a ? `<span class="${d.op === 'type' ? '' : 't-err'}">${esc(short(d.a))}</span>` : '<span class="faint">—</span>'}${d.op === 'type' ? `<div class="faint">${JSONX.typeName(d.a)}</div>` : ''}</td>
+          <td class="mono">${d.b ? `<span class="${d.op === 'type' ? '' : 't-ok'}">${esc(short(d.b))}</span>` : '<span class="faint">—</span>'}${d.op === 'type' ? `<div class="faint">${JSONX.typeName(d.b)}</div>` : ''}</td></tr>`).join('')}</tbody></table>`;
+        $$('.copy-cell', body).forEach(td => on(td, 'click', () => copyText(td.firstChild.textContent)));
+      } else {
+        const ta = JSONX.stringify(JsonDiff.normalize(last.a, last.o), { indent: 2, sortKeys: true });
+        const tb = JSONX.stringify(JsonDiff.normalize(last.b, last.o), { indent: 2, sortKeys: true });
+        body.innerHTML = '';
+        const view = TextDiff.render(TextDiff.diffLines(ta, tb, {}), { mode: 'split', context: 4 });
+        body.appendChild(view);
+      }
+    }
+    return { run, receive(slot, t) { (slot === 'right' ? R : L).set(t); if (L.get() && R.get()) run(); } };
+  },
+});
+
+defineTool({
+  id: 'json-path', group: 'json', abbr: '$..', name: 'JSONPath 검색',
+  desc: '$.users[0].name · $..id · [?(@.age > 20)] 형태로 값 추출',
+  keywords: 'jsonpath json path query 검색 추출 filter xpath jq',
+  inputs: { input: 'JSON' }, fill: true,
+  help: `<table class="tbl"><tr><th>표현식</th><th>의미</th></tr>
+    <tr><td class="mono">$.data.users</td><td>자식 접근</td></tr><tr><td class="mono">$.users[0] · [-1] · [0,2] · [1:3]</td><td>인덱스 · 마지막 · 여러 개 · 범위</td></tr>
+    <tr><td class="mono">$.users[*].name</td><td>모든 요소의 name</td></tr><tr><td class="mono">$..id</td><td>모든 깊이의 id (재귀 탐색)</td></tr>
+    <tr><td class="mono">$.users[?(@.age &gt;= 20 &amp;&amp; @.active)]</td><td>조건 필터 (== != &lt; &lt;= &gt; &gt;= &amp;&amp; || !)</td></tr>
+    <tr><td class="mono">[?(@.email =~ /naver/i)]</td><td>정규식 매칭</td></tr><tr><td class="mono">[?(@.roles.length &gt; 1)]</td><td>배열 · 문자열 길이</td></tr>
+    <tr><td class="mono">$['key with space']</td><td>특수문자 키</td></tr></table>`,
+  init(root) {
+    const expr = bindPersist(h('<input class="inp mono" style="flex:1;min-width:240px" placeholder="$.data.users[*].name">'), 'jp:expr');
+    const fmt = sel([['values', '값 배열'], ['paths', '경로 목록'], ['both', '경로 + 값']], 'jp:fmt', 'values');
+    const ex = sel([['', '예제 표현식…'], ['$.data.users[*].name', '모든 사용자 이름'], ['$..id', '모든 id (재귀)'], ['$.data.users[?(@.active == true)]', '활성 사용자'],
+      ['$.data.users[?(@.roles.length > 1)].email', '역할 2개 이상'], ['$.data.users[-1]', '마지막 사용자'], ["$.data.users[?(@.name =~ /홍/)]", '이름 정규식']]);
+    on(ex, 'change', () => { if (ex.value) { expr.value = ex.value; persistSet('jp:expr', expr.value); run(); } ex.value = ''; });
+    const bar = h('<div class="toolbar"></div>'); bar.append(expr, btn('실행', run, 'primary', 'Ctrl+Enter'), fmt, ex, sampleBtn('예제 JSON', () => { inp.set(SAMPLE_JSON); if (!expr.value) expr.value = '$.data.users[*].name'; run(); }));
+    on(expr, 'keydown', e => { if (e.key === 'Enter') run(); });
+    on(fmt, 'change', run);
+    const inp = Pane({ title: 'JSON', persist: 'jp', placeholder: 'JSON 입력', sendFrom: 'json-path' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', filename: 'jsonpath-result.json', sendFrom: 'json-path' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    function run() {
+      if (!inp.get().trim()) return;
+      let node;
+      try { node = JSONX.smartParse(inp.get()).node; inp.status('✓ 유효', 'ok'); } catch (e) { paneError(inp, e); return; }
+      try {
+        const res = JSONPath.query(node, expr.value || '$');
+        let text;
+        if (fmt.value === 'paths') { text = res.map(x => JSONX.pathStr(x.path)).join('\n'); out.set(text, { lang: null }); }
+        else if (fmt.value === 'both') { text = res.map(x => JSONX.pathStr(x.path) + ' = ' + JSONX.stringify(x.node)).join('\n'); out.set(text, { lang: null }); }
+        else { text = JSONX.stringify({ T: 'A', v: res.map(x => x.node) }, { indent: 2, inline: true }); out.set(text, { lang: 'json' }); }
+        out.status(`${fmtNum(res.length)}건 일치`, res.length ? 'ok' : 'warn');
+      } catch (e) { out.set(''); out.status('✕ 표현식 오류: ' + e.message, 'err'); }
+    }
+    inp.onInput(debounce(run, 400));
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+/* ---------- 컬렉션 도구 ---------- */
+function getField(nd, path) {
+  if (!path) return nd;
+  const parts = path.match(/[^.[\]]+|\[\d+\]/g) || [];
+  let cur = nd;
+  for (let p of parts) {
+    if (!cur) return undefined;
+    if (p[0] === '[') { if (cur.T !== 'A') return undefined; cur = cur.v[+p.slice(1, -1)]; }
+    else if (cur.T === 'O') cur = JSONX.get(cur, p);
+    else if (cur.T === 'A' && /^\d+$/.test(p)) cur = cur.v[+p];
+    else return undefined;
+  }
+  return cur;
+}
+function primVal(nd) { if (!nd) return undefined; if (nd.T === 'N') return Number(nd.v); if (nd.T === 'S') return nd.v; if (nd.T === 'B') return nd.v; if (nd.T === 'Z') return null; return JSONX.stringify(nd); }
+function cmpVals(a, b) {
+  if (a === b) return 0;
+  if (a === undefined || a === null) return 1;
+  if (b === undefined || b === null) return -1;
+  if (typeof a === 'number' && typeof b === 'number') return a - b;
+  return String(a).localeCompare(String(b), 'ko', { numeric: true });
+}
+function flattenObj(nd, prefix = '', out = []) {
+  if (nd.T === 'O' && nd.p.length) nd.p.forEach(([k, v]) => flattenObj(v, prefix ? prefix + '.' + k : k, out));
+  else if (nd.T === 'A' && nd.v.length && nd.v.some(x => x.T === 'O' || x.T === 'A')) nd.v.forEach((v, j) => flattenObj(v, `${prefix}[${j}]`, out));
+  else out.push([prefix || '(value)', nd]);
+  return out;
+}
+DU.flattenObj = flattenObj;
+function findArray(nd) {
+  if (nd.T === 'A') return { node: nd, path: '$' };
+  if (nd.T === 'O') {
+    for (const [k, v] of nd.p) if (v.T === 'A') return { node: v, path: JSONX.pathStr([k]) };
+    for (const [k, v] of nd.p) if (v.T === 'O') for (const [k2, v2] of v.p) if (v2.T === 'A') return { node: v2, path: JSONX.pathStr([k, k2]) };
+  }
+  return null;
+}
+
+defineTool({
+  id: 'json-array', group: 'json', abbr: '[≡]', name: '컬렉션 도구',
+  desc: 'JSON 배열 정렬 · 중복 제거 · 그룹화 · 필드 추출 · 필터 · 통계',
+  keywords: 'array collection sort unique distinct group by pluck filter stats 배열 정렬 중복 그룹 필드 추출 통계 평탄화 flatten',
+  inputs: { input: 'JSON 배열' }, fill: true,
+  help: `JSON 배열(또는 배열이 들어있는 응답 객체)을 가공합니다. <b>대상 배열</b>을 비우면 <code>data</code>, <code>list</code> 등 첫 번째 배열을 자동으로 찾습니다.<br>
+    필드는 <code>dept.name</code>처럼 점으로 중첩 경로를 쓸 수 있고, 여러 개는 쉼표로 구분합니다. 결과를 <b>입력으로</b> 보내 여러 작업을 이어서 할 수 있습니다.`,
+  init(root) {
+    const op = sel([['pluck', '필드 추출'], ['sort', '정렬'], ['unique', '중복 제거'], ['group', '그룹화'], ['count', '그룹별 개수'], ['filter', '필터 (조건식)'], ['stats', '필드 통계'], ['flatten', '객체 평탄화 (a.b.c 키)'], ['reverse', '순서 뒤집기'], ['values', '필드 값 목록 (단일 필드)']], 'ja:op', 'pluck');
+    const target = bindPersist(h('<input class="inp sm mono" placeholder="자동 (예: $.data.users)" style="width:170px">'), 'ja:target');
+    const fields = bindPersist(h('<input class="inp sm mono" placeholder="필드 (예: id, name, dept.code)" style="width:220px">'), 'ja:fields');
+    const cond = bindPersist(h(`<input class="inp sm mono" placeholder="@.active == true && @.age >= 20" style="width:260px">`), 'ja:cond');
+    const dir = sel([['asc', '오름차순'], ['desc', '내림차순']], 'ja:dir', 'asc');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(op, h('<span class="lbl">대상 배열</span>'), target, h('<span class="lbl" data-f>필드</span>'), fields, dir, cond, btn('실행', run, 'primary', 'Ctrl+Enter'),
+      btn('결과 → 입력', () => { if (out.get()) { inp.set(out.get()); persistSet('pane:ja', out.get()); run(); } }, '', '결과를 다시 입력으로 사용 (연속 작업)'),
+      h('<span class="sp"></span>'), sampleBtn('예제', () => {
+        inp.set(JSON.stringify([{ id: 3, name: '박영희', dept: { code: 'D02', name: '영업팀' }, age: 31, active: true }, { id: 1, name: '홍길동', dept: { code: 'D01', name: '개발팀' }, age: 28, active: true },
+          { id: 2, name: '김철수', dept: { code: 'D01', name: '개발팀' }, age: 41, active: false }, { id: 1, name: '홍길동', dept: { code: 'D01', name: '개발팀' }, age: 28, active: true }], null, 2));
+        op.value = 'group'; fields.value = 'dept.name'; sync(); run();
+      }));
+    function sync() {
+      const v = op.value;
+      fields.classList.toggle('hidden', ['filter', 'flatten', 'reverse'].includes(v));
+      $('[data-f]', bar).classList.toggle('hidden', ['filter', 'flatten', 'reverse'].includes(v));
+      dir.classList.toggle('hidden', v !== 'sort');
+      cond.classList.toggle('hidden', v !== 'filter');
+      fields.placeholder = { pluck: '필드 (예: id, name, dept.code)', sort: '정렬 기준 (여러 개: dept.code, age)', unique: '기준 필드 (비우면 요소 전체)', group: '그룹 기준 필드', count: '그룹 기준 필드', stats: '통계 낼 필드 (숫자/문자)', values: '필드 1개' }[v] || '';
+    }
+    on(op, 'change', () => { sync(); run(); }); sync();
+    [dir].forEach(x => on(x, 'change', run));
+    [fields, cond, target].forEach(x => on(x, 'keydown', e => { if (e.key === 'Enter') run(); }));
+    const inp = Pane({ title: 'JSON 입력', persist: 'ja', placeholder: 'JSON 배열 또는 배열을 포함한 응답 JSON', sendFrom: 'json-array' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', filename: 'result.json', sendFrom: 'json-array' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    function run() {
+      if (!inp.get().trim()) return;
+      let rootNode;
+      try { rootNode = JSONX.smartParse(inp.get()).node; inp.status('✓ 유효', 'ok'); } catch (e) { paneError(inp, e); return; }
+      try {
+        let arrInfo;
+        if (target.value.trim()) { const r = JSONPath.query(rootNode, target.value.trim()); if (!r.length || r[0].node.T !== 'A') throw new Error('대상 경로에 배열이 없습니다'); arrInfo = { node: r[0].node, path: target.value.trim() }; }
+        else arrInfo = findArray(rootNode);
+        if (!arrInfo) throw new Error('배열을 찾을 수 없습니다. 대상 배열 경로를 지정하세요');
+        const items = arrInfo.node.v;
+        const fs = fields.value.split(',').map(s => s.trim()).filter(Boolean);
+        let result, note = '';
+        switch (op.value) {
+          case 'pluck': {
+            if (!fs.length) throw new Error('추출할 필드를 입력하세요');
+            result = { T: 'A', v: items.map(it => ({ T: 'O', p: fs.map(f => [f, getField(it, f) || { T: 'Z' }]) })) };
+            break;
+          }
+          case 'values': {
+            if (!fs.length) throw new Error('필드를 입력하세요');
+            result = { T: 'A', v: items.map(it => getField(it, fs[0]) || { T: 'Z' }) }; break;
+          }
+          case 'sort': {
+            if (!fs.length) throw new Error('정렬 기준 필드를 입력하세요');
+            const d = dir.value === 'desc' ? -1 : 1;
+            result = { T: 'A', v: items.slice().sort((a, b) => { for (const f of fs) { const c = cmpVals(primVal(getField(a, f)), primVal(getField(b, f))); if (c) return c * d; } return 0; }) };
+            break;
+          }
+          case 'unique': {
+            const seen = new Set(); const v = [];
+            items.forEach(it => { const k = fs.length ? fs.map(f => JSONX.stringify(getField(it, f) || { T: 'Z' })).join('\u0001') : JsonDiff.canon(it, { ignore: new Set() }); if (!seen.has(k)) { seen.add(k); v.push(it); } });
+            result = { T: 'A', v }; note = `${items.length - v.length}개 중복 제거`; break;
+          }
+          case 'group': case 'count': {
+            if (!fs.length) throw new Error('그룹 기준 필드를 입력하세요');
+            const m = new Map();
+            items.forEach(it => { const kn = getField(it, fs[0]); const k = !kn ? '(없음)' : kn.T === 'S' ? kn.v : JSONX.stringify(kn); if (!m.has(k)) m.set(k, []); m.get(k).push(it); });
+            if (op.value === 'group') result = { T: 'O', p: Array.from(m, ([k, v]) => [k, { T: 'A', v }]) };
+            else result = { T: 'A', v: Array.from(m).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => ({ T: 'O', p: [[fs[0], getField(v[0], fs[0]) || { T: 'Z' }], ['count', { T: 'N', v: String(v.length) }]] })) };
+            note = `${m.size}개 그룹`; break;
+          }
+          case 'filter': {
+            const f = JSONPath.compileFilter(cond.value || 'true');
+            const v = items.filter(it => f(it)); result = { T: 'A', v }; note = `${v.length} / ${items.length}건`; break;
+          }
+          case 'stats': {
+            if (!fs.length) throw new Error('통계 낼 필드를 입력하세요');
+            result = { T: 'O', p: fs.map(f => {
+              const vals = items.map(it => getField(it, f));
+              const present = vals.filter(x => x && x.T !== 'Z');
+              const nums = present.filter(x => x.T === 'N').map(x => Number(x.v));
+              const distinct = new Set(present.map(x => JSONX.stringify(x)));
+              const o = { count: items.length, present: present.length, missingOrNull: items.length - present.length, distinct: distinct.size };
+              if (nums.length) Object.assign(o, { sum: nums.reduce((a, b) => a + b, 0), avg: +(nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(6), min: Math.min(...nums), max: Math.max(...nums) });
+              const strs = present.filter(x => x.T === 'S').map(x => x.v);
+              if (strs.length) Object.assign(o, { minLength: Math.min(...strs.map(s => s.length)), maxLength: Math.max(...strs.map(s => s.length)), maxBytesUtf8: Math.max(...strs.map(s => utf8(s).length)) });
+              if (distinct.size <= 20) o.values = Array.from(distinct).map(s => JSON.parse(s));
+              return [f, JSONX.fromJS(o)];
+            }) };
+            break;
+          }
+          case 'flatten': result = { T: 'A', v: items.map(it => ({ T: 'O', p: flattenObj(it) })) }; break;
+          case 'reverse': result = { T: 'A', v: items.slice().reverse() }; break;
+        }
+        out.set(JSONX.stringify(result, { indent: 2, inline: true }));
+        out.status(`대상 ${arrInfo.path} · ${fmtNum(items.length)}건${note ? ' · ' + note : ''}`, 'ok');
+      } catch (e) { out.status('✕ ' + e.message, 'err'); }
+    }
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+/* =====================================================================
+ * 부팅
+ * ===================================================================== */
+function boot() {
+  applyTheme();
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); const f = () => { if (settings.theme === 'auto') applyTheme(); }; if (mq.addEventListener) mq.addEventListener('change', f); else if (mq.addListener) mq.addListener(f); }
+  renderNav();
+  on($('#openPalette'), 'click', openPalette);
+  on($('#themeBtn'), 'click', cycleTheme);
+  on($('#settingsBtn'), 'click', openSettings);
+  on($('[data-home]'), 'click', () => { location.hash = ''; showHome(); });
+  on($('#menuBtn'), 'click', () => document.body.classList.toggle('nav-open'));
+  on($('#view'), 'click', () => document.body.classList.remove('nav-open'));
+  on(document, 'keydown', e => {
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); openPalette(); }
+    else if (mod && e.key === 'Enter') {
+      if ($('.overlay')) return;
+      if (currentTool && currentTool.inst && currentTool.inst.run) { e.preventDefault(); currentTool.inst.run(); }
+    } else if (e.key === 'Escape') closeMenu();
+  });
+  on(window, 'hashchange', route);
+  route();
+}
+DU.TOOLS = TOOLS;
+boot();
+
+})();
+</script>
+</body>
+</html>
