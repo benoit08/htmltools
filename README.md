@@ -19,7 +19,7 @@
 | **대용량 모드** | 큰 JSON은 Web Worker로 처리, 큰 로그·GC 로그·Hex 파일은 나눠 읽기 (수십~수백 MB, Hex 뷰어는 GB 단위) |
 | **디자인** | 사이드바의 **◐ 테마**로 라이트/다크, **▦ 디자인**으로 스킨 선택. 기본 스킨 '미드나잇 오로라'는 기능 분류마다 사무실 프로그램 색(데이터 Excel 초록, HTTP Outlook 파랑, 텍스트 Word 파랑 …)을 씁니다 |
 
-## 도구 목록 (66종)
+## 도구 목록 (80종)
 
 | 분류 | 도구 |
 | --- | --- |
@@ -32,14 +32,30 @@
 | 포매터 | XML 포매터(XPath, XML ↔ JSON) · HTML 포매터 · 엔티티 · SQL 포매터 |
 | 텍스트 | 텍스트 · 파일 비교 · 정규식 테스터 · 문자열 도구 · 줄바꿈 · 공백 정리(CRLF 셸 스크립트 감지) · 유니코드 정규화 · 숨은 문자 |
 | Java · 서버 | SQL 바인드 치환(MyBatis/Hibernate 로그) · 스택 트레이스 분석 · Java 로그 분석기(Logback/Log4j/JEUS/Tomcat, 큰 파일 스트리밍) · Properties · YAML · JSON · JDBC URL 빌더 · 파서(11종 DB) · JNDI 설정 점검 · 스레드 덤프 분석 · GC 로그 분석 · 실행 계획 분석(Oracle/Tibero/PostgreSQL/MySQL) · 플레이스홀더 해석 · WAR · JAR 탐색기(중복·충돌 라이브러리) · 클래스 버전 확인 · web.xml 분석 |
+| 명령어 · 리눅스 | 명령어 사전(한글 작업 검색: 동의어 · 초성 · 오타, 리눅스 417개 + 서버 280개 예제, 위험 명령 · 헷갈리는 짝 · Windows 대응, 즐겨찾기) · 명령어 설명기(파이프 · 리다이렉트 · 묶음 옵션 · 위험 표시, 프로그램 148개 옵션 사전) · 옵션 비교기 · 명령어 북마크({{변수}} 채워 복사) · 셸 따옴표 도우미(bash · ssh · sudo · find -exec · curl JSON · crontab · cmd · PowerShell) · Linux ↔ Windows 명령 변환 · 명령어 조립기(find · grep · tar · rsync · chmod · curl · java -jar 등 12종) · Vim 연습 |
+| 운영 · 배포 | 로그 범위 추출(grep -A/-B/-C와 같은 결과, 스택 끝까지, 시간 범위, .gz) · 압축 경로 시뮬레이터(tar · zip 실제 파일 읽기, 최상위 폴더 중복 · zip slip 경고, -C · --strip-components · unzip -d 풀기 전후 트리) · 복사 · 이동 시뮬레이터(cp · mv · rsync 끝 슬래시 · 숨김 파일 · --delete 전후 트리) · 경로 사전(146개, JEUS 9.1 · Tomcat · WebtoB · Spring Boot 등, 변수 치환 · 경로 해석기) · 배포 체크리스트(템플릿 7종) · 장애 · 오류 사전(시나리오 86개, 로그 붙여넣기 자동 매칭) |
 | 시간 · 스케줄 | 날짜 · 타임스탬프 변환 · Cron 표현식(Linux/Spring/Quartz) |
 | 기타 유틸 | 진법 변환 · 비트 · IP · CIDR 계산기(IPv4/IPv6) · 색상 변환 · 대비 검사 |
+
+### 명령어 · 경로 정보의 근거 표시
+
+명령어 사전 · 경로 사전 · 장애 사전의 모든 항목에 근거를 표시합니다.
+
+| 표시 | 뜻 |
+| --- | --- |
+| **실행 확인** | 검증 환경(Ubuntu 24.04 · GNU coreutils 9.4 · grep 3.11 · tar 1.35 · rsync 3.2.7 · OpenJDK 21 · Maven 3.9 · Gradle 8.14 · git 2.43 · svn 1.14)에서 실제로 실행해 확인 |
+| **매뉴얼 확인** | man 페이지 · `--help` · 배포본 내용으로 확인 (재부팅 · 포맷 · systemd처럼 실행하지 않은 명령) |
+| **문서 기준** | 제품 공식 문서 기준 (JEUS · WebtoB · Tibero · Oracle · Windows) — 현장 버전에 따라 다를 수 있으니 확인 필요 |
+
+- 예시 출력은 항상 **예시**로 표시합니다. 실제 결과는 사용자가 넣은 로그 · 압축 파일 · 폴더 구조를 분석하는 도구(로그 범위 추출, 압축 경로 시뮬레이터, 복사 · 이동 시뮬레이터)에서만 보여 줍니다.
+- 시뮬레이터 결과는 실제 GNU grep · tar · unzip · cp · mv · rsync 실행 결과와 무작위 시나리오 수천 건을 대조해 맞췄습니다. RHEL/CentOS 7 · 8의 구버전 도구와 다른 점은 화면에 따로 안내합니다.
 
 ## 저장 데이터와 보안
 
 - 입력 내용은 새로고침해도 복원되도록 이 PC 브라우저의 localStorage에만 저장됩니다. **설정(⚙)**에서 끄거나 지울 수 있습니다.
 - **JWT 토큰, HTTP 인증 값, HTTP 응답 본문, 인증서·키스토어 비밀번호, JDBC 비밀번호, 민감정보 마스킹 원본, PKCE verifier는 저장하지 않습니다.** Authorization·Cookie·토큰류 헤더도 히스토리에 남기지 않습니다(값이 `Bearer {{token}}`처럼 환경변수 참조뿐이면 유지).
 - HTTP 테스터에서 추출한 값 중 token처럼 민감해 보이는 이름은 기본으로 메모리에만 보관합니다.
+- 명령어 북마크 · 배포 체크리스트 · 경로 사전 변수는 저장되지만, 비밀번호 · 토큰처럼 보이는 값은 저장 전에 경고하고 비밀 변수는 저장하지 않습니다.
 - 설정 · 환경변수 · 저장된 요청은 설정 화면에서 JSON 파일로 내보내고 다른 PC에서 가져올 수 있습니다.
 
 ## HTTP 테스터와 CORS
@@ -80,8 +96,8 @@ HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요
 ## 구성
 
 ```
-dev-utility-hub.html     단일 실행 파일 (HTML + CSS + JavaScript, 약 1.3MB)
+dev-utility-hub.html     단일 실행 파일 (HTML + CSS + JavaScript, 약 2.4MB)
 proxy/DevHubProxy.java   선택: HTTP 테스터용 로컬 프록시 (JDK 11+)
 ```
 
-`dev-utility-hub.html`이 유일한 실행 파일입니다. 각 도구는 `defineTool({ id, group, name, init(root) })` 블록으로 정의되며, `inputs`를 정의하면 다른 도구의 **보내기** 메뉴에, `defineDetector`로 Smart Paste에, `defineOp`로 레시피 파이프라인에 나타납니다.
+`dev-utility-hub.html`이 유일한 실행 파일입니다. 각 도구는 `defineTool({ id, group, name, init(root) })` 블록으로 정의되며, `inputs`를 정의하면 다른 도구의 **보내기** 메뉴에, `defineDetector`로 Smart Paste에, `defineOp`로 레시피 파이프라인에 나타납니다. 명령어 · 경로 · 장애 데이터는 `defineCmds` · `definePaths` · `defineErrors` · `defineOpts`로 등록합니다.
