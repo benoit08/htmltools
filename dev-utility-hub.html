@@ -709,19 +709,30 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
   --btn-soft: linear-gradient(120deg, rgba(139, 125, 255, .16) 0%, rgba(79, 139, 255, .13) 55%, rgba(34, 211, 238, .11) 100%); --btn-soft-hover: linear-gradient(120deg, rgba(139, 125, 255, .25) 0%, rgba(79, 139, 255, .2) 55%, rgba(34, 211, 238, .17) 100%);
   --btn-soft-line: #34306e; --btn-soft-text: #c9c1ff;
 }
-/* 분류별 색: 라이트는 진한 색 배지 + 흰 글자, 다크는 은은한 배경 + 밝은 글자 */
-[data-design="nova"] [data-group="auto"] { --g: #7c3aed; --gw: rgba(124, 58, 237, .1); } [data-design="nova"] [data-group="json"] { --g: #4f46e5; --gw: rgba(79, 70, 229, .1); }
-[data-design="nova"] [data-group="data"] { --g: #0d9488; --gw: rgba(13, 148, 136, .1); } [data-design="nova"] [data-group="http"] { --g: #2563eb; --gw: rgba(37, 99, 235, .1); }
-[data-design="nova"] [data-group="encode"] { --g: #059669; --gw: rgba(5, 150, 105, .1); } [data-design="nova"] [data-group="file"] { --g: #0891b2; --gw: rgba(8, 145, 178, .1); }
-[data-design="nova"] [data-group="format"] { --g: #0369a1; --gw: rgba(3, 105, 161, .1); } [data-design="nova"] [data-group="text"] { --g: #db2777; --gw: rgba(219, 39, 119, .1); }
-[data-design="nova"] [data-group="java"] { --g: #dc2626; --gw: rgba(220, 38, 38, .1); } [data-design="nova"] [data-group="time"] { --g: #9333ea; --gw: rgba(147, 51, 234, .1); }
-[data-design="nova"] [data-group="misc"] { --g: #475569; --gw: rgba(71, 85, 105, .1); }
-[data-design="nova"][data-theme="dark"] [data-group="auto"] { --g: #a78bfa; --gw: rgba(167, 139, 250, .2); } [data-design="nova"][data-theme="dark"] [data-group="json"] { --g: #818cf8; --gw: rgba(129, 140, 248, .2); }
-[data-design="nova"][data-theme="dark"] [data-group="data"] { --g: #2dd4bf; --gw: rgba(45, 212, 191, .2); } [data-design="nova"][data-theme="dark"] [data-group="http"] { --g: #60a5fa; --gw: rgba(96, 165, 250, .2); }
-[data-design="nova"][data-theme="dark"] [data-group="encode"] { --g: #34d399; --gw: rgba(52, 211, 153, .2); } [data-design="nova"][data-theme="dark"] [data-group="file"] { --g: #22d3ee; --gw: rgba(34, 211, 238, .2); }
-[data-design="nova"][data-theme="dark"] [data-group="format"] { --g: #38bdf8; --gw: rgba(56, 189, 248, .2); } [data-design="nova"][data-theme="dark"] [data-group="text"] { --g: #f472b6; --gw: rgba(244, 114, 182, .2); }
-[data-design="nova"][data-theme="dark"] [data-group="java"] { --g: #f87171; --gw: rgba(248, 113, 113, .2); } [data-design="nova"][data-theme="dark"] [data-group="time"] { --g: #c084fc; --gw: rgba(192, 132, 252, .2); }
-[data-design="nova"][data-theme="dark"] [data-group="misc"] { --g: #94a3b8; --gw: rgba(148, 163, 184, .2); }
+/* 분류별 색: 사무실 프로그램(Office) 계열 — auto Teams, json OneNote, data Excel, http Outlook, encode SharePoint, file Visio, format PowerPoint, text Word, java Access, time Project */
+[data-design="nova"] [data-group="auto"] { --g: #5b5fc7; --gw: rgba(91, 95, 199, .08); --gh: rgba(91, 95, 199, .15); --gb: rgba(91, 95, 199, .32); }
+[data-design="nova"] [data-group="json"] { --g: #7719aa; --gw: rgba(119, 25, 170, .08); --gh: rgba(119, 25, 170, .15); --gb: rgba(119, 25, 170, .32); }
+[data-design="nova"] [data-group="data"] { --g: #107c41; --gw: rgba(16, 124, 65, .08); --gh: rgba(16, 124, 65, .15); --gb: rgba(16, 124, 65, .32); }
+[data-design="nova"] [data-group="http"] { --g: #0078d4; --gw: rgba(0, 120, 212, .08); --gh: rgba(0, 120, 212, .15); --gb: rgba(0, 120, 212, .32); }
+[data-design="nova"] [data-group="encode"] { --g: #038387; --gw: rgba(3, 131, 135, .08); --gh: rgba(3, 131, 135, .15); --gb: rgba(3, 131, 135, .32); }
+[data-design="nova"] [data-group="file"] { --g: #3955a3; --gw: rgba(57, 85, 163, .08); --gh: rgba(57, 85, 163, .15); --gb: rgba(57, 85, 163, .32); }
+[data-design="nova"] [data-group="format"] { --g: #c43e1c; --gw: rgba(196, 62, 28, .08); --gh: rgba(196, 62, 28, .15); --gb: rgba(196, 62, 28, .32); }
+[data-design="nova"] [data-group="text"] { --g: #185abd; --gw: rgba(24, 90, 189, .08); --gh: rgba(24, 90, 189, .15); --gb: rgba(24, 90, 189, .32); }
+[data-design="nova"] [data-group="java"] { --g: #a4373a; --gw: rgba(164, 55, 58, .08); --gh: rgba(164, 55, 58, .15); --gb: rgba(164, 55, 58, .32); }
+[data-design="nova"] [data-group="time"] { --g: #31752f; --gw: rgba(49, 117, 47, .08); --gh: rgba(49, 117, 47, .15); --gb: rgba(49, 117, 47, .32); }
+[data-design="nova"] [data-group="misc"] { --g: #605e5c; --gw: rgba(96, 94, 92, .08); --gh: rgba(96, 94, 92, .15); --gb: rgba(96, 94, 92, .32); }
+[data-design="nova"][data-theme="dark"] [data-group="auto"] { --g: #8b8ff0; --gw: rgba(139, 143, 240, .14); --gh: rgba(139, 143, 240, .22); --gb: rgba(139, 143, 240, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="json"] { --g: #c084e8; --gw: rgba(192, 132, 232, .14); --gh: rgba(192, 132, 232, .22); --gb: rgba(192, 132, 232, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="data"] { --g: #4cc283; --gw: rgba(76, 194, 131, .14); --gh: rgba(76, 194, 131, .22); --gb: rgba(76, 194, 131, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="http"] { --g: #4ba6f0; --gw: rgba(75, 166, 240, .14); --gh: rgba(75, 166, 240, .22); --gb: rgba(75, 166, 240, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="encode"] { --g: #3cc0c0; --gw: rgba(60, 192, 192, .14); --gh: rgba(60, 192, 192, .22); --gb: rgba(60, 192, 192, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="file"] { --g: #8fa2e6; --gw: rgba(143, 162, 230, .14); --gh: rgba(143, 162, 230, .22); --gb: rgba(143, 162, 230, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="format"] { --g: #f0855e; --gw: rgba(240, 133, 94, .14); --gh: rgba(240, 133, 94, .22); --gb: rgba(240, 133, 94, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="text"] { --g: #6d9cf0; --gw: rgba(109, 156, 240, .14); --gh: rgba(109, 156, 240, .22); --gb: rgba(109, 156, 240, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="java"] { --g: #ec7f82; --gw: rgba(236, 127, 130, .14); --gh: rgba(236, 127, 130, .22); --gb: rgba(236, 127, 130, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="time"] { --g: #7cc46f; --gw: rgba(124, 196, 111, .14); --gh: rgba(124, 196, 111, .22); --gb: rgba(124, 196, 111, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="misc"] { --g: #b3b0ad; --gw: rgba(179, 176, 173, .14); --gh: rgba(179, 176, 173, .22); --gb: rgba(179, 176, 173, .4); }
+[data-design="nova"] .tool[data-group] { --accent: var(--g); --accent-hover: var(--g); --accent-weak: var(--gw); --btn-soft: var(--gw); --btn-soft-hover: var(--gh); --btn-soft-line: var(--gb); --btn-soft-text: var(--g); }
 [data-design="nova"] #view { background: radial-gradient(1000px 440px at 105% -12%, rgba(109, 93, 252, .12), transparent 60%), radial-gradient(900px 440px at -12% 112%, rgba(6, 182, 212, .09), transparent 60%), var(--bg); }
 [data-design="nova"][data-theme="dark"] #view { background: radial-gradient(1100px 480px at 105% -12%, rgba(139, 125, 255, .20), transparent 60%), radial-gradient(900px 460px at -12% 112%, rgba(34, 211, 238, .12), transparent 60%), var(--bg); }
 [data-design="nova"][data-theme="dark"] #sidebar { background: #0a0f1d; }
@@ -745,7 +756,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 [data-design="nova"] .btn.primary { background: var(--btn-soft); border-color: var(--btn-soft-line); color: var(--btn-soft-text); }
 [data-design="nova"] .btn.primary:hover { background: var(--btn-soft-hover); }
 [data-design="nova"] .inp, [data-design="nova"] .seg { border-radius: 10px; }
-[data-design="nova"] .seg button.on { background: var(--accent-weak); color: var(--btn-soft-text); }
+[data-design="nova"] .seg button.on { background: var(--btn-soft-hover); color: var(--btn-soft-text); }
 [data-design="nova"] .pane, [data-design="nova"] .card, [data-design="nova"] .tbl-wrap, [data-design="nova"] .kvlist, [data-design="nova"] .sp-item, [data-design="nova"] .rc-step, [data-design="nova"] .op, [data-design="nova"] .rc-ops { border-radius: 14px; box-shadow: var(--card-shadow); }
 [data-design="nova"] .pane-head, [data-design="nova"] .gutter, [data-design="nova"] .pane-foot { background: transparent; }
 [data-design="nova"] .badge { border-radius: 999px; }
@@ -1123,7 +1134,7 @@ function Pane(o) {
     ta = h('<textarea class="code" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>');
     ta.placeholder = o.placeholder;
     r.body.append(gut, ta);
-    on(ta, 'scroll', () => { gutIn.style.transform = `translateY(${-ta.scrollTop}px)`; if (mark) mark.style.transform = `translateY(${-ta.scrollTop}px)`; });
+    on(ta, 'scroll', () => { paintGutter(); if (mark) mark.style.transform = `translateY(${-ta.scrollTop}px)`; });
     const persistSave = o.persist ? debounce(() => persistSet('pane:' + o.persist, ta.value), 500) : null;
     on(ta, 'input', () => { text = ta.value; refresh(); clearMark(); if (persistSave) persistSave(); idleSnap(); inputCb.forEach(f => f(text)); });
     on(ta, 'keydown', e => {
@@ -1196,11 +1207,26 @@ function Pane(o) {
   function refresh() {
     const n = countLines(ta ? text : shown) || 1;
     if (o.lines && n !== lastLines) {
-      lastLines = n; let s = ''; for (let i = 1; i <= n; i++) s += i + '\n';
-      gutIn.textContent = s;
+      lastLines = n;
+      if (ta) paintGutter();
+      else { let s = ''; for (let i = 1; i <= n; i++) s += i + '\n'; gutIn.textContent = s; }
     }
     const total = ta || shown === text ? n : countLines(text);
     r.stat.textContent = text ? `${fmtNum(text.length)}자 · ${fmtNum(total)}줄${shown !== text && !ta ? ` · 앞 ${fmtBytes(shown.length)}만 표시 (복사·저장은 전체)` : ''}` : '';
+  }
+  /* 편집 영역 줄 번호: 보이는 범위(+여유 40줄)만 그림 — 수십만 줄 입력에서도 입력·스크롤이 느려지지 않음 */
+  let gutFirst = -1, gutLast = -1;
+  function paintGutter() {
+    if (!o.lines || !ta) return;
+    const gutLh = parseFloat(getComputedStyle(ta).lineHeight) || 20;
+    const n = Math.max(1, lastLines), top = ta.scrollTop;
+    const first = Math.max(0, Math.floor(top / gutLh) - 40), last = Math.min(n, first + Math.ceil((ta.clientHeight || 600) / gutLh) + 80);
+    if (first !== gutFirst || last !== gutLast) {
+      gutFirst = first; gutLast = last;
+      let s = ''; for (let i = first + 1; i <= last; i++) s += i + '\n';
+      gutIn.textContent = s; gutIn.style.minWidth = String(n).length + 'ch';
+    }
+    gutIn.style.transform = `translateY(${first * gutLh - top}px)`;
   }
   function clearMark() { if (mark) { mark.remove(); mark = null; } }
   const api = {
@@ -5907,7 +5933,7 @@ const Csv = (() => {
 })();
 DU.Csv = Csv;
 defineTool({
-  id: 'csv', group: 'text', abbr: 'CSV', name: 'CSV · JSON · 표 변환',
+  id: 'csv', group: 'data', abbr: 'CSV', name: 'CSV · JSON · 표 변환',
   desc: 'CSV/TSV(엑셀 붙여넣기) ↔ JSON · Markdown 표 · SQL INSERT 생성 · 미리보기',
   keywords: 'csv tsv json excel 엑셀 표 table markdown sql insert convert 변환 스프레드시트',
   inputs: { input: '입력' },
@@ -7591,6 +7617,1669 @@ defineTool({
     return { run: () => run(true), load, receive(slot, t) { fileBytes = null; inp.set(t); run(); } };
   },
 });
+
+/* =====================================================================
+ * JSON 고급 도구 — 스키마 검증 · 스키마 생성 · DTO 생성 · Flatten · Patch · NDJSON
+ * ===================================================================== */
+
+/** JSON 텍스트에서 경로(path 배열)의 값 시작 위치(문자 offset)를 찾음. 못 찾으면 -1 */
+function jaLocate(src, path) {
+  let i = 0; const n = src.length;
+  const ws = () => { while (i < n && (src[i] === ' ' || src[i] === '\n' || src[i] === '\r' || src[i] === '\t' || src.charCodeAt(i) === 0xFEFF)) i++; };
+  const skipStr = () => { i++; while (i < n && src[i] !== '"') { if (src[i] === '\\') i++; i++; } i++; };
+  const skipVal = () => {
+    ws(); const c = src[i];
+    if (c === '"') { skipStr(); return; }
+    if (c === '{' || c === '[') {
+      let d = 0;
+      while (i < n) { const ch = src[i]; if (ch === '"') { skipStr(); continue; } if (ch === '{' || ch === '[') d++; else if (ch === '}' || ch === ']') { d--; if (d === 0) { i++; return; } } i++; }
+      return;
+    }
+    while (i < n && !/[,\]}\s]/.test(src[i])) i++;
+  };
+  ws();
+  for (const seg of path) {
+    ws();
+    if (src[i] === '{' && typeof seg === 'string') {
+      i++; let found = -1;
+      while (i < n) {
+        ws(); if (src[i] !== '"') break;
+        const ks = i; skipStr(); let key; try { key = JSON.parse(src.slice(ks, i)); } catch (e) { return -1; }
+        ws(); if (src[i] !== ':') return -1; i++; ws();
+        if (key === seg) found = i; // 중복 키는 마지막 값이 유효
+        skipVal(); ws(); if (src[i] === ',') { i++; continue; } break;
+      }
+      if (found < 0) return -1;
+      i = found;
+    } else if (src[i] === '[' && typeof seg === 'number') {
+      i++; let idx = 0;
+      for (;;) { ws(); if (src[i] === ']' || i >= n) return -1; if (idx === seg) break; skipVal(); ws(); if (src[i] !== ',') return -1; i++; idx++; }
+    } else return -1;
+  }
+  ws(); return i < n ? i : -1;
+}
+
+/* ---------- JSON Schema 검증 (draft-07 / 2019-09 / 2020-12 핵심 키워드) ---------- */
+const JSchemaV = (() => {
+  const TYPE_KO = { object: '객체', array: '배열', string: '문자열', number: '숫자', integer: '정수', boolean: '불리언', null: 'null' };
+  const nType = nd => ({ O: 'object', A: 'array', S: 'string', N: 'number', B: 'boolean', Z: 'null' })[nd.T];
+  const isInt = raw => /^-?\d+$/.test(raw) || Number.isInteger(Number(raw));
+  const intRaw = raw => /^-?\d+$/.test(raw);
+  function canonNum(raw) { if (intRaw(raw)) return BigInt(raw).toString(); const x = Number(raw); return Number.isInteger(x) && Math.abs(x) < 1e21 ? BigInt(x).toString() : String(x); }
+  function canonNode(nd) {
+    switch (nd.T) {
+      case 'O': { const m = new Map(nd.p); return '{' + Array.from(m.keys()).sort().map(k => JSON.stringify(k) + ':' + canonNode(m.get(k))).join(',') + '}'; }
+      case 'A': return '[' + nd.v.map(canonNode).join(',') + ']';
+      case 'N': return canonNum(nd.v);
+      case 'S': return JSON.stringify(nd.v);
+      case 'B': return String(nd.v);
+      default: return 'null';
+    }
+  }
+  function canonJs(v) {
+    if (v === null || v === undefined) return 'null';
+    if (Array.isArray(v)) return '[' + v.map(canonJs).join(',') + ']';
+    if (typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canonJs(v[k])).join(',') + '}';
+    if (typeof v === 'number') return canonNum(String(v));
+    return JSON.stringify(v);
+  }
+  function cmpNum(raw, lim) {
+    if (intRaw(raw) && Number.isInteger(lim)) { const a = BigInt(raw), b = BigInt(lim); return a < b ? -1 : a > b ? 1 : 0; }
+    const x = Number(raw); return x < lim ? -1 : x > lim ? 1 : 0;
+  }
+  const validDate = (y, m, d) => { const dt = new Date(Date.UTC(+y, +m - 1, +d)); return dt.getUTCFullYear() === +y && dt.getUTCMonth() === +m - 1 && dt.getUTCDate() === +d; };
+  const FORMATS = {
+    'date-time': s => { const m = /^(\d{4})-(\d{2})-(\d{2})[Tt ](\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/.exec(s); return !!m && validDate(m[1], m[2], m[3]) && +m[4] < 24 && +m[5] < 60 && +m[6] < 61; },
+    date: s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); return !!m && validDate(m[1], m[2], m[3]); },
+    time: s => { const m = /^(\d{2}):(\d{2}):(\d{2})(\.\d+)?([Zz]|[+-]\d{2}:\d{2})?$/.exec(s); return !!m && +m[1] < 24 && +m[2] < 60 && +m[3] < 61; },
+    email: s => /^[^\s@"(),:;<>[\]\\]+@[A-Za-z0-9가-힣](?:[A-Za-z0-9가-힣-]*[A-Za-z0-9가-힣])?(?:\.[A-Za-z0-9가-힣](?:[A-Za-z0-9가-힣-]*[A-Za-z0-9가-힣])?)+$/.test(s),
+    'idn-email': s => FORMATS.email(s),
+    uri: s => /^[A-Za-z][A-Za-z\d+.-]*:[^\s]*$/.test(s),
+    'uri-reference': s => !/\s/.test(s),
+    uuid: s => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s),
+    ipv4: s => /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(s),
+    ipv6: s => { if (!/^[0-9a-fA-F:.]+$/.test(s) || !s.includes(':')) return false; try { new URL(`http://[${s}]/`); return true; } catch (e) { return false; } },
+    hostname: s => /^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/.test(s),
+    regex: s => { try { new RegExp(s, 'u'); return true; } catch (e) { return false; } },
+  };
+  function detectDraft(s) {
+    const id = s && typeof s === 'object' && typeof s.$schema === 'string' ? s.$schema : '';
+    if (/draft-0[4-7]/.test(id)) return '07';
+    if (/2019-09/.test(id)) return '2019';
+    return '2020';
+  }
+  const escPtr = k => String(k).replace(/~/g, '~0').replace(/\//g, '~1');
+  function validate(root, inst, opt = {}) {
+    const draft = opt.draft && opt.draft !== 'auto' ? opt.draft : detectDraft(root);
+    const fmtOn = opt.format !== false;
+    const anchors = {}; const reCache = new Map();
+    (function walk(s) {
+      if (!s || typeof s !== 'object') return;
+      if (Array.isArray(s)) { s.forEach(walk); return; }
+      if (typeof s.$anchor === 'string') anchors[s.$anchor] = s;
+      if (typeof s.$id === 'string') { anchors[s.$id] = s; if (s.$id[0] === '#') anchors[s.$id.slice(1)] = s; }
+      Object.keys(s).forEach(k => { if (k !== 'enum' && k !== 'const' && k !== 'examples' && k !== 'default') walk(s[k]); });
+    })(root);
+    function resolve(ref) {
+      let frag = ref;
+      const hi = ref.indexOf('#');
+      if (hi > 0) { const base = ref.slice(0, hi); if (root.$id && (root.$id === base || root.$id.replace(/#$/, '') === base)) frag = ref.slice(hi); else return anchors[ref] || anchors[base]; }
+      else if (hi < 0) return anchors[ref];
+      const f = frag.slice(1);
+      if (f === '') return root;
+      if (f[0] !== '/') return anchors[f];
+      let cur = root;
+      for (const raw of f.slice(1).split('/')) {
+        const k = decodeURIComponent(raw).replace(/~1/g, '/').replace(/~0/g, '~');
+        if (cur === null || typeof cur !== 'object') return undefined;
+        cur = Array.isArray(cur) ? cur[+k] : cur[k];
+        if (cur === undefined) return undefined;
+      }
+      return cur;
+    }
+    const active = new Set();
+    const mk = (path, sp, kw, msg, sub) => ({ path: path.slice(), sp: sp || '#', kw, msg, sub });
+    const best = rs => rs.slice().sort((a, b) => a.length - b.length)[0] || [];
+    function regex(p) {
+      if (!reCache.has(p)) { let r = null; try { r = new RegExp(p, 'u'); } catch (e) { try { r = new RegExp(p); } catch (e2) { r = null; } } reCache.set(p, r); }
+      return reCache.get(p);
+    }
+    function v(s, nd, path, sp, depth) {
+      const E = [];
+      if (s === true || s === undefined || s === null) return E;
+      if (s === false) { E.push(mk(path, sp, 'false', '스키마가 false — 이 위치에는 어떤 값도 허용되지 않습니다')); return E; }
+      if (typeof s !== 'object' || Array.isArray(s)) return E;
+      if (depth > 400) { E.push(mk(path, sp, '$ref', '스키마 참조 깊이가 너무 깊습니다 (순환 참조 의심)')); return E; }
+      if (typeof s.$ref === 'string') {
+        const key = s.$ref + '\u0001' + JSONX.pathStr(path);
+        if (!active.has(key)) {
+          const target = resolve(s.$ref);
+          if (target === undefined) E.push(mk(path, sp + '/$ref', '$ref', `참조를 찾을 수 없습니다: ${s.$ref} (외부 파일 참조는 지원하지 않음)`));
+          else { active.add(key); E.push(...v(target, nd, path, s.$ref, depth + 1)); active.delete(key); }
+        }
+        if (draft === '07') return E;
+      }
+      if (typeof s.$dynamicRef === 'string' || typeof s.$recursiveRef === 'string') {
+        const ref = s.$dynamicRef || s.$recursiveRef; const key = ref + '\u0001' + JSONX.pathStr(path);
+        if (!active.has(key)) { const target = ref === '#' ? root : resolve(ref); if (target !== undefined) { active.add(key); E.push(...v(target, nd, path, ref, depth + 1)); active.delete(key); } }
+      }
+      const t = nType(nd);
+      if (s.type !== undefined) {
+        const ts = Array.isArray(s.type) ? s.type : [s.type];
+        const ok = ts.some(x => x === t || (x === 'integer' && t === 'number' && isInt(nd.v)));
+        if (!ok) E.push(mk(path, sp + '/type', 'type', `타입이 ${ts.map(x => TYPE_KO[x] || x).join(' 또는 ')}이어야 하는데 ${t === 'number' && isInt(nd.v) ? '정수' : TYPE_KO[t]}입니다`));
+      }
+      if (Array.isArray(s.enum)) { const c = canonNode(nd); if (!s.enum.some(x => canonJs(x) === c)) E.push(mk(path, sp + '/enum', 'enum', `허용된 값 ${s.enum.slice(0, 8).map(x => JSON.stringify(x)).join(', ')}${s.enum.length > 8 ? ' …' : ''} 중 하나여야 합니다`)); }
+      if (Object.prototype.hasOwnProperty.call(s, 'const') && canonJs(s.const) !== canonNode(nd)) E.push(mk(path, sp + '/const', 'const', `값이 ${JSON.stringify(s.const)} 이어야 합니다`));
+      if (t === 'number') {
+        const raw = nd.v;
+        if (typeof s.minimum === 'number') { const c = cmpNum(raw, s.minimum); if (s.exclusiveMinimum === true ? c <= 0 : c < 0) E.push(mk(path, sp + '/minimum', 'minimum', `${s.minimum} ${s.exclusiveMinimum === true ? '초과' : '이상'}이어야 합니다 (현재 ${raw})`)); }
+        if (typeof s.maximum === 'number') { const c = cmpNum(raw, s.maximum); if (s.exclusiveMaximum === true ? c >= 0 : c > 0) E.push(mk(path, sp + '/maximum', 'maximum', `${s.maximum} ${s.exclusiveMaximum === true ? '미만' : '이하'}이어야 합니다 (현재 ${raw})`)); }
+        if (typeof s.exclusiveMinimum === 'number' && cmpNum(raw, s.exclusiveMinimum) <= 0) E.push(mk(path, sp + '/exclusiveMinimum', 'exclusiveMinimum', `${s.exclusiveMinimum}보다 커야 합니다 (현재 ${raw})`));
+        if (typeof s.exclusiveMaximum === 'number' && cmpNum(raw, s.exclusiveMaximum) >= 0) E.push(mk(path, sp + '/exclusiveMaximum', 'exclusiveMaximum', `${s.exclusiveMaximum}보다 작아야 합니다 (현재 ${raw})`));
+        if (typeof s.multipleOf === 'number' && s.multipleOf > 0) {
+          let bad;
+          if (intRaw(raw) && Number.isInteger(s.multipleOf)) bad = BigInt(raw) % BigInt(s.multipleOf) !== 0n;
+          else { const q = Number(raw) / s.multipleOf; bad = Math.abs(q - Math.round(q)) > 1e-9 * Math.max(1, Math.abs(q)); }
+          if (bad) E.push(mk(path, sp + '/multipleOf', 'multipleOf', `${s.multipleOf}의 배수여야 합니다 (현재 ${raw})`));
+        }
+      }
+      if (t === 'string') {
+        const str = nd.v;
+        if (typeof s.minLength === 'number' || typeof s.maxLength === 'number') {
+          const len = Array.from(str).length;
+          if (typeof s.minLength === 'number' && len < s.minLength) E.push(mk(path, sp + '/minLength', 'minLength', `길이가 ${s.minLength}자 이상이어야 합니다 (현재 ${len}자)`));
+          if (typeof s.maxLength === 'number' && len > s.maxLength) E.push(mk(path, sp + '/maxLength', 'maxLength', `길이가 ${s.maxLength}자 이하여야 합니다 (현재 ${len}자)`));
+        }
+        if (typeof s.pattern === 'string') { const re = regex(s.pattern); if (!re) E.push(mk(path, sp + '/pattern', 'pattern', `스키마의 pattern 정규식이 올바르지 않습니다: ${s.pattern}`)); else if (!re.test(str)) E.push(mk(path, sp + '/pattern', 'pattern', `패턴 /${s.pattern}/ 과 일치하지 않습니다`)); }
+        if (fmtOn && typeof s.format === 'string' && FORMATS[s.format] && !FORMATS[s.format](str)) E.push(mk(path, sp + '/format', 'format', `형식(format: ${s.format})이 올바르지 않습니다: ${JSON.stringify(str.length > 60 ? str.slice(0, 60) + '…' : str)}`));
+      }
+      if (t === 'array') {
+        const a = nd.v; let prefix = 0;
+        if (Array.isArray(s.prefixItems)) {
+          s.prefixItems.forEach((x, i) => { if (i < a.length) E.push(...v(x, a[i], path.concat(i), `${sp}/prefixItems/${i}`, depth + 1)); });
+          prefix = s.prefixItems.length;
+          if (s.items !== undefined && !Array.isArray(s.items)) for (let i = prefix; i < a.length; i++) E.push(...v(s.items, a[i], path.concat(i), `${sp}/items`, depth + 1));
+          if (s.items === false && a.length > prefix) E.push(mk(path, sp + '/items', 'items', `항목은 최대 ${prefix}개까지 허용됩니다 (현재 ${a.length}개)`));
+        } else if (Array.isArray(s.items)) {
+          s.items.forEach((x, i) => { if (i < a.length) E.push(...v(x, a[i], path.concat(i), `${sp}/items/${i}`, depth + 1)); });
+          prefix = s.items.length;
+          if (s.additionalItems === false && a.length > prefix) E.push(mk(path, sp + '/additionalItems', 'additionalItems', `항목은 최대 ${prefix}개까지 허용됩니다 (현재 ${a.length}개)`));
+          else if (s.additionalItems !== undefined && typeof s.additionalItems === 'object') for (let i = prefix; i < a.length; i++) E.push(...v(s.additionalItems, a[i], path.concat(i), `${sp}/additionalItems`, depth + 1));
+        } else if (s.items !== undefined) a.forEach((x, i) => E.push(...v(s.items, x, path.concat(i), `${sp}/items`, depth + 1)));
+        if (s.contains !== undefined) {
+          const n = a.filter((x, i) => !v(s.contains, x, path.concat(i), sp + '/contains', depth + 1).length).length;
+          const min = typeof s.minContains === 'number' ? s.minContains : 1;
+          if (n < min) E.push(mk(path, sp + '/contains', 'contains', min === 1 ? 'contains 조건을 만족하는 항목이 하나도 없습니다' : `contains 조건을 만족하는 항목이 ${min}개 이상이어야 합니다 (현재 ${n}개)`));
+          if (typeof s.maxContains === 'number' && n > s.maxContains) E.push(mk(path, sp + '/maxContains', 'maxContains', `contains 조건을 만족하는 항목이 ${s.maxContains}개 이하여야 합니다 (현재 ${n}개)`));
+        }
+        if (typeof s.minItems === 'number' && a.length < s.minItems) E.push(mk(path, sp + '/minItems', 'minItems', `항목이 ${s.minItems}개 이상이어야 합니다 (현재 ${a.length}개)`));
+        if (typeof s.maxItems === 'number' && a.length > s.maxItems) E.push(mk(path, sp + '/maxItems', 'maxItems', `항목이 ${s.maxItems}개 이하여야 합니다 (현재 ${a.length}개)`));
+        if (s.uniqueItems === true) {
+          const seen = new Map();
+          for (let i = 0; i < a.length; i++) { const c = canonNode(a[i]); if (seen.has(c)) { E.push(mk(path.concat(i), sp + '/uniqueItems', 'uniqueItems', `중복 항목입니다 ([${seen.get(c)}]번 항목과 같음)`)); break; } seen.set(c, i); }
+        }
+      }
+      if (t === 'object') {
+        const m = new Map(nd.p); const keys = Array.from(m.keys());
+        if (Array.isArray(s.required)) s.required.forEach(k => { if (!m.has(k)) E.push(mk(path, sp + '/required', 'required', `필수 속성 "${k}"이(가) 없습니다`)); });
+        const props = s.properties && typeof s.properties === 'object' ? s.properties : {};
+        const pats = s.patternProperties && typeof s.patternProperties === 'object' ? Object.keys(s.patternProperties) : [];
+        keys.forEach(k => {
+          let matched = false;
+          if (Object.prototype.hasOwnProperty.call(props, k)) { matched = true; E.push(...v(props[k], m.get(k), path.concat(k), `${sp}/properties/${escPtr(k)}`, depth + 1)); }
+          pats.forEach(p => { const re = regex(p); if (re && re.test(k)) { matched = true; E.push(...v(s.patternProperties[p], m.get(k), path.concat(k), `${sp}/patternProperties/${escPtr(p)}`, depth + 1)); } });
+          if (!matched && s.additionalProperties !== undefined) {
+            if (s.additionalProperties === false) E.push(mk(path.concat(k), sp + '/additionalProperties', 'additionalProperties', `허용되지 않은 속성 "${k}" (additionalProperties: false)`));
+            else E.push(...v(s.additionalProperties, m.get(k), path.concat(k), sp + '/additionalProperties', depth + 1));
+          }
+          if (s.propertyNames !== undefined) { const pe = v(s.propertyNames, { T: 'S', v: k }, path.concat(k), sp + '/propertyNames', depth + 1); if (pe.length) E.push(mk(path.concat(k), sp + '/propertyNames', 'propertyNames', `속성 이름 "${k}"이(가) propertyNames 규칙에 맞지 않습니다: ${pe[0].msg}`)); }
+        });
+        if (typeof s.minProperties === 'number' && keys.length < s.minProperties) E.push(mk(path, sp + '/minProperties', 'minProperties', `속성이 ${s.minProperties}개 이상이어야 합니다 (현재 ${keys.length}개)`));
+        if (typeof s.maxProperties === 'number' && keys.length > s.maxProperties) E.push(mk(path, sp + '/maxProperties', 'maxProperties', `속성이 ${s.maxProperties}개 이하여야 합니다 (현재 ${keys.length}개)`));
+        const depReq = Object.assign({}, s.dependentRequired || {}), depSch = Object.assign({}, s.dependentSchemas || {});
+        if (s.dependencies && typeof s.dependencies === 'object') Object.entries(s.dependencies).forEach(([k, d]) => { if (Array.isArray(d)) depReq[k] = d; else depSch[k] = d; });
+        Object.entries(depReq).forEach(([k, req]) => { if (m.has(k) && Array.isArray(req)) req.forEach(r => { if (!m.has(r)) E.push(mk(path, `${sp}/dependentRequired/${escPtr(k)}`, 'dependentRequired', `"${k}"이(가) 있으면 "${r}"도 있어야 합니다`)); }); });
+        Object.entries(depSch).forEach(([k, ds]) => { if (m.has(k)) E.push(...v(ds, nd, path, `${sp}/dependentSchemas/${escPtr(k)}`, depth + 1)); });
+      }
+      if (Array.isArray(s.allOf)) s.allOf.forEach((x, i) => E.push(...v(x, nd, path, `${sp}/allOf/${i}`, depth + 1)));
+      if (Array.isArray(s.anyOf)) { const rs = s.anyOf.map((x, i) => v(x, nd, path, `${sp}/anyOf/${i}`, depth + 1)); if (!rs.some(r => !r.length)) E.push(mk(path, sp + '/anyOf', 'anyOf', `anyOf의 스키마 ${s.anyOf.length}개 중 어느 것도 만족하지 않습니다`, best(rs))); }
+      if (Array.isArray(s.oneOf)) {
+        const rs = s.oneOf.map((x, i) => v(x, nd, path, `${sp}/oneOf/${i}`, depth + 1)); const okIdx = rs.map((r, i) => (r.length ? -1 : i)).filter(i => i >= 0);
+        if (!okIdx.length) E.push(mk(path, sp + '/oneOf', 'oneOf', `oneOf의 스키마 ${s.oneOf.length}개 중 정확히 하나를 만족해야 하는데 하나도 만족하지 않습니다`, best(rs)));
+        else if (okIdx.length > 1) E.push(mk(path, sp + '/oneOf', 'oneOf', `oneOf는 정확히 하나만 만족해야 하는데 ${okIdx.length}개(${okIdx.join(', ')}번)를 만족합니다`));
+      }
+      if (s.not !== undefined && !v(s.not, nd, path, sp + '/not', depth + 1).length) E.push(mk(path, sp + '/not', 'not', 'not 스키마와 일치하면 안 됩니다'));
+      if (s.if !== undefined) {
+        const ok = !v(s.if, nd, path, sp + '/if', depth + 1).length;
+        if (ok && s.then !== undefined) E.push(...v(s.then, nd, path, sp + '/then', depth + 1));
+        if (!ok && s.else !== undefined) E.push(...v(s.else, nd, path, sp + '/else', depth + 1));
+      }
+      return E;
+    }
+    const errors = v(root, inst, [], '#', 0);
+    return { errors, draft };
+  }
+  return { validate, FORMATS, canonNode, canonJs, detectDraft };
+})();
+DU.JSchemaV = JSchemaV;
+
+/* ---------- JSON Schema 생성 / 구조 분석 ---------- */
+const JSchemaGen = (() => {
+  const intRaw = raw => /^-?\d+$/.test(raw) || Number.isInteger(Number(raw));
+  const GEN_FMT = ['date-time', 'date', 'time', 'email', 'uuid', 'ipv4', 'uri'];
+  function prim(n) { return n.T === 'N' ? Number(n.v) : n.T === 'S' ? n.v : n.T === 'B' ? n.v : null; }
+  function gen(nodes, opt) {
+    const nonNull = nodes.filter(n => n.T !== 'Z'); const hasNull = nonNull.length < nodes.length;
+    if (!nonNull.length) return { type: 'null' };
+    const groups = {};
+    nonNull.forEach(n => { const t = n.T === 'N' ? (intRaw(n.v) ? 'integer' : 'number') : { O: 'object', A: 'array', S: 'string', B: 'boolean' }[n.T]; (groups[t] = groups[t] || []).push(n); });
+    if (groups.integer && groups.number) { groups.number = groups.number.concat(groups.integer); delete groups.integer; }
+    const parts = Object.keys(groups).map(t => genType(t, groups[t], opt));
+    let s;
+    if (parts.length === 1) s = parts[0];
+    else if (parts.every(p => Object.keys(p).length === 1)) s = { type: parts.map(p => p.type) };
+    else s = { anyOf: parts };
+    if (hasNull) { if (s.anyOf) s.anyOf.push({ type: 'null' }); else s.type = [].concat(s.type, 'null'); }
+    return s;
+  }
+  function genType(t, ns, opt) {
+    if (t === 'object') {
+      const keys = []; const vals = new Map(); const cnt = new Map();
+      ns.forEach(n => { const seenHere = new Set(); n.p.forEach(([k, v]) => { if (!vals.has(k)) { vals.set(k, []); cnt.set(k, 0); keys.push(k); } vals.get(k).push(v); if (!seenHere.has(k)) { seenHere.add(k); cnt.set(k, cnt.get(k) + 1); } }); });
+      const s = { type: 'object' };
+      if (keys.length) { s.properties = {}; keys.forEach(k => { s.properties[k] = gen(vals.get(k), opt); }); }
+      if (opt.required) { const req = keys.filter(k => cnt.get(k) === ns.length); if (req.length) s.required = req; }
+      if (opt.noAdditional) s.additionalProperties = false;
+      return s;
+    }
+    if (t === 'array') {
+      const els = []; ns.forEach(n => els.push(...n.v));
+      const s = { type: 'array' };
+      if (els.length) s.items = gen(els, opt);
+      if (opt.minmax) { const ls = ns.map(n => n.v.length); s.minItems = Math.min(...ls); s.maxItems = Math.max(...ls); }
+      return s;
+    }
+    if (t === 'string') {
+      const vs = ns.map(n => n.v); const s = { type: 'string' };
+      if (opt.format) { const nonEmpty = vs.filter(Boolean); const f = nonEmpty.length && GEN_FMT.find(fm => nonEmpty.every(x => JSchemaV.FORMATS[fm](x))); if (f) s.format = f; }
+      if (opt.enumOn) { const d = Array.from(new Set(vs)); if (vs.length >= 3 && d.length <= (opt.enumMax || 10) && d.length < vs.length && !s.format) s.enum = d; }
+      if (opt.minmax) { const ls = vs.map(x => Array.from(x).length); s.minLength = Math.min(...ls); s.maxLength = Math.max(...ls); }
+      if (opt.examples && !s.enum) s.examples = Array.from(new Set(vs)).slice(0, 2);
+      return s;
+    }
+    if (t === 'integer' || t === 'number') {
+      const s = { type: t };
+      if (opt.minmax) { const xs = ns.map(n => Number(n.v)); s.minimum = Math.min(...xs); s.maximum = Math.max(...xs); }
+      if (opt.examples) s.examples = Array.from(new Set(ns.map(n => Number(n.v)))).slice(0, 2);
+      return s;
+    }
+    const s = { type: 'boolean' };
+    return s;
+  }
+  function generate(root, opt = {}) {
+    const head = {};
+    head.$schema = opt.draft === '07' ? 'http://json-schema.org/draft-07/schema#' : 'https://json-schema.org/draft/2020-12/schema';
+    if (opt.title) head.title = opt.title;
+    let body;
+    if (opt.arraySamples && root.T === 'A' && root.v.length) body = gen(root.v, opt);
+    else body = gen([root], opt);
+    return Object.assign(head, body);
+  }
+  /** 구조 개요: 경로 패턴별 타입·개수·예시 */
+  function outline(root) {
+    const rows = new Map();
+    const add = (pat, n, parentCount) => {
+      let r = rows.get(pat);
+      if (!r) { r = { path: pat, count: 0, types: {}, ex: [], parents: parentCount }; rows.set(pat, r); }
+      r.count++; const tn = n.T === 'N' ? (intRaw(n.v) ? 'integer' : 'number') : { O: 'object', A: 'array', S: 'string', B: 'boolean', Z: 'null' }[n.T];
+      r.types[tn] = (r.types[tn] || 0) + 1;
+      if (n.T !== 'O' && n.T !== 'A' && r.ex.length < 3) { const x = n.T === 'S' ? JSON.stringify(n.v.length > 40 ? n.v.slice(0, 40) + '…' : n.v) : JSONX.stringify(n); if (!r.ex.includes(x)) r.ex.push(x); }
+      if (n.T === 'A') r.len = (r.len || []).concat(n.v.length);
+    };
+    (function walk(n, pat, pc) {
+      add(pat, n, pc);
+      if (n.T === 'O') n.p.forEach(([k, v]) => walk(v, pat + (/^[A-Za-z_$][\w$]*$/.test(k) ? '.' + k : `['${k}']`), 1));
+      else if (n.T === 'A') n.v.forEach(v => walk(v, pat + '[]', 1));
+    })(root, '$', 1);
+    // 존재 비율: 부모 객체 수 대비
+    const list = Array.from(rows.values());
+    list.forEach(r => {
+      const parent = r.path === '$' ? null : r.path.replace(/(\.[A-Za-z_$][\w$]*|\['(?:[^']|\\')*'\]|\[\])$/, '');
+      const pr = parent != null ? rows.get(parent) : null;
+      r.of = pr ? (r.path.endsWith('[]') ? null : (pr.types.object || 0)) : null;
+    });
+    return list;
+  }
+  return { generate, outline };
+})();
+DU.JSchemaGen = JSchemaGen;
+
+/* ---------- JSON → Java / TypeScript / Kotlin DTO ---------- */
+const JDto = (() => {
+  const JAVA_KW = new Set('abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while true false null var record yield sealed permits'.split(' '));
+  const KT_KW = new Set('as break class continue do else false for fun if in interface is null object package return super this throw true try typealias typeof val var when while'.split(' '));
+  const words = s => String(s).replace(/([a-z\d])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').split(/[^A-Za-z\dÀ-￿]+/).filter(Boolean);
+  const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
+  function camel(key) {
+    const ws = words(key);
+    if (!ws.length) return 'field';
+    let s = ws.map((w, i) => (i ? cap(w.toLowerCase()) : w.toLowerCase())).join('');
+    if (/^[A-Z]+$/.test(ws[0]) && ws.length === 1 && ws[0].length > 1) s = ws[0].toLowerCase();
+    if (/^\d/.test(s)) s = '_' + s;
+    return s;
+  }
+  function pascal(key) { const ws = words(key); let s = ws.map(w => cap(/^[A-Z\d]+$/.test(w) && w.length > 1 ? w.toLowerCase() : w)).join(''); if (/^\d/.test(s)) s = 'C' + s; return s; }
+  function singular(w) {
+    if (/List$/.test(w) && w.length > 4) return w.slice(0, -4);
+    if (/ies$/i.test(w) && w.length > 4) return w.slice(0, -3) + 'y';
+    if (/(ss|us|is)$/i.test(w)) return /sses$/i.test(w) ? w.slice(0, -2) : w;
+    if (/(s|x|z|ch|sh)es$/i.test(w) && w.length > 4) return w.slice(0, -2);
+    if (/s$/i.test(w) && !/ss$/i.test(w) && w.length > 2) return w.slice(0, -1);
+    return w;
+  }
+  const isAsciiName = s => /[A-Za-z]/.test(s);
+  /* 타입 모델: {k:'str'|'int'|'long'|'big'|'dbl'|'dec'|'bool'|'any'|'date'|'ldt'|'odt'|'cls'|'list'|'map', cls, of} */
+  function build(root, opt) {
+    const classes = []; const byName = new Map(); let anon = 0;
+    // Java에서 import·어노테이션과 이름이 겹치면 컴파일 오류 (예: Lombok @Data 와 중첩 클래스 Data)
+    const JAVA_CLASH = new Set(['Data', 'Builder', 'Getter', 'Setter', 'Value', 'List', 'Map', 'Object', 'String', 'Integer', 'Long', 'Double', 'Boolean', 'Record', 'Override', 'Class', 'System', 'Math', 'Optional', 'JsonProperty', 'JsonIgnoreProperties', 'LocalDate', 'LocalDateTime', 'OffsetDateTime', 'BigDecimal', 'BigInteger', 'Serializable', 'NoArgsConstructor', 'AllArgsConstructor', 'Number', 'Character', 'Void', 'Thread', 'Exception', 'Error', 'Iterable', 'Collection', 'Set']);
+    function uniqueName(base) { if (opt.lang === 'java' && JAVA_CLASH.has(base)) base += 'Dto'; let n = base, i = 2; while (byName.has(n)) n = base + i++; return n; }
+    function strKind(vs) {
+      if (!opt.dates || !vs.length) return 'str';
+      if (vs.every(s => /^\d{4}-\d{2}-\d{2}$/.test(s))) return 'date';
+      if (vs.every(s => /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(s))) return 'ldt';
+      if (vs.every(s => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/.test(s))) return 'odt';
+      return 'str';
+    }
+    function dynKeys(objs) {
+      if (!opt.mapDetect) return false;
+      const ks = []; objs.forEach(o => o.p.forEach(([k]) => ks.push(k)));
+      return ks.length >= 2 && ks.every(k => /^\d+$/.test(k) || /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(k) || /^\d{4}-\d{2}(-\d{2})?$/.test(k));
+    }
+    function infer(nodes, hint, fromArray) {
+      const nn = nodes.filter(n => n.T !== 'Z'); const nullable = nn.length < nodes.length;
+      if (!nn.length) return { k: 'any', nullable: true };
+      const Ts = new Set(nn.map(n => n.T));
+      if (Ts.size > 1) {
+        if (Ts.size === 2 && Ts.has('N') && Ts.has('S') && false) return { k: 'str', nullable };
+        return { k: 'any', nullable };
+      }
+      const T = nn[0].T;
+      if (T === 'S') return { k: strKind(nn.map(n => n.v)), nullable };
+      if (T === 'B') return { k: 'bool', nullable };
+      if (T === 'N') {
+        if (nn.every(n => /^-?\d+$/.test(n.v))) {
+          let big = false, long = false;
+          nn.forEach(n => { const b = BigInt(n.v); if (b > 9223372036854775807n || b < -9223372036854775808n) big = true; else if (b > 2147483647n || b < -2147483648n) long = true; });
+          const name = (hint || '').toLowerCase();
+          return { k: big ? 'big' : long || (opt.idLong && /(^|_)id$|Id$|seq|no$/i.test(hint || '')) ? 'long' : 'int', nullable };
+        }
+        return { k: opt.decimal ? 'dec' : 'dbl', nullable };
+      }
+      if (T === 'A') { const els = []; nn.forEach(n => els.push(...n.v)); return { k: 'list', of: els.length ? infer(els, singularHint(hint), true) : { k: 'any' }, nullable }; }
+      if (dynKeys(nn)) { const vs = []; nn.forEach(o => o.p.forEach(([, v]) => vs.push(v))); return { k: 'map', of: infer(vs, singular(hint || 'value'), false), nullable }; }
+      // 클래스
+      const keys = []; const vals = new Map(); const cnt = new Map();
+      nn.forEach(o => { const seen = new Set(); o.p.forEach(([k, v]) => { if (!vals.has(k)) { vals.set(k, []); cnt.set(k, 0); keys.push(k); } vals.get(k).push(v); if (!seen.has(k)) { seen.add(k); cnt.set(k, cnt.get(k) + 1); } }); });
+      let base = hint && isAsciiName(hint) ? pascal(hint) : '';
+      if (!base) base = (opt.root || 'Root') + 'Item' + (++anon);
+      const cls = { name: uniqueName(base), fields: [] };
+      byName.set(cls.name, cls); classes.push(cls);
+      keys.forEach(k => {
+        const t = infer(vals.get(k), k, false);
+        const present = cnt.get(k) === nn.length;
+        cls.fields.push({ key: k, name: fieldName(k), type: t, optional: !present || t.nullable, sample: vals.get(k)[0] });
+      });
+      return { k: 'cls', cls, nullable };
+    }
+    function singularHint(h) { if (!h) return 'Item'; const s = singular(h); return s === h ? h + 'Item' : s; }
+    function fieldName(k) {
+      let n = opt.camel ? camel(k) : k.replace(/[^\w$À-￿]/g, '_');
+      if (!/^[A-Za-z_$À-￿]/.test(n)) n = '_' + n;
+      if (JAVA_KW.has(n) || KT_KW.has(n)) n = n + '_';
+      return n;
+    }
+    let rootT;
+    if (root.T === 'A') { const els = root.v; rootT = { k: 'list', of: els.length ? infer(els, opt.root || 'Root', true) : { k: 'any' } }; }
+    else rootT = infer([root], opt.root || 'Root', false);
+    // 루트 클래스를 첫 번째로 (요청한 이름)
+    return { classes, rootT };
+  }
+  /* ---------- Java ---------- */
+  function javaType(t, opt, prim) {
+    const w = { str: 'String', int: 'Integer', long: 'Long', big: 'BigInteger', dbl: 'Double', dec: 'BigDecimal', bool: 'Boolean', any: 'Object', date: 'LocalDate', ldt: 'LocalDateTime', odt: 'OffsetDateTime' };
+    const p = { int: 'int', long: 'long', dbl: 'double', bool: 'boolean' };
+    if (t.k === 'cls') return t.cls.name;
+    if (t.k === 'list') return `List<${javaType(t.of, opt, false)}>`;
+    if (t.k === 'map') return `Map<String, ${javaType(t.of, opt, false)}>`;
+    if (prim && opt.primitive && p[t.k] && !t.nullable) return p[t.k];
+    return w[t.k] || 'Object';
+  }
+  function javaImports(classes, opt) {
+    const used = new Set();
+    const walk = t => { if (!t) return; if (t.k === 'list') { used.add('java.util.List'); walk(t.of); } else if (t.k === 'map') { used.add('java.util.Map'); walk(t.of); } else if (t.k === 'big') used.add('java.math.BigInteger'); else if (t.k === 'dec') used.add('java.math.BigDecimal'); else if (t.k === 'date') used.add('java.time.LocalDate'); else if (t.k === 'ldt') used.add('java.time.LocalDateTime'); else if (t.k === 'odt') used.add('java.time.OffsetDateTime'); };
+    classes.forEach(c => c.fields.forEach(f => walk(f.type)));
+    const out = Array.from(used);
+    if (opt.jackson && classes.some(c => c.fields.some(f => needsProp(f, opt)))) out.push('com.fasterxml.jackson.annotation.JsonProperty');
+    if (opt.ignoreUnknown) out.push('com.fasterxml.jackson.annotation.JsonIgnoreProperties');
+    if (opt.mode === 'lombok') { if (opt.lData) out.push('lombok.Data'); else { out.push('lombok.Getter', 'lombok.Setter'); } if (opt.lNoArgs) out.push('lombok.NoArgsConstructor'); if (opt.lAllArgs) out.push('lombok.AllArgsConstructor'); if (opt.lBuilder) out.push('lombok.Builder'); }
+    if (opt.serial && opt.mode !== 'record') out.push('java.io.Serializable');
+    return Array.from(new Set(out)).sort((a, b) => (a.startsWith('java.') === b.startsWith('java.') ? (a < b ? -1 : 1) : a.startsWith('java.') ? 1 : -1));
+  }
+  const needsProp = (f, opt) => opt.jackson && (opt.jacksonAlways || f.name !== f.key);
+  function javaClass(c, opt, nested, ind) {
+    const I = ind + '    ', L = [];
+    const ann = [];
+    if (opt.ignoreUnknown) ann.push('@JsonIgnoreProperties(ignoreUnknown = true)');
+    if (opt.mode === 'lombok') { if (opt.lData) ann.push('@Data'); else ann.push('@Getter', '@Setter'); if (opt.lBuilder) ann.push('@Builder'); if (opt.lNoArgs) ann.push('@NoArgsConstructor'); if (opt.lAllArgs) ann.push('@AllArgsConstructor'); }
+    ann.forEach(a => L.push(ind + a));
+    if (opt.mode === 'record') {
+      const comps = c.fields.map(f => `${needsProp(f, opt) ? `@JsonProperty(${JSON.stringify(f.key)}) ` : ''}${javaType(f.type, opt, true)} ${f.name}`);
+      const inner = nested.map(n => javaClass(n, opt, [], I)).join('\n\n');
+      L.push(`${ind}public ${ind ? 'static ' : ''}record ${c.name}(` + (comps.length ? '\n' + comps.map(x => I + '    ' + x).join(',\n') + '\n' + ind : '') + `) {${inner ? '\n' + inner + '\n' + ind : ''}}`);
+      return L.join('\n');
+    }
+    L.push(`${ind}public ${ind ? 'static ' : ''}class ${c.name}${opt.serial ? ' implements Serializable' : ''} {`);
+    if (opt.serial) L.push('', `${I}private static final long serialVersionUID = 1L;`);
+    L.push('');
+    c.fields.forEach(f => { if (needsProp(f, opt)) L.push(`${I}@JsonProperty(${JSON.stringify(f.key)})`); L.push(`${I}private ${javaType(f.type, opt, true)} ${f.name};`); });
+    if (opt.mode === 'class') {
+      c.fields.forEach(f => {
+        const ty = javaType(f.type, opt, true); const P = f.name.replace(/^_+/, ''); const Cap = P.charAt(0).toUpperCase() + P.slice(1);
+        // Lombok 규칙: boolean isActive → isActive() / setActive()
+        const isPref = ty === 'boolean' && /^is[A-Z\d]/.test(P);
+        const getter = ty === 'boolean' ? (isPref ? P : 'is' + Cap) : 'get' + Cap, setter = 'set' + (isPref ? P.slice(2) : Cap);
+        L.push('', `${I}public ${ty} ${getter}() {`, `${I}    return ${f.name};`, `${I}}`);
+        L.push('', `${I}public void ${setter}(${ty} ${f.name}) {`, `${I}    this.${f.name} = ${f.name};`, `${I}}`);
+      });
+    }
+    nested.forEach(n => L.push('', javaClass(n, opt, [], I)));
+    L.push(`${ind}}`);
+    return L.join('\n');
+  }
+  function java(model, opt) {
+    const { classes } = model; if (!classes.length) return [{ name: 'README.txt', text: '// 최상위 값이 객체(또는 객체 배열)가 아니어서 생성할 클래스가 없습니다' }];
+    const pkg = opt.pkg ? `package ${opt.pkg};\n\n` : '';
+    if (opt.separate) return classes.map(c => { const imps = javaImports([c], opt); return { name: c.name + '.java', text: pkg + (imps.length ? imps.map(x => `import ${x};`).join('\n') + '\n\n' : '') + javaClass(c, opt, [], '') + '\n' }; });
+    const imps = javaImports(classes, opt);
+    const root = classes[0];
+    return [{ name: root.name + '.java', text: pkg + (imps.length ? imps.map(x => `import ${x};`).join('\n') + '\n\n' : '') + javaClass(root, opt, classes.slice(1), '') + '\n' }];
+  }
+  /* ---------- TypeScript ---------- */
+  function tsType(t) {
+    const m = { str: 'string', int: 'number', long: 'number', big: 'number', dbl: 'number', dec: 'number', bool: 'boolean', any: 'unknown', date: 'string', ldt: 'string', odt: 'string' };
+    if (t.k === 'cls') return t.cls.name;
+    if (t.k === 'list') { const x = tsType(t.of); return /[|&]/.test(x) ? `(${x})[]` : `${x}[]`; }
+    if (t.k === 'map') return `Record<string, ${tsType(t.of)}>`;
+    return m[t.k] || 'unknown';
+  }
+  function ts(model) {
+    const out = model.classes.map(c => `export interface ${c.name} {\n${c.fields.map(f => `  ${/^[A-Za-z_$][\w$]*$/.test(f.key) ? f.key : JSON.stringify(f.key)}${f.optional && !f.type.nullable ? '?' : ''}: ${tsType(f.type)}${f.type.nullable ? ' | null' : ''};${f.type.k === 'big' ? ' // 2^53 초과 정수: 문자열/BigInt 처리 고려' : ''}`).join('\n')}\n}`);
+    if (!model.classes.length || model.rootT.k === 'list') out.unshift(`export type ${model.classes.length ? model.classes[0].name + 'List' : 'Root'} = ${tsType(model.rootT)};`);
+    return [{ name: (model.classes[0] ? model.classes[0].name : 'types') + '.ts', text: out.join('\n\n') + '\n' }];
+  }
+  /* ---------- Kotlin ---------- */
+  function ktType(t) {
+    const m = { str: 'String', int: 'Int', long: 'Long', big: 'BigInteger', dbl: 'Double', dec: 'BigDecimal', bool: 'Boolean', any: 'Any', date: 'LocalDate', ldt: 'LocalDateTime', odt: 'OffsetDateTime' };
+    if (t.k === 'cls') return t.cls.name;
+    if (t.k === 'list') return `List<${ktType(t.of)}${t.of.nullable ? '?' : ''}>`;
+    if (t.k === 'map') return `Map<String, ${ktType(t.of)}>`;
+    return m[t.k] || 'Any';
+  }
+  function kotlin(model, opt) {
+    const imps = new Set(); const walk = t => { if (!t) return; if (t.k === 'big') imps.add('java.math.BigInteger'); if (t.k === 'dec') imps.add('java.math.BigDecimal'); if (t.k === 'date') imps.add('java.time.LocalDate'); if (t.k === 'ldt') imps.add('java.time.LocalDateTime'); if (t.k === 'odt') imps.add('java.time.OffsetDateTime'); if (t.of) walk(t.of); };
+    model.classes.forEach(c => c.fields.forEach(f => walk(f.type)));
+    if (opt.jackson && model.classes.some(c => c.fields.some(f => needsProp(f, opt)))) imps.add('com.fasterxml.jackson.annotation.JsonProperty');
+    if (opt.ignoreUnknown) imps.add('com.fasterxml.jackson.annotation.JsonIgnoreProperties');
+    const body = model.classes.map(c => `${opt.ignoreUnknown ? '@JsonIgnoreProperties(ignoreUnknown = true)\n' : ''}data class ${c.name}(\n${c.fields.map(f => {
+      const nn = f.optional || f.type.nullable; const ty = ktType(f.type) + (nn ? '?' : '');
+      const name = /^[A-Za-z_][\w]*$/.test(f.name) && !KT_KW.has(f.name) ? f.name : '`' + f.name + '`';
+      return `    ${needsProp(f, opt) ? `@JsonProperty(${JSON.stringify(f.key)}) ` : ''}val ${name}: ${ty}${nn ? ' = null' : ''}`;
+    }).join(',\n')}\n)`).join('\n\n');
+    return [{ name: (model.classes[0] ? model.classes[0].name : 'Model') + '.kt', text: (opt.pkg ? `package ${opt.pkg}\n\n` : '') + (imps.size ? Array.from(imps).sort().map(x => `import ${x}`).join('\n') + '\n\n' : '') + body + '\n' }];
+  }
+  function generate(rootNode, opt) {
+    const model = build(rootNode, opt);
+    if (opt.lang === 'ts') return ts(model);
+    if (opt.lang === 'kotlin') return kotlin(model, opt);
+    return java(model, opt);
+  }
+  return { generate, camel, pascal, singular };
+})();
+DU.JDto = JDto;
+
+/* ---------- Flatten / Unflatten ---------- */
+const JFlat = (() => {
+  function flatten(root, opt = {}) {
+    const d = opt.delim == null ? '.' : opt.delim, dot = opt.arr === 'dot'; const out = []; const warn = [];
+    (function walk(n, pre) {
+      if (n.T === 'O' && n.p.length) n.p.forEach(([k, v]) => { if (d && k.includes(d) && warn.length < 20) warn.push(`키 "${k}"에 구분자 "${d}"가 포함되어 있어 되돌릴 때 구조가 달라질 수 있습니다`); walk(v, pre === null ? k : pre + d + k); });
+      else if (n.T === 'A' && n.v.length) n.v.forEach((v, i) => walk(v, pre === null ? (dot ? String(i) : `[${i}]`) : dot ? pre + d + i : `${pre}[${i}]`));
+      else if ((n.T === 'O' || n.T === 'A') && !opt.keepEmpty) { /* 빈 객체/배열 생략 */ }
+      else out.push([pre === null ? '' : pre, n]);
+    })(root, null);
+    return { node: { T: 'O', p: out }, warn };
+  }
+  function unflatten(obj, opt = {}) {
+    if (obj.T !== 'O') throw new Error('평탄화된 JSON 객체({"a.b": 1} 형태)를 입력하세요');
+    const d = opt.delim == null ? '.' : opt.delim, dot = opt.arr === 'dot'; const warn = [];
+    const root = { T: 'O', p: [], m: new Map() };
+    const mkC = isArr => (isArr ? { T: 'A', v: [] } : { T: 'O', p: [], m: new Map() });
+    const parse = key => {
+      const segs = [];
+      (d ? key.split(d) : [key]).forEach(part => {
+        const re = /\[(\d+)\]/g; let m, last = 0; const head = part.replace(/\[\d+\].*$/, '');
+        if (head || !/^\[/.test(part)) segs.push(dot && /^\d+$/.test(head) ? +head : head);
+        while ((m = re.exec(part))) { segs.push(+m[1]); last = re.lastIndex; }
+      });
+      return segs;
+    };
+    obj.p.forEach(([key, val]) => {
+      const segs = key === '' ? [] : parse(key);
+      if (!segs.length) { warn.push('빈 키는 건너뜁니다'); return; }
+      let cur = root;
+      for (let i = 0; i < segs.length; i++) {
+        const s = segs[i], last = i === segs.length - 1, nextArr = !last && typeof segs[i + 1] === 'number';
+        if (cur.T === 'A') {
+          if (typeof s !== 'number') { warn.push(`"${key}": 배열 위치에 이름 키 "${s}"가 있어 건너뜁니다`); return; }
+          while (cur.v.length < s) cur.v.push({ T: 'Z' });
+          if (last) { cur.v[s] = val; break; }
+          let nx = cur.v[s];
+          if (!nx || (nx.T !== 'O' && nx.T !== 'A')) { if (nx && nx.T !== 'Z') warn.push(`"${key}": 값과 하위 키가 충돌해 값이 덮어써졌습니다`); nx = mkC(nextArr); cur.v[s] = nx; }
+          cur = nx;
+        } else {
+          const k = String(s);
+          if (last) { if (cur.m.has(k) && (cur.m.get(k).T === 'O' || cur.m.get(k).T === 'A')) warn.push(`"${key}": 하위 키가 있는 위치에 값이 와서 덮어썼습니다`); if (!cur.m.has(k)) cur.p.push([k, val]); else cur.p[cur.p.findIndex(e => e[0] === k)][1] = val; cur.m.set(k, val); break; }
+          let nx = cur.m.get(k);
+          if (!nx || (nx.T !== 'O' && nx.T !== 'A')) { if (nx) warn.push(`"${key}": 값과 하위 키가 충돌해 값이 덮어써졌습니다`); nx = mkC(nextArr); if (cur.m.has(k)) cur.p[cur.p.findIndex(e => e[0] === k)][1] = nx; else cur.p.push([k, nx]); cur.m.set(k, nx); }
+          cur = nx;
+        }
+      }
+    });
+    const strip = n => { if (n.T === 'O') return { T: 'O', p: n.p.map(([k, v]) => [k, strip(v)]) }; if (n.T === 'A') return { T: 'A', v: n.v.map(x => strip(x || { T: 'Z' })) }; return n; };
+    return { node: strip(root), warn };
+  }
+  return { flatten, unflatten };
+})();
+DU.JFlat = JFlat;
+
+/* ---------- JSON Patch (RFC 6902) / Merge Patch (RFC 7396) ---------- */
+const JPatch = (() => {
+  const clone = n => (n.T === 'O' ? { T: 'O', p: n.p.map(([k, v]) => [k, clone(v)]) } : n.T === 'A' ? { T: 'A', v: n.v.map(clone) } : Object.assign({}, n));
+  const eq = (a, b) => JSchemaV.canonNode(a) === JSchemaV.canonNode(b);
+  function ptr(s) {
+    if (s === '') return [];
+    if (typeof s !== 'string' || s[0] !== '/') throw new Error(`잘못된 JSON Pointer: ${JSON.stringify(s)} ('/'로 시작해야 함)`);
+    return s.slice(1).split('/').map(x => x.replace(/~1/g, '/').replace(/~0/g, '~'));
+  }
+  const toPtr = path => path.map(x => '/' + String(x).replace(/~/g, '~0').replace(/\//g, '~1')).join('');
+  function idxOf(arr, tok, forAdd) {
+    if (tok === '-' && forAdd) return arr.v.length;
+    if (!/^(0|[1-9]\d*)$/.test(tok)) throw new Error(`배열 인덱스가 올바르지 않습니다: ${tok}`);
+    const i = +tok; if (i > arr.v.length || (!forAdd && i >= arr.v.length)) throw new Error(`배열 인덱스 범위 초과: ${i} (길이 ${arr.v.length})`);
+    return i;
+  }
+  function getAt(doc, toks) {
+    let cur = doc;
+    for (const t of toks) {
+      if (cur.T === 'O') { const e = cur.p.filter(x => x[0] === t).pop(); if (!e) throw new Error(`경로가 없습니다: ${toPtr(toks)}`); cur = e[1]; }
+      else if (cur.T === 'A') cur = cur.v[idxOf(cur, t, false)];
+      else throw new Error(`경로가 없습니다: ${toPtr(toks)}`);
+    }
+    return cur;
+  }
+  function add(doc, toks, val) {
+    if (!toks.length) return val;
+    const parent = getAt(doc, toks.slice(0, -1)), last = toks[toks.length - 1];
+    if (parent.T === 'O') { const i = parent.p.findIndex(e => e[0] === last); if (i >= 0) parent.p[i][1] = val; else parent.p.push([last, val]); }
+    else if (parent.T === 'A') parent.v.splice(idxOf(parent, last, true), 0, val);
+    else throw new Error(`부모가 객체/배열이 아닙니다: ${toPtr(toks.slice(0, -1))}`);
+    return doc;
+  }
+  function remove(doc, toks) {
+    if (!toks.length) throw new Error('문서 루트는 remove 할 수 없습니다');
+    const parent = getAt(doc, toks.slice(0, -1)), last = toks[toks.length - 1];
+    let old;
+    if (parent.T === 'O') { const i = parent.p.findIndex(e => e[0] === last); if (i < 0) throw new Error(`삭제할 경로가 없습니다: ${toPtr(toks)}`); old = parent.p[i][1]; parent.p = parent.p.filter(e => e[0] !== last); }
+    else if (parent.T === 'A') { const i = idxOf(parent, last, false); old = parent.v.splice(i, 1)[0]; }
+    else throw new Error(`삭제할 경로가 없습니다: ${toPtr(toks)}`);
+    return old;
+  }
+  /** ops: AST 배열 → {doc, log:[{i, op, path, ok, msg}], failed} */
+  function apply(docNode, patchNode, opt = {}) {
+    if (patchNode.T !== 'A') throw new Error('JSON Patch는 연산 객체의 배열이어야 합니다');
+    let doc = clone(docNode); const log = []; let failed = false;
+    for (let i = 0; i < patchNode.v.length; i++) {
+      const o = patchNode.v[i]; const g = k => (o.T === 'O' ? (o.p.filter(e => e[0] === k).pop() || [])[1] : undefined);
+      const opN = g('op'), pathN = g('path');
+      const op = opN && opN.T === 'S' ? opN.v : '?', path = pathN && pathN.T === 'S' ? pathN.v : null;
+      try {
+        if (o.T !== 'O') throw new Error('연산은 객체여야 합니다');
+        if (path === null) throw new Error('"path"가 없습니다');
+        const toks = ptr(path);
+        const value = g('value'), fromN = g('from');
+        switch (op) {
+          case 'add': if (!value) throw new Error('"value"가 없습니다'); doc = add(doc, toks, clone(value)); break;
+          case 'remove': remove(doc, toks); break;
+          case 'replace': if (!value) throw new Error('"value"가 없습니다'); if (!toks.length) doc = clone(value); else { getAt(doc, toks); remove(doc, toks); doc = add(doc, toks, clone(value)); } break;
+          case 'move': { if (!fromN || fromN.T !== 'S') throw new Error('"from"이 없습니다'); const f = ptr(fromN.v); if (path.startsWith(fromN.v + '/') ) throw new Error('자기 자신의 하위 경로로 move 할 수 없습니다'); if (fromN.v === path) break; const v = remove(doc, f); doc = add(doc, toks, v); break; }
+          case 'copy': { if (!fromN || fromN.T !== 'S') throw new Error('"from"이 없습니다'); const v = clone(getAt(doc, ptr(fromN.v))); doc = add(doc, toks, v); break; }
+          case 'test': { if (!value) throw new Error('"value"가 없습니다'); const cur = getAt(doc, toks); if (!eq(cur, value)) throw new Error(`test 실패: 현재 값 ${JSONX.stringify(cur).slice(0, 80)}`); break; }
+          default: throw new Error(`알 수 없는 op: ${op}`);
+        }
+        log.push({ i, op, path, ok: true });
+      } catch (e) {
+        log.push({ i, op, path, ok: false, msg: e.message }); failed = true;
+        if (!opt.continueOnError) break;
+      }
+    }
+    return { doc: failed && !opt.continueOnError ? null : doc, log, failed };
+  }
+  /** a → b 로 가는 패치 생성 (배열은 인덱스 기준) */
+  function diff(a, b, path = [], out = []) {
+    if (a.T !== b.T || (a.T !== 'O' && a.T !== 'A')) { if (!eq(a, b)) out.push({ op: 'replace', path: toPtr(path), value: b }); return out; }
+    if (a.T === 'O') {
+      const ma = new Map(a.p), mb = new Map(b.p);
+      ma.forEach((v, k) => { if (!mb.has(k)) out.push({ op: 'remove', path: toPtr(path.concat(k)) }); });
+      mb.forEach((v, k) => { if (!ma.has(k)) out.push({ op: 'add', path: toPtr(path.concat(k)), value: v }); else diff(ma.get(k), v, path.concat(k), out); });
+      return out;
+    }
+    const n = Math.min(a.v.length, b.v.length);
+    for (let i = 0; i < n; i++) diff(a.v[i], b.v[i], path.concat(i), out);
+    for (let i = a.v.length - 1; i >= n; i--) out.push({ op: 'remove', path: toPtr(path.concat(i)) });
+    for (let i = n; i < b.v.length; i++) out.push({ op: 'add', path: toPtr(path.concat(i)), value: b.v[i] });
+    return out;
+  }
+  function opsToNode(ops) { return { T: 'A', v: ops.map(o => ({ T: 'O', p: [['op', { T: 'S', v: o.op }], ['path', { T: 'S', v: o.path }]].concat(o.value ? [['value', o.value]] : []) })) }; }
+  function mergeApply(target, patch) {
+    if (patch.T !== 'O') return clone(patch);
+    const t = target && target.T === 'O' ? clone(target) : { T: 'O', p: [] };
+    patch.p.forEach(([k, v]) => {
+      const i = t.p.findIndex(e => e[0] === k);
+      if (v.T === 'Z') { if (i >= 0) t.p.splice(i, 1); }
+      else { const nv = mergeApply(i >= 0 ? t.p[i][1] : null, v); if (i >= 0) t.p[i][1] = nv; else t.p.push([k, nv]); }
+    });
+    return t;
+  }
+  function mergeDiff(a, b) {
+    if (a.T !== 'O' || b.T !== 'O') return eq(a, b) ? null : clone(b);
+    const out = { T: 'O', p: [] }; const ma = new Map(a.p), mb = new Map(b.p);
+    ma.forEach((v, k) => { if (!mb.has(k)) out.p.push([k, { T: 'Z' }]); });
+    mb.forEach((v, k) => { if (!ma.has(k)) out.p.push([k, clone(v)]); else { const d = mergeDiff(ma.get(k), v); if (d) out.p.push([k, d]); } });
+    return out.p.length ? out : null;
+  }
+  return { apply, diff, opsToNode, mergeApply, mergeDiff, ptr, toPtr };
+})();
+DU.JPatch = JPatch;
+
+/* ---------- NDJSON ---------- */
+const NdJson = (() => {
+  function parse(text, opt = {}) {
+    const lines = text.replace(/\r\n?/g, '\n').split('\n'); const items = []; const errors = [];
+    lines.forEach((l, i) => {
+      if (!l.trim()) return;
+      try { items.push({ line: i + 1, node: JSONX.parse(l).node }); }
+      catch (e) { errors.push({ line: i + 1, col: e.col || 1, msg: e.message, text: l.length > 120 ? l.slice(0, 120) + '…' : l }); }
+    });
+    return { items, errors, lines: lines.length };
+  }
+  function fromJson(node) {
+    const arr = node.T === 'A' ? node.v : [node];
+    return arr.map(x => JSONX.stringify(x)).join('\n');
+  }
+  return { parse, fromJson };
+})();
+DU.NdJson = NdJson;
+
+/* =====================================================================
+ * 도구 UI
+ * ===================================================================== */
+injectCss(`
+.ja-err-row { cursor: pointer; }
+.ja-err-row:hover td { background: var(--accent-weak); }
+.ja-files { display: flex; gap: 4px; flex-wrap: wrap; }
+.ja-ol td.mono { white-space: nowrap; }
+.ja-split3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; flex: 1; min-height: 320px; }
+@media (max-width: 960px) { .ja-split3 { grid-template-columns: minmax(0, 1fr); } .ja-split3 > .pane { min-height: 220px; } }
+`);
+function jaParse(pane, label) {
+  try { const r = JSONX.smartParse(pane.get()); pane.status('✓ 유효한 JSON', 'ok'); return r.node; }
+  catch (e) { paneError(pane, e); throw new Error(`${label} JSON 오류: ${e.message}${e.line ? ` (줄 ${e.line}, 열 ${e.col})` : ''}`); }
+}
+const JA_SAMPLE_SCHEMA = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema', title: '사용자', type: 'object',
+  required: ['id', 'name', 'email', 'roles'],
+  properties: {
+    id: { type: 'integer', minimum: 1 }, name: { type: 'string', minLength: 2, maxLength: 20 }, email: { type: 'string', format: 'email' },
+    age: { type: 'integer', minimum: 0, maximum: 150 }, roles: { type: 'array', items: { enum: ['ADMIN', 'USER', 'GUEST'] }, minItems: 1, uniqueItems: true },
+    phone: { type: 'string', pattern: '^01[016789]-\\d{3,4}-\\d{4}$' }, dept: { $ref: '#/$defs/dept' }, createdAt: { type: 'string', format: 'date-time' },
+  },
+  additionalProperties: false,
+  $defs: { dept: { type: 'object', required: ['code'], properties: { code: { type: 'string', pattern: '^D\\d{2}$' }, name: { type: 'string' } } } },
+};
+
+defineTool({
+  id: 'json-schema', group: 'json', abbr: 'JSV', name: 'JSON Schema 검증',
+  desc: 'JSON Schema(draft-07 / 2019-09 / 2020-12)로 데이터 검증 · 오류 위치 이동',
+  keywords: 'json schema validate validator 스키마 검증 유효성 draft-07 2020-12 required type format ajv',
+  inputs: { data: '데이터', schema: '스키마' }, fill: true,
+  help: `왼쪽에 검증할 JSON 데이터, 오른쪽에 JSON Schema를 넣으면 바로 검증합니다. 오류 행을 클릭하면 데이터의 해당 위치로 이동합니다.<br>
+    지원: type · enum · const · required · properties · patternProperties · additionalProperties · propertyNames · min/maxProperties · dependentRequired · dependentSchemas · dependencies · items · prefixItems · additionalItems · contains · min/maxContains · min/maxItems · uniqueItems · min/maxLength · pattern · format(date-time, date, time, email, uri, uuid, ipv4, ipv6, hostname) · minimum/maximum/exclusive* · multipleOf · allOf/anyOf/oneOf/not · if/then/else · $ref(#/…, $defs, definitions, $anchor).<br>
+    큰 정수(Java Long 등)도 정밀도 손실 없이 비교합니다. 외부 파일 $ref, unevaluatedProperties/Items는 지원하지 않습니다.`,
+  init(root) {
+    const draft = sel([['auto', '드래프트 자동 ($schema)'], ['2020', '2020-12'], ['2019', '2019-09'], ['07', 'draft-07 (06/04 호환)']], 'jsv:draft', 'auto');
+    const oFmt = chk('format 검사', 'jsv:fmt', true), oLive = chk('실시간', 'jsv:live', true);
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('검증', run, 'primary', 'Ctrl+Enter'), draft, oFmt.el, oLive.el, h('<span class="sep"></span>'),
+      btn('데이터로 스키마 생성 →', () => { sendTo('json-schema-gen', 'input', dataP.get()); }, 'sm ghost', '현재 데이터로 스키마 초안을 만듭니다'),
+      h('<span class="sp"></span>'), sampleBtn('예제', () => {
+        dataP.set(JSON.stringify({ id: 0, name: '홍', email: 'hong@example', age: 200, roles: ['ADMIN', 'ADMIN', 'ROOT'], phone: '010-1234-56789', dept: { name: '개발팀' }, createdAt: '2026-10-28T09:15:22+09:00', nickname: 'gildong' }, null, 2));
+        schP.set(JSON.stringify(JA_SAMPLE_SCHEMA, null, 2)); run();
+      }));
+    const dataP = Pane({ title: '데이터 (검증 대상)', persist: 'jsvD', placeholder: '검증할 JSON 데이터', sendFrom: 'json-schema' });
+    const schP = Pane({ title: 'JSON Schema', persist: 'jsvS', placeholder: '{\n  "type": "object",\n  "required": ["id"],\n  "properties": { "id": { "type": "integer" } }\n}', sendFrom: 'json-schema' });
+    const split = h('<div class="split" style="flex:0 0 42vh;min-height:240px"></div>'); split.append(dataP.el, schP.el);
+    const res = h('<div class="card" style="flex:1;overflow:auto;min-height:200px"></div>');
+    root.append(bar, split, res);
+    function run() {
+      res.innerHTML = '';
+      if (!dataP.get().trim() || !schP.get().trim()) { res.innerHTML = '<div class="empty-state">데이터와 스키마를 입력하세요</div>'; return; }
+      let data, sch;
+      try { data = jaParse(dataP, '데이터'); sch = JSONX.toJS(jaParse(schP, '스키마')); }
+      catch (e) { res.innerHTML = `<div class="note err" style="margin:8px">${esc(e.message)}</div>`; return; }
+      if (typeof sch !== 'object' && typeof sch !== 'boolean') { res.innerHTML = '<div class="note err" style="margin:8px">스키마는 객체 또는 true/false여야 합니다</div>'; return; }
+      const t0 = performance.now();
+      const r = JSchemaV.validate(sch, data, { draft: draft.value, format: oFmt.get() });
+      const ms = (performance.now() - t0).toFixed(1);
+      const dn = { '07': 'draft-07', 2019: '2019-09', 2020: '2020-12' }[r.draft];
+      const head = h(`<div class="row" style="padding:8px 10px;border-bottom:1px solid var(--border)">${r.errors.length ? `<span class="badge err">✕ 유효하지 않음 — 오류 ${r.errors.length}개</span>` : '<span class="badge ok">✓ 스키마를 만족합니다</span>'}<span class="dim">${dn} · ${ms}ms</span></div>`);
+      res.appendChild(head);
+      if (!r.errors.length) return;
+      const tw = h(`<table class="tbl"><thead><tr><th>위치 (데이터)</th><th style="width:110px">키워드</th><th>내용</th><th>스키마 경로</th></tr></thead><tbody></tbody></table>`);
+      const tb = $('tbody', tw);
+      r.errors.slice(0, 1000).forEach(e => {
+        const tr = h(`<tr class="ja-err-row" title="클릭하면 데이터의 해당 위치로 이동"><td class="mono"></td><td><span class="badge warn"></span></td><td></td><td class="mono faint"></td></tr>`);
+        tr.children[0].textContent = JSONX.pathStr(e.path); $('.badge', tr).textContent = e.kw; tr.children[2].textContent = e.msg; tr.children[3].textContent = e.sp;
+        if (e.sub && e.sub.length) { const d = h('<div class="faint" style="font-size:12px;margin-top:2px"></div>'); d.textContent = '가장 가까운 후보의 오류: ' + e.sub.slice(0, 3).map(x => `${JSONX.pathStr(x.path)} ${x.msg}`).join(' / '); tr.children[2].appendChild(d); }
+        on(tr, 'click', () => {
+          const off = jaLocate(dataP.get(), e.path);
+          if (off < 0) { toast('원문에서 위치를 찾지 못했습니다 (이스케이프된 입력 등)', 'warn'); return; }
+          const lc = lineColOf(dataP.get(), off); dataP.goto(lc.line, lc.col); dataP.markError(lc.line, lc.col);
+        });
+        tb.appendChild(tr);
+      });
+      res.appendChild(tw);
+      if (r.errors.length > 1000) res.appendChild(h('<div class="faint" style="padding:6px">앞 1000개만 표시</div>'));
+    }
+    const lazy = debounce(() => { if (oLive.get()) run(); }, 400);
+    dataP.onInput(lazy); schP.onInput(lazy); on(draft, 'change', run); on(oFmt.input, 'change', run);
+    if (dataP.get() && schP.get()) run();
+    return { run, receive(slot, t) { (slot === 'schema' ? schP : dataP).set(t); run(); } };
+  },
+});
+
+defineTool({
+  id: 'json-schema-gen', group: 'json', abbr: 'JSG', name: 'JSON Schema 생성',
+  desc: '샘플 JSON에서 스키마 자동 생성 · required/format/enum 추론 · 구조 보기',
+  keywords: 'json schema generator infer 스키마 생성 추론 구조 분석 outline structure',
+  inputs: { input: '샘플 JSON' }, fill: true,
+  help: `샘플 JSON에서 JSON Schema 초안을 만듭니다. 배열 안의 객체는 모두 합쳐 <b>모든 샘플에 있는 키만 required</b>로 지정하고, 타입이 섞이면 타입 배열(<code>["string","null"]</code>)로 표현합니다.<br>
+    <b>배열을 샘플 목록으로</b>를 켜면 최상위 배열의 각 요소를 같은 객체의 샘플로 보고 요소 하나의 스키마를 만듭니다.<br><b>구조 보기</b>는 경로별 타입·등장 횟수·예시 값을 표로 보여줍니다.`,
+  init(root) {
+    const draft = sel([['2020', '2020-12'], ['07', 'draft-07']], 'jsg:draft', '2020');
+    const title = bindPersist(h('<input class="inp sm" placeholder="title (선택)" style="width:120px">'), 'jsg:title');
+    const oArr = chk('배열을 샘플 목록으로', 'jsg:arr'), oReq = chk('required 추론', 'jsg:req', true), oFmt = chk('format 감지', 'jsg:fmt', true), oEnum = chk('enum 제안', 'jsg:enum'),
+      oMm = chk('min/max 포함', 'jsg:mm'), oEx = chk('examples', 'jsg:ex'), oNoAdd = chk('additionalProperties: false', 'jsg:noadd');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('생성', run, 'primary', 'Ctrl+Enter'), draft, title, oArr.el, oReq.el, oFmt.el, oEnum.el, oMm.el, oEx.el, oNoAdd.el,
+      btn('검증 도구로 →', () => { if (!out.get()) run(); sendTo('json-schema', 'schema', out.get()); toolInst('json-schema').receive('data', inp.get()); }, 'sm ghost', '생성한 스키마와 샘플을 검증 도구로 보냅니다'),
+      h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(SAMPLE_JSON); run(); }));
+    const inp = Pane({ title: '샘플 JSON', persist: 'jsg', placeholder: '샘플 JSON (객체 또는 배열)', sendFrom: 'json-schema-gen' });
+    const out = Pane({ title: '생성된 스키마', readonly: true, lang: 'json', filename: 'schema.json', sendFrom: 'json-schema-gen' });
+    const ol = h('<div class="pane-view hidden" style="padding:0"></div>');
+    out.el.insertBefore(ol, out.el.querySelector('.pane-foot'));
+    let view = 'schema';
+    const seg = Seg([['schema', '스키마'], ['outline', '구조 보기']], 'schema', v => { view = v; ol.classList.toggle('hidden', v !== 'outline'); out.el.querySelector('.pane-body').classList.toggle('hidden', v === 'outline'); run(); });
+    seg.el.style.marginLeft = '8px'; out.extra.appendChild(seg.el);
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    function run() {
+      if (!inp.get().trim()) return;
+      let node; try { node = jaParse(inp, '샘플'); } catch (e) { out.status(e.message, 'err'); return; }
+      const opt = { draft: draft.value, title: title.value.trim(), arraySamples: oArr.get(), required: oReq.get(), format: oFmt.get(), enumOn: oEnum.get(), minmax: oMm.get(), examples: oEx.get(), noAdditional: oNoAdd.get() };
+      const s = JSchemaGen.generate(node, opt);
+      out.set(JSON.stringify(s, null, 2), { lang: 'json' });
+      const chk2 = JSchemaV.validate(s, node, {}).errors.length;
+      out.status(chk2 && !opt.arraySamples ? `⚠ 생성된 스키마로 샘플 검증 시 오류 ${chk2}개` : '✓ 생성 완료 — 샘플이 스키마를 만족합니다', chk2 && !opt.arraySamples ? 'warn' : 'ok');
+      if (view === 'outline') {
+        const rows = JSchemaGen.outline(node);
+        ol.innerHTML = `<table class="tbl ja-ol"><thead><tr><th>경로</th><th>타입</th><th>등장</th><th>예시</th></tr></thead><tbody>${rows.map(r => `<tr><td class="mono">${esc(r.path)}</td><td>${Object.entries(r.types).map(([t, c]) => `<span class="badge">${esc(t)}${Object.keys(r.types).length > 1 ? ' ' + c : ''}</span>`).join(' ')}${r.len ? `<div class="faint" style="font-size:11px">길이 ${Math.min(...r.len)}~${Math.max(...r.len)}</div>` : ''}</td><td class="mono">${r.count}${r.of != null && r.of !== r.count ? ` / ${r.of} <span class="t-warn">(선택)</span>` : ''}</td><td class="mono faint">${esc(r.ex.join(', '))}</td></tr>`).join('')}</tbody></table>`;
+      }
+    }
+    [draft, oArr.input, oReq.input, oFmt.input, oEnum.input, oMm.input, oEx.input, oNoAdd.input].forEach(x => on(x, 'change', run));
+    on(title, 'input', debounce(run, 300));
+    inp.onInput(debounce(() => { if (inp.get().length < 3e6) run(); }, 400));
+    if (inp.get()) run();
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+defineTool({
+  id: 'json-dto', group: 'json', abbr: 'DTO', name: 'JSON → Java DTO',
+  desc: 'API 응답 JSON으로 Java 클래스 · Lombok · record · TypeScript · Kotlin 코드 생성',
+  keywords: 'json to java dto pojo class lombok record typescript interface kotlin data class 코드 생성 클래스 jackson',
+  inputs: { input: 'JSON' }, fill: true,
+  help: `JSON 구조에서 DTO 코드를 만듭니다. 배열 안 객체들은 모두 합쳐 필드를 만들고, 일부 샘플에만 있거나 null이 있는 필드는 nullable(래퍼 타입·<code>?</code>)로 만듭니다.<br>
+    숫자는 값 범위에 따라 Integer → Long → BigInteger를 고르고, 소수는 Double 또는 BigDecimal(옵션)입니다. 키가 <code>user_name</code>처럼 camelCase가 아니면 <code>@JsonProperty("user_name")</code>를 붙입니다.<br>
+    배열 키는 단수형 클래스 이름(<code>users → User</code>, <code>categories → Category</code>)을 씁니다.`,
+  init(root) {
+    const lang = sel([['class', 'Java 클래스 (getter/setter)'], ['lombok', 'Java + Lombok'], ['record', 'Java record (16+)'], ['ts', 'TypeScript interface'], ['kotlin', 'Kotlin data class']], 'dto:lang', 'lombok');
+    const rootName = bindPersist(h('<input class="inp sm mono" value="UserResponse" style="width:130px" title="최상위 클래스 이름">'), 'dto:root');
+    const pkg = bindPersist(h('<input class="inp sm mono" placeholder="com.example.dto" style="width:150px" title="패키지 (선택)">'), 'dto:pkg');
+    const o = {
+      jackson: chk('@JsonProperty', 'dto:jk', true, '키가 필드명과 다를 때 붙임'), jacksonAlways: chk('항상', 'dto:jka', false, '모든 필드에 @JsonProperty'),
+      ignoreUnknown: chk('@JsonIgnoreProperties', 'dto:iu'), decimal: chk('BigDecimal', 'dto:dec', false, '소수를 BigDecimal로'), dates: chk('날짜 타입', 'dto:date', true, 'yyyy-MM-dd → LocalDate, ISO 날짜시간 → LocalDateTime/OffsetDateTime'),
+      primitive: chk('원시형', 'dto:prim', false, 'null이 없는 숫자/불리언을 int/long/double/boolean으로'), idLong: chk('*Id → Long', 'dto:idl', true), serial: chk('Serializable', 'dto:ser'),
+      separate: chk('클래스별 파일', 'dto:sep', false, '중첩 클래스를 static inner 대신 별도 파일로'), camel: chk('camelCase 필드', 'dto:camel', true), mapDetect: chk('동적 키 → Map', 'dto:map', true, '숫자/UUID/날짜 키 객체를 Map<String, T>로'),
+      lData: chk('@Data', 'dto:ld', true), lBuilder: chk('@Builder', 'dto:lb'), lNoArgs: chk('@NoArgsConstructor', 'dto:ln', true), lAllArgs: chk('@AllArgsConstructor', 'dto:la'),
+    };
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('생성', run, 'primary', 'Ctrl+Enter'), lang, h('<span class="lbl">클래스</span>'), rootName, h('<span class="lbl">패키지</span>'), pkg, h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(SAMPLE_JSON); run(); }));
+    const bar2 = h('<div class="toolbar"></div>');
+    const lomb = h('<span class="row" style="gap:8px"></span>'); lomb.append(o.lData.el, o.lBuilder.el, o.lNoArgs.el, o.lAllArgs.el);
+    bar2.append(o.jackson.el, o.jacksonAlways.el, o.ignoreUnknown.el, o.decimal.el, o.dates.el, o.primitive.el, o.idLong.el, o.serial.el, o.separate.el, o.camel.el, o.mapDetect.el, h('<span class="sep"></span>'), lomb);
+    const inp = Pane({ title: 'JSON (API 응답 등)', persist: 'dto', placeholder: 'JSON 붙여넣기', sendFrom: 'json-dto' });
+    const out = Pane({ title: '생성된 코드', readonly: true, filename: 'Dto.java', sendFrom: 'json-dto' });
+    const files = h('<div class="ja-files"></div>'); out.extra.appendChild(files);
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, bar2, split);
+    let result = [], cur = 0;
+    function show() {
+      files.innerHTML = '';
+      if (result.length > 1) {
+        result.forEach((f, i) => { const b = btn(f.name, () => { cur = i; show(); }, 'xs' + (i === cur ? ' primary' : '')); files.appendChild(b); });
+        files.appendChild(btn('전체 저장', () => download('dto-all.txt', result.map(f => `// ===== ${f.name} =====\n${f.text}`).join('\n')), 'xs ghost'));
+      }
+      const f = result[cur] || { name: '', text: '' };
+      out.set(f.text, { lang: null }); out.setTitle(result.length > 1 ? `생성된 코드 (${result.length}개 파일)` : (f.name || '생성된 코드'));
+    }
+    function run() {
+      lomb.classList.toggle('hidden', lang.value !== 'lombok');
+      if (!inp.get().trim()) return;
+      let node; try { node = jaParse(inp, '입력'); } catch (e) { out.status(e.message, 'err'); return; }
+      const opt = { lang: ['ts', 'kotlin'].includes(lang.value) ? lang.value : 'java', mode: lang.value, root: rootName.value.trim() || 'Root', pkg: pkg.value.trim() };
+      Object.keys(o).forEach(k => { opt[k] = o[k].get(); });
+      try { result = JDto.generate(node, opt); cur = 0; show(); out.status(`${result.length}개 파일 · ${result.reduce((a, f) => a + (f.text.match(/\b(class|record|interface) \w+/g) || []).length, 0)}개 타입`, 'ok'); }
+      catch (e) { out.status('✕ ' + e.message, 'err'); }
+    }
+    [lang].concat(Object.values(o).map(x => x.input)).forEach(x => on(x, 'change', run));
+    [rootName, pkg].forEach(x => on(x, 'input', debounce(run, 300)));
+    inp.onInput(debounce(() => { if (inp.get().length < 3e6) run(); }, 400));
+    if (inp.get()) run(); else lomb.classList.toggle('hidden', lang.value !== 'lombok');
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+defineTool({
+  id: 'json-flatten', group: 'json', abbr: 'a.b', name: 'JSON Flatten',
+  desc: '중첩 JSON ↔ "user.address.city" 평탄화 · 되돌리기',
+  keywords: 'json flatten unflatten dot notation 평탄화 키 경로 중첩',
+  inputs: { input: 'JSON' }, fill: true,
+  init(root) {
+    const delim = bindPersist(h('<input class="inp sm mono" value="." style="width:46px" title="구분자">'), 'jfl:d');
+    const arr = sel([['bracket', '배열: a[0]'], ['dot', '배열: a.0']], 'jfl:arr', 'bracket');
+    const oEmpty = chk('빈 객체/배열 유지', 'jfl:empty', true);
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('평탄화 →', () => go('flat'), 'primary', 'Ctrl+Enter'), btn('← 되돌리기 (Unflatten)', () => go('unflat')), h('<span class="lbl">구분자</span>'), delim, arr, oEmpty.el,
+      btn('결과 → 입력', () => { if (out.get()) { inp.set(out.get()); persistSet('pane:jfl', out.get()); } }, 'sm ghost'), h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(SAMPLE_JSON); go('flat'); }));
+    const inp = Pane({ title: '입력', persist: 'jfl', placeholder: '중첩 JSON 또는 평탄화된 JSON', sendFrom: 'json-flatten' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', sendFrom: 'json-flatten' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    let last = 'flat';
+    function go(mode) {
+      last = mode; if (!inp.get().trim()) return;
+      let node; try { node = jaParse(inp, '입력'); } catch (e) { out.status(e.message, 'err'); return; }
+      try {
+        const opt = { delim: delim.value, arr: arr.value, keepEmpty: oEmpty.get() };
+        const r = mode === 'flat' ? JFlat.flatten(node, opt) : JFlat.unflatten(node, opt);
+        out.set(JSONX.stringify(r.node, { indent: 2 }));
+        out.status(r.warn.length ? '⚠ ' + r.warn.slice(0, 2).join(' / ') : mode === 'flat' ? `평탄화 · 키 ${r.node.p.length}개` : '되돌리기 완료', r.warn.length ? 'warn' : 'ok');
+      } catch (e) { out.status('✕ ' + e.message, 'err'); }
+    }
+    [arr, oEmpty.input].forEach(x => on(x, 'change', () => go(last))); on(delim, 'input', debounce(() => go(last), 300));
+    return { run: () => go('flat'), receive(slot, t) { inp.set(t); go('flat'); } };
+  },
+});
+
+defineTool({
+  id: 'json-patch', group: 'json', abbr: 'PAT', name: 'JSON Patch',
+  desc: 'RFC 6902 JSON Patch · RFC 7396 Merge Patch 적용 · 두 문서 차이로 패치 생성',
+  keywords: 'json patch rfc6902 rfc7396 merge patch diff apply jsonpatch 패치 적용 생성 pointer',
+  inputs: { doc: '원본 문서', patch: '패치 / 목표 문서' }, fill: true,
+  help: `<b>JSON Patch (RFC 6902)</b> — <code>[{"op":"replace","path":"/a/0","value":1}]</code> 형식의 연산을 순서대로 적용합니다. 하나라도 실패하면 RFC 규칙에 따라 전체가 적용되지 않습니다(<b>실패해도 계속</b> 옵션으로 부분 적용 가능).<br>
+    <b>Merge Patch (RFC 7396)</b> — 바꿀 값만 담은 객체를 병합합니다. <code>null</code>은 키 삭제를 뜻합니다.<br>
+    <b>생성</b> 모드에서는 가운데 칸을 목표 문서로 보고 원본 → 목표 패치를 만듭니다. 배열은 인덱스 기준으로 비교합니다.`,
+  init(root) {
+    let kind = persistGet('jpt:kind', '6902'), mode = persistGet('jpt:mode', 'apply');
+    const tabs = Tabs([{ id: '6902', label: 'JSON Patch (RFC 6902)' }, { id: '7396', label: 'Merge Patch (RFC 7396)' }], id => { kind = id; persistSet('jpt:kind', id); titles(); run(); });
+    const modeSeg = Seg([['apply', '적용'], ['gen', '생성 (원본 → 목표)']], mode, v => { mode = v; persistSet('jpt:mode', v); titles(); run(); });
+    const oCont = chk('실패해도 계속', 'jpt:cont');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('실행', run, 'primary', 'Ctrl+Enter'), modeSeg.el, oCont.el, h('<span class="sp"></span>'), sampleBtn('예제', () => {
+      docP.set(JSON.stringify({ name: '홍길동', roles: ['USER'], address: { city: '서울', zip: '04524' }, temp: 1 }, null, 2));
+      if (kind === '6902') patP.set(JSON.stringify([{ op: 'replace', path: '/name', value: '김철수' }, { op: 'add', path: '/roles/-', value: 'ADMIN' }, { op: 'remove', path: '/temp' }, { op: 'move', from: '/address/zip', path: '/zip' }, { op: 'test', path: '/address/city', value: '서울' }], null, 2));
+      else patP.set(JSON.stringify({ name: '김철수', temp: null, address: { zip: '06000' } }, null, 2));
+      modeSeg.set('apply'); mode = 'apply'; titles(); run();
+    }));
+    const docP = Pane({ title: '원본 문서', persist: 'jptD', placeholder: '원본 JSON 문서', sendFrom: 'json-patch' });
+    const patP = Pane({ title: '패치', persist: 'jptP', placeholder: '', sendFrom: 'json-patch' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', sendFrom: 'json-patch' });
+    const grid = h('<div class="ja-split3"></div>'); grid.append(docP.el, patP.el, out.el);
+    const logBox = h('<div class="tbl-wrap" style="max-height:26vh"></div>');
+    root.append(tabs.el, bar, grid, logBox);
+    function titles() {
+      patP.setTitle(mode === 'gen' ? '목표 문서' : kind === '6902' ? '패치 (연산 배열)' : 'Merge Patch 문서');
+      patP.setPlaceholder(mode === 'gen' ? '바뀐 후의 JSON 문서' : kind === '6902' ? '[\n  { "op": "replace", "path": "/name", "value": "김철수" }\n]' : '{ "name": "김철수", "temp": null }');
+      out.setTitle(mode === 'gen' ? (kind === '6902' ? '생성된 JSON Patch' : '생성된 Merge Patch') : '적용 결과');
+    }
+    function run() {
+      logBox.innerHTML = '';
+      if (!docP.get().trim() || !patP.get().trim()) { out.set(''); out.status(''); return; }
+      let a, b; try { a = jaParse(docP, '원본'); b = jaParse(patP, mode === 'gen' ? '목표' : '패치'); } catch (e) { out.set(''); out.status(e.message, 'err'); return; }
+      try {
+        if (mode === 'gen') {
+          if (kind === '6902') { const ops = JPatch.diff(a, b); out.set(JSONX.stringify(JPatch.opsToNode(ops), { indent: 2 })); out.status(`연산 ${ops.length}개`, 'ok'); }
+          else { const d = JPatch.mergeDiff(a, b); out.set(d ? JSONX.stringify(d, { indent: 2 }) : '{}'); out.status(d ? 'Merge Patch 생성 (값을 null로 바꾸는 변경은 표현 불가)' : '두 문서가 같습니다', 'ok'); }
+          return;
+        }
+        if (kind === '7396') { out.set(JSONX.stringify(JPatch.mergeApply(a, b), { indent: 2 })); out.status('병합 완료', 'ok'); return; }
+        const r = JPatch.apply(a, b, { continueOnError: oCont.get() });
+        logBox.innerHTML = `<table class="tbl"><thead><tr><th>#</th><th>op</th><th>path</th><th>결과</th></tr></thead><tbody>${r.log.map(l => `<tr><td class="faint">${l.i + 1}</td><td class="mono">${esc(l.op)}</td><td class="mono">${esc(l.path == null ? '' : l.path)}</td><td>${l.ok ? '<span class="t-ok">✓</span>' : `<span class="t-err">✕ ${esc(l.msg)}</span>`}</td></tr>`).join('')}${r.log.length < b.v.length ? `<tr><td colspan="4" class="faint">나머지 ${b.v.length - r.log.length}개 연산은 실행하지 않음</td></tr>` : ''}</tbody></table>`;
+        if (r.doc) { out.set(JSONX.stringify(r.doc, { indent: 2 })); out.status(r.failed ? '⚠ 일부 연산 실패 — 성공한 연산만 적용' : `✓ 연산 ${r.log.length}개 적용`, r.failed ? 'warn' : 'ok'); }
+        else { out.set(''); out.status('✕ 연산이 실패해 패치 전체가 적용되지 않았습니다 (RFC 6902)', 'err'); }
+      } catch (e) { out.set(''); out.status('✕ ' + e.message, 'err'); }
+    }
+    tabs.set(kind, true); titles();
+    const lazy = debounce(run, 400); docP.onInput(lazy); patP.onInput(lazy); on(oCont.input, 'change', run);
+    if (docP.get() && patP.get()) run();
+    return { run, receive(slot, t) { (slot === 'patch' ? patP : docP).set(t); run(); } };
+  },
+});
+
+defineTool({
+  id: 'ndjson', group: 'json', abbr: 'NDJ', name: 'NDJSON · JSON Lines',
+  desc: 'JSON Lines ↔ JSON 배열 · 줄별 검증 · 오류 줄 건너뛰기',
+  keywords: 'ndjson jsonl json lines newline delimited 줄 단위 json 로그 elasticsearch bulk 변환',
+  inputs: { input: '입력' }, fill: true,
+  init(root) {
+    const oSkip = chk('오류 줄 건너뛰기', 'ndj:skip', true), oPretty = chk('정렬해서 출력', 'ndj:pretty', true);
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('NDJSON → JSON 배열', toArr, 'primary', 'Ctrl+Enter'), btn('JSON 배열 → NDJSON', toNd), btn('검증만', validate), oSkip.el, oPretty.el, h('<span class="sep"></span>'),
+      btn('CSV · 표 변환으로', () => { const a = arrText(); if (a) sendTo('csv', 'input', a); }, 'sm ghost'), btn('데이터 표로 보기', () => { const a = arrText(); if (a) sendTo('data-table', 'input', a); }, 'sm ghost'),
+      h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set('{"ts":"2026-10-28T09:15:22Z","level":"INFO","msg":"started","user":{"id":1}}\n{"ts":"2026-10-28T09:15:23Z","level":"ERROR","msg":"조회 실패","user":{"id":9007199254740993}}\n{"ts":"2026-10-28T09:15:24Z", level:"WARN"}\n\n{"ts":"2026-10-28T09:15:25Z","level":"INFO","msg":"done"}'); toArr(); }));
+    const inp = Pane({ title: '입력 (NDJSON 또는 JSON 배열)', persist: 'ndj', placeholder: '{"a":1}\n{"a":2}', sendFrom: 'ndjson' });
+    const out = Pane({ title: '결과', readonly: true, lang: 'json', filename: 'result.json', sendFrom: 'ndjson' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    const errBox = h('<div class="tbl-wrap" style="max-height:26vh"></div>');
+    root.append(bar, split, errBox);
+    const src = jaBigInput(inp, () => toArr());
+    function showErrors(r) {
+      errBox.innerHTML = r.errors.length ? `<table class="tbl"><thead><tr><th style="width:60px">줄</th><th>오류</th><th>내용</th></tr></thead><tbody>${r.errors.slice(0, 500).map(e => `<tr class="ja-err-row" data-l="${e.line}" data-c="${e.col}"><td class="mono">${e.line}</td><td class="t-err">${esc(e.msg)}</td><td class="mono faint">${esc(e.text)}</td></tr>`).join('')}</tbody></table>` : '';
+      $$('tr[data-l]', errBox).forEach(tr => on(tr, 'click', () => { inp.goto(+tr.dataset.l, 1); inp.markError(+tr.dataset.l, 1); }));
+    }
+    function arrText() {
+      const s = src.get().trim(); if (!s) return '';
+      if (/^\[/.test(s)) return s;
+      const r = NdJson.parse(s); return JSONX.stringify({ T: 'A', v: r.items.map(x => x.node) }, { indent: 2 });
+    }
+    function toArr() {
+      const r = NdJson.parse(src.get()); showErrors(r);
+      if (r.errors.length && !oSkip.get()) { out.set(''); out.status(`✕ 오류 ${r.errors.length}줄 — 건너뛰기를 켜거나 수정하세요`, 'err'); return; }
+      out.set(JSONX.stringify({ T: 'A', v: r.items.map(x => x.node) }, oPretty.get() ? { indent: 2, inline: true } : {}), { lang: 'json' });
+      out.status(`${fmtNum(r.items.length)}개 레코드${r.errors.length ? ` · 오류 ${r.errors.length}줄 건너뜀` : ''}`, r.errors.length ? 'warn' : 'ok');
+    }
+    function toNd() {
+      errBox.innerHTML = '';
+      try { const node = src.isBig() ? JSONX.smartParse(src.get()).node : jaParse(inp, '입력'); out.set(NdJson.fromJson(node), { lang: null }); out.setTitle('결과 (NDJSON)'); out.status(`${node.T === 'A' ? fmtNum(node.v.length) : 1}줄`, 'ok'); }
+      catch (e) { out.status(e.message, 'err'); }
+    }
+    function validate() {
+      const r = NdJson.parse(src.get()); showErrors(r);
+      out.status(r.errors.length ? `✕ 오류 ${r.errors.length}줄 / 정상 ${r.items.length}줄` : `✓ ${r.items.length}줄 모두 올바른 JSON`, r.errors.length ? 'err' : 'ok');
+    }
+    return { run: toArr, receive(slot, t) { src.set(t); if (/^\s*\[/.test(t)) toNd(); else toArr(); } };
+  },
+});
+
+/* ---------- Smart Paste · 레시피 연동 ---------- */
+defineDetector({ id: 'json-adv', test(text, c) {
+  const j = c.json; if (!j || (j.node.T !== 'O' && j.node.T !== 'A')) return null;
+  const n = j.node, out = [];
+  const acts = [spAct('JSON Schema 생성', 'json-schema-gen'), spAct('Java DTO 생성', 'json-dto'), spAct('Mock 데이터 생성', 'json-mock'), spAct('Flatten (a.b.c)', 'json-flatten')];
+  const arr = n.T === 'A' ? n : findArray(n) ? findArray(n).node : null;
+  if (arr && arr.v.length && arr.v.every(x => x.T === 'O')) acts.splice(1, 0, spAct('데이터 표로 보기', 'data-table'));
+  out.push({ key: j.levels > 0 ? 'json-escaped' : 'json', score: 1, label: 'JSON', actions: acts });
+  if (n.T === 'O') {
+    const has = k => JSONX.get(n, k) !== undefined;
+    const isSchema = (has('$schema') && /json-schema/.test((JSONX.get(n, '$schema') || {}).v || '')) || ((has('type') || has('$ref')) && (has('properties') || has('items') || has('$defs') || has('definitions')) && JSONX.get(n, 'properties') && JSONX.get(n, 'properties').T === 'O');
+    if (isSchema) out.push({ key: 'json-schema', score: 94, label: 'JSON Schema 문서', detail: ((JSONX.get(n, 'title') || {}).v || '') + ((JSONX.get(n, '$schema') || {}).v ? ' · ' + JSONX.get(n, '$schema').v : ''), actions: [spAct('이 스키마로 데이터 검증', 'json-schema', { slot: 'schema' }), spAct('JSON 포매터', 'json-format')] });
+    if (n.p.length && n.p.every(([k]) => /[.[]/.test(k))) out.push({ key: 'json-flat', score: 88, label: '평탄화된 JSON (a.b.c 키)', actions: [{ label: '중첩 JSON으로 되돌리기', recipe: [{ op: 'json-unflatten' }] }, spAct('Flatten 도구', 'json-flatten')] });
+    if (n.T === 'O') { const ops = JSONX.get(n, 'op'); if (ops && ops.T === 'S' && JSONX.get(n, 'path')) out.push({ key: 'json-patch', score: 70, label: 'JSON Patch 연산', actions: [spAct('JSON Patch 도구', 'json-patch', { slot: 'patch' })] }); }
+  }
+  if (n.T === 'A' && n.v.length && n.v.every(x => x.T === 'O' && JSONX.get(x, 'op') && JSONX.get(x, 'path'))) out.push({ key: 'json-patch', score: 93, label: `JSON Patch (RFC 6902, 연산 ${n.v.length}개)`, actions: [spAct('JSON Patch 적용', 'json-patch', { slot: 'patch' })] });
+  return out;
+} });
+defineDetector({ id: 'ndjson', test(text, c) {
+  if (c.json || c.lines.length < 2) return null;
+  const ls = c.lines.filter(l => l.trim()); if (ls.length < 2) return null;
+  const sample = ls.slice(0, 200); let ok = 0;
+  for (const l of sample) { const t = l.trim(); if (!/^[{[]/.test(t)) return null; try { JSONX.parse(t); ok++; } catch (e) { /* 일부 오류 허용 */ } }
+  if (ok < sample.length * 0.8) return null;
+  return { key: 'ndjson', score: 96, label: `NDJSON / JSON Lines (${fmtNum(ls.length)}줄${ok < sample.length ? `, 오류 ${sample.length - ok}줄` : ''})`, actions: [spAct('NDJSON → JSON 배열', 'ndjson'), spAct('데이터 표로 보기', 'data-table'), { label: 'JSON 배열로 변환 + 정렬', recipe: [{ op: 'ndjson-to-json' }] }] };
+} });
+defineFileDetector({ id: 'ndjson-file', test(file, head, ext) {
+  if (!/^(ndjson|jsonl)$/.test(ext)) return null;
+  return { key: 'ndjson', score: 97, label: `NDJSON 파일 (${file.name})`, actions: [{ label: 'NDJSON 도구로 열기', run: async f => { const t = (await readFileText(f)).text; sendTo('ndjson', 'input', t); } }, { label: '데이터 표로 보기', run: async f => { const t = (await readFileText(f)).text; sendTo('data-table', 'input', t); } }] };
+} });
+[
+  { id: 'json-flatten', name: 'JSON 평탄화 (a.b.c)', group: 'JSON', params: [{ k: 'delim', label: '구분자', type: 'text', def: '.' }, { k: 'arr', label: '배열', type: 'select', options: [['bracket', 'a[0]'], ['dot', 'a.0']] }], run: (v, p) => JSONX.stringify(JFlat.flatten(JSONX.smartParse(v).node, { delim: p.delim, arr: p.arr, keepEmpty: true }).node, { indent: 2 }) },
+  { id: 'json-unflatten', name: 'JSON 되돌리기 (Unflatten)', group: 'JSON', params: [{ k: 'delim', label: '구분자', type: 'text', def: '.' }, { k: 'arr', label: '배열', type: 'select', options: [['bracket', 'a[0]'], ['dot', 'a.0']] }], run: (v, p) => JSONX.stringify(JFlat.unflatten(JSONX.smartParse(v).node, { delim: p.delim, arr: p.arr }).node, { indent: 2 }) },
+  { id: 'ndjson-to-json', name: 'NDJSON → JSON 배열', group: 'JSON', params: [{ k: 'skip', label: '오류 줄 건너뛰기', type: 'bool', def: true }], run: (v, p) => { const r = NdJson.parse(v); if (r.errors.length && !p.skip) throw new Error(`${r.errors[0].line}줄: ${r.errors[0].msg}`); return JSONX.stringify({ T: 'A', v: r.items.map(x => x.node) }, { indent: 2, inline: true }); } },
+  { id: 'json-to-ndjson', name: 'JSON 배열 → NDJSON', group: 'JSON', run: v => NdJson.fromJson(JSONX.smartParse(v).node) },
+  { id: 'json-schema-gen', name: 'JSON Schema 생성', group: 'JSON', params: [{ k: 'arr', label: '배열=샘플 목록', type: 'bool' }], run: (v, p) => JSON.stringify(JSchemaGen.generate(JSONX.smartParse(v).node, { required: true, format: true, arraySamples: p.arr }), null, 2) },
+  { id: 'json-to-dto', name: 'JSON → Java DTO', group: 'JSON', params: [{ k: 'mode', label: '형식', type: 'select', options: [['lombok', 'Lombok'], ['class', '클래스'], ['record', 'record'], ['ts', 'TypeScript'], ['kotlin', 'Kotlin']] }, { k: 'root', label: '클래스', type: 'text', def: 'Root' }],
+    run: (v, p) => JDto.generate(JSONX.smartParse(v).node, { lang: ['ts', 'kotlin'].includes(p.mode) ? p.mode : 'java', mode: p.mode, root: p.root || 'Root', jackson: true, dates: true, camel: true, idLong: true, mapDetect: true, lData: true, lNoArgs: true }).map(f => (p.mode === 'ts' || p.mode === 'kotlin' ? f.text : f.text)).join('\n') },
+].forEach(defineOp);
+
+/* =====================================================================
+ * 데이터 도구 — 한국어 더미 데이터(Faker) · Mock 생성 · 데이터 표 · 테스트 데이터 빌더
+ * ===================================================================== */
+const KoFaker = (() => {
+  const SUR = '김김김김김이이이이박박박최최정정강강조조윤윤장장임임한오서신권황안송류전홍고문양손배백허유남'.split('');
+  const GIVEN = '민준 서준 도윤 예준 시우 하준 지호 주원 지후 준우 준서 건우 현우 우진 선우 연우 유준 정우 승우 승현 서연 서윤 지우 서현 민서 하은 하윤 윤서 지유 채원 지민 수아 지아 다은 은서 예은 수빈 소율 예린 지원 영수 영희 철수 민수 지훈 성민 혜진 은지 현정 동현 상우 재현 태윤 가은 나연 다인 유진'.split(' ');
+  const ROM_S = ['kim', 'lee', 'park', 'choi', 'jung', 'kang', 'cho', 'yoon', 'jang', 'lim', 'han', 'oh', 'seo', 'shin', 'kwon'];
+  const ROM_G = ['minjun', 'seojun', 'doyun', 'siwoo', 'jiho', 'seoyeon', 'jiwoo', 'hayun', 'eunseo', 'sua', 'jimin', 'yejin', 'hyunwoo', 'dahye', 'sumin'];
+  const DOMAINS = ['example.com', 'example.co.kr', 'test.com', 'mail.example.org', 'sample.kr'];
+  const CITY = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도 수원시', '경기도 성남시', '경기도 고양시', '경기도 용인시', '강원특별자치도 춘천시', '충청북도 청주시', '충청남도 천안시', '전북특별자치도 전주시', '전라남도 여수시', '경상북도 포항시', '경상남도 창원시', '제주특별자치도 제주시'];
+  const GU = { 서울특별시: ['강남구', '서초구', '송파구', '마포구', '영등포구', '종로구', '중구', '용산구', '성동구', '광진구', '동작구', '관악구', '강서구', '노원구'] };
+  const GU_ETC = ['중구', '동구', '서구', '남구', '북구', '수성구', '해운대구', '유성구', '연수구', '분당구', '일산동구', '수지구'];
+  const ROAD = ['테헤란로', '세종대로', '올림픽로', '강남대로', '도산대로', '중앙로', '번영로', '시청로', '대학로', '해운대로', '가산디지털1로', '판교역로', '월드컵로', '한강대로', '경인로'];
+  const CO_A = ['한빛', '누리', '바른', '미래', '하늘', '새솔', '온누리', '푸른', '다온', '가람', '나래', '태양', '동방', '성진', '우리', '한결', '참빛'];
+  const CO_B = ['소프트', '정보통신', '시스템', '데이터', '전자', '물산', '테크', '솔루션', '네트웍스', '에너지', '건설', '제약', '물류', '식품', '이앤씨'];
+  const DEPT = ['개발팀', '기획팀', '영업팀', '인사팀', '재무팀', '마케팅팀', '품질관리팀', '운영팀', '보안팀', '고객지원팀', '디자인팀', '기술연구소', '인프라팀', '데이터팀'];
+  const POS = ['사원', '주임', '대리', '과장', '차장', '부장', '팀장', '이사', '수석', '책임', '선임'];
+  const TOPIC = ['주문 처리', '회원 가입', '배송 조회', '결제 승인', '재고 확인', '로그인', '비밀번호 변경', '포인트 적립', '쿠폰 발급', '정산 처리', '공지 등록', '문의 답변', '배치 작업', '데이터 동기화', '파일 업로드'];
+  const TAIL = ['요청이 접수되었습니다.', '처리가 완료되었습니다.', '확인이 필요합니다.', '중 오류가 발생했습니다.', '일정이 변경되었습니다.', '결과를 안내드립니다.', '기능이 개선되었습니다.', '담당자 검토 중입니다.'];
+  const WORDS = ['사과', '바다', '하늘', '구름', '나무', '책상', '노트', '연필', '커피', '창문', '기차', '도시', '산책', '음악', '시간', '여행', '정원', '등대'];
+  function hashSeed(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function make(seed) {
+    const R = seed === undefined || seed === null || seed === '' ? Math.random : mulberry(hashSeed(seed));
+    const int = (a, b) => Math.floor(a + R() * (b - a + 1));
+    const pick = arr => arr[Math.floor(R() * arr.length)];
+    const digits = n => { let s = ''; for (let i = 0; i < n; i++) s += Math.floor(R() * 10); return s; };
+    const F = {
+      R, int, pick, digits,
+      float: (a, b, d = 2) => +(a + R() * (b - a)).toFixed(d),
+      bool: (p = 0.5) => R() < p,
+      name: () => pick(SUR) + pick(GIVEN),
+      loginId: () => pick(ROM_G) + int(1, 999),
+      email: () => `${pick(ROM_G)}.${pick(ROM_S)}${R() < 0.5 ? int(1, 99) : ''}@${pick(DOMAINS)}`,
+      phone: () => `010-${digits(4)}-${digits(4)}`,
+      tel: () => `0${pick(['2', '31', '32', '42', '51', '53', '62'])}-${digits(3 + int(0, 1))}-${digits(4)}`,
+      city: () => pick(CITY),
+      address: () => { const c = pick(CITY); const gu = c.includes(' ') ? '' : ' ' + pick(GU[c] || GU_ETC); return `${c}${gu} ${pick(ROAD)} ${int(1, 450)}${R() < 0.4 ? `, ${int(1, 20)}층` : ''}`; },
+      zip: () => String(int(1000, 63999)).padStart(5, '0'),
+      company: () => { const n = pick(CO_A) + pick(CO_B); const r = R(); return r < 0.35 ? `(주)${n}` : r < 0.5 ? `주식회사 ${n}` : n; },
+      dept: () => pick(DEPT), position: () => pick(POS),
+      title: () => `${pick(TOPIC)} ${pick(['안내', '요청', '보고', '문의', '공지', '결과'])}`,
+      sentence: () => `${pick(TOPIC)} ${pick(TAIL)}${R() < 0.4 ? ' ' + pick(TOPIC) + ' ' + pick(TAIL) : ''}`,
+      word: () => pick(WORDS),
+      uuid: () => { const hx = () => Math.floor(R() * 16).toString(16); let s = ''; for (let i = 0; i < 32; i++) s += i === 12 ? '4' : i === 16 ? '89ab'[Math.floor(R() * 4)] : hx(); return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20)}`; },
+      ip: () => pick([`10.${int(0, 255)}.${int(0, 255)}.${int(1, 254)}`, `192.168.${int(0, 255)}.${int(1, 254)}`, `172.${int(16, 31)}.${int(0, 255)}.${int(1, 254)}`]),
+      url: () => `https://www.${pick(DOMAINS)}/${pick(['product', 'board', 'user', 'order', 'notice'])}/${int(1, 99999)}`,
+      date: (from, to) => from + Math.floor(R() * Math.max(1, to - from)),
+      /** 패턴: # 숫자, ? 대문자, @ 소문자, * 대문자/숫자, \\ 다음 문자 그대로 */
+      pattern: p => { let o = ''; for (let i = 0; i < p.length; i++) { const c = p[i]; if (c === '\\' && i + 1 < p.length) { o += p[++i]; continue; } o += c === '#' ? digits(1) : c === '?' ? String.fromCharCode(65 + int(0, 25)) : c === '@' ? String.fromCharCode(97 + int(0, 25)) : c === '*' ? pick('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'.split('')) : c; } return o; },
+    };
+    return F;
+  }
+  return { make };
+})();
+DU.KoFaker = KoFaker;
+
+/** 샘플 날짜 문자열과 같은 형식으로 ms를 표현 (형식을 알 수 없으면 null) */
+function jdFmtLike(sample, ms) {
+  const m = /^(\d{4})([-./]?)(\d{2})\2(\d{2})(?:([T ]?)(\d{2})(:?)(\d{2})(?:\7(\d{2})(?:([.,])(\d+))?)?)?(Z|[+-]\d{2}:?\d{2})?$/.exec(sample);
+  if (!m) return null;
+  let off = 540;
+  if (m[12]) off = m[12] === 'Z' ? 0 : (m[12][0] === '-' ? -1 : 1) * (+m[12].slice(1, 3) * 60 + +m[12].slice(-2));
+  const d = new Date(ms + off * 60000);
+  let s = `${d.getUTCFullYear()}${m[2]}${pad(d.getUTCMonth() + 1)}${m[2]}${pad(d.getUTCDate())}`;
+  if (m[6] !== undefined) {
+    s += `${m[5] || ''}${pad(d.getUTCHours())}${m[7]}${pad(d.getUTCMinutes())}`;
+    if (m[9] !== undefined) { s += m[7] + pad(d.getUTCSeconds()); if (m[11]) s += m[10] + String(d.getUTCMilliseconds()).padStart(3, '0').padEnd(m[11].length, '0').slice(0, m[11].length); }
+  }
+  return s + (m[12] || '');
+}
+
+const JMock = (() => {
+  const K = (key, re) => re.test(String(key || ''));
+  /** id·번호류 키 (orderId, user_no, seq …) */
+  const isIdKey = key => /(^|_)(id|seq|no|idx|sn|num)$/i.test(String(key || '')) || /[a-z](Id|No|Seq|Idx|Num)$/.test(String(key || '')) || /번호$/.test(String(key || ''));
+  /** 경로(예: $.items[].name)별 샘플 값 모음 — 같은 이름의 키라도 위치가 다르면 따로 모음 */
+  function pools(items) {
+    const m = new Map();
+    const walk = (n, path) => {
+      if (n.T === 'O') n.p.forEach(([k, v]) => walk(v, path + '.' + k));
+      else if (n.T === 'A') n.v.forEach(v => walk(v, path + '[]'));
+      else { if (!m.has(path)) m.set(path, []); m.get(path).push(n); }
+    };
+    items.forEach(it => walk(it, '$'));
+    return m;
+  }
+  function generate(root, n, opt = {}) {
+    const F = KoFaker.make(opt.seed);
+    let pool = new Map(); const seq = new Map(); const now = Date.now();
+    /** 경로별 일련번호: 첫 샘플 값을 시작으로 1씩 증가 (템플릿이 여러 개여도 중복 없음) */
+    function nextSeq(path, make) { let st = seq.get(path); if (!st) { st = make(); st.n = 0; seq.set(path, st); } return st.n++; }
+    /** 'ORD-2026-0001' → 접두어 유지, 끝 숫자만 경로별로 증가 (자릿수 유지) */
+    function strSeq(s, path) {
+      const c = nextSeq(path, () => { const m = /^(.*?)(\d+)$/.exec(s); return { pre: m[1], w: m[2].length, base: BigInt(m[2]) }; });
+      const st = seq.get(path); return st.pre + (st.base + BigInt(c)).toString().padStart(st.w, '0');
+    }
+    function strVal(s, key, path) {
+      const k = String(key || '').toLowerCase();
+      const pv = (pool.get(path) || []).filter(x => x.T === 'S').map(x => x.v); const distinct = Array.from(new Set(pv));
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return F.uuid();
+      const dm = /^(\d{4})[-./]?(\d{2})[-./]?(\d{2})/.exec(s);
+      if (dm && +dm[1] >= 1900 && +dm[1] <= 2100 && +dm[2] >= 1 && +dm[2] <= 12 && +dm[3] >= 1 && +dm[3] <= 31 && jdFmtLike(s, 0) !== null) { const base = Date.parse(s.length >= 10 ? s.slice(0, 10) : s) || now; const center = isNaN(base) ? now : base; return jdFmtLike(s, F.date(center - 180 * 864e5, center + 180 * 864e5)); }
+      if (K(k, /e-?mail|메일/)) return F.email();
+      if (K(k, /phone|mobile|tel|hp$|휴대|전화|연락처/)) return /^0[2-6]/.test(s) ? F.tel() : F.phone();
+      if (K(k, /(^|_)(nm|name)$|name$|이름|성명|작성자|writer|author|nick/)) {
+        if (/item|product|goods|sku|menu|category|file|dept|team|code/i.test(path) || /(product|item|goods|file|menu|category|dept|team|company|corp)/.test(k)) return distinct.length >= 2 ? F.pick(distinct) : s;
+        if (/(login|nick|account)/.test(k) || (/^[a-z0-9_.]+$/.test(s) && s.length > 0)) return F.loginId();
+        return F.name();
+      }
+      if (K(k, /addr|address|주소/)) return F.address();
+      if (K(k, /zip|post|우편/)) return F.zip();
+      if (K(k, /^city$|도시|지역|region/)) return F.city();
+      if (K(k, /company|corp|회사|업체|vendor/)) return F.company();
+      if (K(k, /dept|department|부서|team|팀/)) return F.dept();
+      if (K(k, /position|직급|직위|grade_nm/)) return F.position();
+      if (K(k, /url|link|homepage|href/)) return F.url();
+      if (K(k, /(^|_)ip($|_)|ipaddr|ip_addr|ipAddress/i)) return F.ip();
+      if (isIdKey(key) && /\d+$/.test(s)) return strSeq(s, path);
+      if (distinct.length >= 2 && distinct.length <= Math.max(6, pv.length / 2) && s.length < 40) return F.pick(distinct);
+      if (K(k, /title|subject|제목/)) return F.title();
+      if (K(k, /desc|content|memo|comment|note|remark|message|msg|내용|설명|비고|본문/) || s.length > 30) return F.sentence();
+      if (/\d/.test(s)) {
+        if (K(k, /code|key/) && /\d+$/.test(s)) return strSeq(s, path);
+        return s.replace(/\d/g, () => String(F.int(0, 9)));
+      }
+      if (distinct.length >= 2) return F.pick(distinct);
+      if (/^[가-힣\s]+$/.test(s) && s.length <= 6) return F.word();
+      return s;
+    }
+    function numVal(raw, key, path) {
+      const k = String(key || '').toLowerCase(); const isInt = /^-?\d+$/.test(raw); const x = Number(raw);
+      const dec = isInt ? 0 : ((raw.split('.')[1] || '').replace(/e.*$/i, '').length || 2);
+      if (isInt && isIdKey(key)) {
+        const c = nextSeq(path, () => ({ base: BigInt(raw) }));
+        return (seq.get(path).base + BigInt(c)).toString();
+      }
+      if (/^-?\d{16,}$/.test(raw)) { let s = String(F.int(1, 9)); for (let i = 1; i < raw.replace('-', '').length; i++) s += F.int(0, 9); return s; }
+      if (K(k, /lat/)) return F.float(33.2, 38.5, Math.max(dec, 4)).toFixed(Math.max(dec, 4));
+      if (K(k, /lon|lng/)) return F.float(126.1, 129.5, Math.max(dec, 4)).toFixed(Math.max(dec, 4));
+      if (isInt && raw.length === 13 && /^1[5-9]/.test(raw)) return String(F.date(now - 180 * 864e5, now + 30 * 864e5));
+      if (isInt && raw.length === 10 && /^1[5-9]/.test(raw)) return String(Math.floor(F.date(now - 180 * 864e5, now + 30 * 864e5) / 1000));
+      if (K(k, /price|amount|amt|cost|fee|pay|salary|금액|가격|단가|급여/)) { const hi = Math.max(1000, Math.abs(x) * 3); const v = F.int(Math.max(0, Math.floor(Math.abs(x) * 0.3)), hi); return isInt ? String(Math.round(v / 100) * 100 || v) : v.toFixed(dec); }
+      if (K(k, /^age$|나이/)) return String(F.int(20, 65));
+      if (K(k, /count|cnt|qty|quantity|수량|개수/)) return String(F.int(0, Math.max(10, Math.abs(x) * 2)));
+      if (K(k, /rate|ratio|percent|pct|score|점수|비율/)) return Math.abs(x) <= 1 && !isInt ? F.float(0, 1, dec).toFixed(dec) : String(isInt ? F.int(0, 100) : F.float(0, 100, dec).toFixed(dec));
+      const hi = Math.max(10, Math.abs(x) * 2);
+      return isInt ? String(F.int(x < 0 ? -hi : 0, hi)) : F.float(x < 0 ? -hi : 0, hi, dec).toFixed(dec);
+    }
+    function gen(t, key, path, idx) {
+      switch (t.T) {
+        case 'O': return { T: 'O', p: t.p.map(([k, v]) => [k, gen(v, k, path + '.' + k, idx)]) };
+        case 'A': {
+          if (!t.v.length) return { T: 'A', v: [] };
+          const len = t.v.length; const nlen = Math.max(1, F.int(Math.floor(len * 0.5), Math.ceil(len * 1.5)));
+          if (t.v.every(x => x.T === 'S') && new Set(t.v.map(x => x.v)).size === len) {
+            const all = Array.from(new Set((pool.get(path + '[]') || []).filter(x => x.T === 'S').map(x => x.v).concat(t.v.map(x => x.v))));
+            const cnt = Math.min(all.length, nlen); const shuffled = all.slice().sort(() => F.R() - 0.5);
+            return { T: 'A', v: shuffled.slice(0, cnt).map(v => ({ T: 'S', v })) };
+          }
+          return { T: 'A', v: Array.from({ length: nlen }, (_, j) => gen(t.v[j % len], key, path + '[]', idx)) };
+        }
+        case 'S': return { T: 'S', v: strVal(t.v, key, path) };
+        case 'N': return { T: 'N', v: numVal(t.v, key, path) };
+        case 'B': return { T: 'B', v: F.bool() };
+        default: return { T: 'Z' };
+      }
+    }
+    const count = clamp(n | 0, 1, 100000);
+    // 응답 래퍼({data:{users:[…]}, total})면 배열만 늘림
+    let tplItems, wrap = null;
+    if (root.T === 'A') tplItems = root.v;
+    else {
+      const fa = opt.keepWrapper !== false ? findArray(root) : null;
+      if (fa && fa.node.v.length && fa.node.v.every(x => x.T === 'O')) { wrap = fa; tplItems = fa.node.v; } else tplItems = [root];
+    }
+    if (!tplItems.length) throw new Error('빈 배열에서는 생성할 수 없습니다 (샘플 요소가 필요합니다)');
+    pool = pools(tplItems);
+    const items = Array.from({ length: count }, (_, i) => gen(tplItems[i % tplItems.length], null, '$', i));
+    if (!wrap) return { node: { T: 'A', v: items }, items, wrapped: false };
+    const cloneWith = (n2, target) => {
+      if (n2 === target) return { T: 'A', v: items };
+      if (n2.T === 'O') return { T: 'O', p: n2.p.map(([k, v]) => [k, /^(total|count|totalCount|totalElements|totalCnt|total_count|cnt|size)$/.test(k) && v.T === 'N' ? { T: 'N', v: String(count) } : cloneWith(v, target)]) };
+      if (n2.T === 'A') return { T: 'A', v: n2.v.map(v => cloneWith(v, target)) };
+      return n2;
+    };
+    return { node: cloneWith(root, wrap.node), items, wrapped: wrap.path };
+  }
+  return { generate };
+})();
+DU.JMock = JMock;
+
+/* ---------- 테스트 데이터 빌더 (규칙 기반) ---------- */
+const TestDataGen = (() => {
+  const TYPES = [
+    ['seq', '시퀀스', [['start', '시작', '1'], ['step', '증가', '1'], ['prefix', '접두어', ''], ['pad', '자릿수', '0']]],
+    ['uuid', 'UUID', []], ['name', '한국어 이름', []], ['email', '이메일', []], ['phone', '휴대폰', []],
+    ['date', '날짜 범위', [['from', '시작', '2025-01-01'], ['to', '끝', '2026-12-31'], ['fmt', '형식', 'yyyy-MM-dd HH:mm:ss']]],
+    ['int', '정수 범위', [['min', '최소', '0'], ['max', '최대', '100']]], ['float', '소수 범위', [['min', '최소', '0'], ['max', '최대', '1000'], ['dec', '소수점', '2']]],
+    ['pick', '목록에서 선택', [['values', '값 (A:3, B:1 가중치 가능)', 'ACTIVE:3, INACTIVE:1, DELETED']]], ['pattern', '패턴', [['p', '패턴 (# 숫자 ? 대문자 @ 소문자 * 영숫자)', 'ORD-####-??']]],
+    ['const', '고정값', [['v', '값', 'Y']]], ['bool', '불리언', [['p', 'true 확률(%)', '50']]], ['address', '주소', []], ['company', '회사', []], ['dept', '부서', []],
+    ['sentence', '문장', []], ['ip', 'IP', []], ['url', 'URL', []], ['zip', '우편번호', []], ['login', '로그인 ID', []],
+  ];
+  const TYPE_MAP = Object.fromEntries(TYPES.map(t => [t[0], t]));
+  function parseWeighted(s) {
+    const items = String(s).split(',').map(x => x.trim()).filter(Boolean).map(x => { const m = /^(.*?):(\d+(?:\.\d+)?)$/.exec(x); return m ? { v: m[1].trim(), w: +m[2] } : { v: x, w: 1 }; });
+    const total = items.reduce((a, b) => a + b.w, 0); return { items, total };
+  }
+  function parseDay(s, end) { const r = DateX.parse(String(s || ''), 'kst'); return end && /^\d{4}-\d{2}-\d{2}$/.test(String(s).trim()) ? r.ms + 864e5 - 1000 : r.ms; }
+  /** cols: [{name, type, p:{}, nul: 0~100}] → rows: [[값]] (JS 값; null 허용) */
+  function build(cols, n, seed) {
+    const F = KoFaker.make(seed); const count = clamp(n | 0, 1, 1000000);
+    const prep = cols.map(c => {
+      const p = c.p || {};
+      if (c.type === 'pick') return { c, w: parseWeighted(p.values) };
+      if (c.type === 'date') { let a, b; try { a = parseDay(p.from); b = parseDay(p.to, true); } catch (e) { throw new Error(`"${c.name}" 날짜 범위 오류: ${e.message}`); } if (b < a) [a, b] = [b, a]; return { c, a, b }; }
+      return { c };
+    });
+    const rows = new Array(count);
+    for (let i = 0; i < count; i++) {
+      rows[i] = prep.map(({ c, w, a, b }) => {
+        const p = c.p || {};
+        if (c.nul > 0 && F.R() * 100 < c.nul) return null;
+        switch (c.type) {
+          case 'seq': { const v = (+p.start || 0) + i * (p.step === '' || p.step == null ? 1 : +p.step); const pd = +p.pad || 0; return p.prefix || pd ? (p.prefix || '') + String(v).padStart(pd, '0') : v; }
+          case 'uuid': return F.uuid();
+          case 'name': return F.name(); case 'email': return F.email(); case 'phone': return F.phone();
+          case 'date': return DateX.format(F.date(a, b), p.fmt || 'yyyy-MM-dd HH:mm:ss', 'kst');
+          case 'int': { const lo = Math.ceil(+p.min || 0), hi = Math.floor(p.max === '' || p.max == null ? 100 : +p.max); return F.int(Math.min(lo, hi), Math.max(lo, hi)); }
+          case 'float': { const lo = +p.min || 0, hi = p.max === '' || p.max == null ? 1000 : +p.max, d = clamp(+p.dec || 0, 0, 10); return F.float(Math.min(lo, hi), Math.max(lo, hi), d); }
+          case 'pick': { if (!w.items.length) return null; let r = F.R() * w.total; for (const it of w.items) { r -= it.w; if (r < 0) return it.v; } return w.items[w.items.length - 1].v; }
+          case 'pattern': return F.pattern(p.p || '');
+          case 'const': return p.v === undefined ? '' : p.v;
+          case 'bool': return F.R() * 100 < (p.p === '' || p.p == null ? 50 : +p.p);
+          case 'address': return F.address(); case 'company': return F.company(); case 'dept': return F.dept(); case 'sentence': return F.sentence();
+          case 'ip': return F.ip(); case 'url': return F.url(); case 'zip': return F.zip(); case 'login': return F.loginId();
+          default: return null;
+        }
+      });
+    }
+    return rows;
+  }
+  function render(cols, rows, fmt, opt = {}) {
+    const names = cols.map(c => c.name || 'col');
+    if (fmt === 'json' || fmt === 'ndjson') {
+      const objs = rows.map(r => { const o = {}; names.forEach((k, i) => { o[k] = r[i]; }); return o; });
+      return fmt === 'json' ? JSON.stringify(objs, null, 2) : objs.map(o => JSON.stringify(o)).join('\n');
+    }
+    if (fmt === 'csv' || fmt === 'tsv') { const d = fmt === 'csv' ? ',' : '\t'; return [names.map(x => Csv.cell(x, d)).join(d)].concat(rows.map(r => r.map(x => Csv.cell(x, d)).join(d))).join('\n'); }
+    // SQL INSERT
+    const t = opt.table || 'TB_TEST';
+    const bs = opt.boolStyle || 'tf';
+    const lit = v => v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : typeof v === 'boolean' ? (bs === 'yn' ? (v ? "'Y'" : "'N'") : bs === '10' ? (v ? '1' : '0') : (v ? 'TRUE' : 'FALSE')) : "'" + String(v).replace(/'/g, "''") + "'";
+    const cn = names.map(c => (/^[A-Za-z_][\w$#]*$/.test(c) ? c : `"${c.replace(/"/g, '""')}"`)).join(', ');
+    if (opt.multiRow) return `INSERT INTO ${t} (${cn}) VALUES\n` + rows.map(r => `  (${r.map(lit).join(', ')})`).join(',\n') + ';';
+    return rows.map(r => `INSERT INTO ${t} (${cn}) VALUES (${r.map(lit).join(', ')});`).join('\n');
+  }
+  return { TYPES, TYPE_MAP, build, render };
+})();
+DU.TestDataGen = TestDataGen;
+
+/** 큰 입력(기본 2MB 초과)은 편집 칸에 넣지 않고 메모리에만 보관 — 붙여넣기·파일 드롭·보내기 모두 처리 */
+function jaBigInput(pane, onBig, limit = 2e6) {
+  let big = null;
+  const hold = (t, label) => { big = t; pane.set(`(대용량 데이터 ${fmtBytes(t.length)}${label ? ' · ' + label : ''} — 속도를 위해 입력 칸에는 표시하지 않습니다. 지우거나 새로 입력하면 해제됩니다)`, { snap: false }); pane.status(`대용량 입력 ${fmtBytes(t.length)} 보관 중`, 'info'); if (onBig) onBig(); };
+  pane.onInput(() => { big = null; });
+  if (pane.ta) on(pane.ta, 'paste', e => { const t = (e.clipboardData || window.clipboardData).getData('text'); if (t && t.length > limit) { e.preventDefault(); hold(t, '붙여넣기'); } });
+  on(pane.el, 'drop', async e => {
+    const f = e.dataTransfer && e.dataTransfer.files[0]; if (!f || f.size <= limit) return;
+    e.preventDefault(); e.stopImmediatePropagation(); pane.el.classList.remove('drop');
+    const r = await readFileText(f); hold(r.text, `${f.name}, ${r.encoding}`);
+  }, true);
+  return { get: () => (big !== null ? big : pane.get()), set: t => { if (t.length > limit) hold(t); else { big = null; pane.set(t); } }, isBig: () => big !== null };
+}
+
+/* ---------- 데이터 표 (가상 스크롤) ---------- */
+const DataTbl = (() => {
+  function load(text, flatten) {
+    const t = text.trim(); if (!t) return { cols: [], rows: [] };
+    if (/^[[{]/.test(t)) {
+      let node;
+      try { node = JSONX.smartParse(t).node; }
+      catch (e) {
+        const nd = NdJson.parse(t); if (!nd.items.length) throw e;
+        node = { T: 'A', v: nd.items.map(x => x.node) };
+      }
+      const tb = Csv.tableFromJson(node, flatten);
+      return { cols: tb.cols, rows: tb.rows, src: 'JSON' };
+    }
+    const rows = Csv.parse(t, Csv.detectDelim(t)); const head = rows.shift() || [];
+    const w = Math.max(head.length, ...rows.slice(0, 1000).map(r => r.length));
+    const cols = Array.from({ length: w }, (_, i) => (head[i] || '').trim() || 'col' + (i + 1));
+    return { cols, rows: rows.map(r => cols.map((_, i) => Csv.infer(r[i] === undefined ? '' : r[i]))), src: 'CSV' };
+  }
+  /** 열 필터 식: 텍스트(부분일치), >n <n >=n <=n =값 !값 /정규식/ null empty */
+  function compileFilter(s) {
+    s = s.trim(); if (!s) return null;
+    let m;
+    if (/^(null|empty|빈값)$/i.test(s)) return v => v === null || v === '';
+    if (/^!(null|empty)$/i.test(s)) return v => !(v === null || v === '');
+    if ((m = /^(>=|<=|>|<)\s*(-?\d+(?:\.\d+)?)$/.exec(s))) { const x = +m[2], op = m[1]; return v => { const n = typeof v === 'number' ? v : parseFloat(v); if (isNaN(n)) return false; return op === '>' ? n > x : op === '<' ? n < x : op === '>=' ? n >= x : n <= x; }; }
+    if ((m = /^\/(.+)\/([a-z]*)$/.exec(s))) { let re; try { re = new RegExp(m[1], m[2] || 'i'); } catch (e) { return () => true; } return v => re.test(v === null ? '' : String(v)); }
+    if (s[0] === '=') { const x = s.slice(1).toLowerCase(); return v => String(v === null ? 'null' : v).toLowerCase() === x; }
+    if (s[0] === '!') { const x = s.slice(1).toLowerCase(); return v => !String(v === null ? '' : v).toLowerCase().includes(x); }
+    const x = s.toLowerCase(); return v => v !== null && String(v).toLowerCase().includes(x);
+  }
+  return { load, compileFilter };
+})();
+DU.DataTbl = DataTbl;
+
+injectCss(`
+.dt-wrap { flex: 1; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); min-height: 240px; position: relative; }
+.dt-tbl { border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 12.5px; }
+.dt-tbl th, .dt-tbl td { height: 26px; padding: 0 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+.dt-tbl thead th { position: sticky; top: 0; background: var(--bg-sunk); z-index: 2; font-weight: 600; color: var(--text-dim); cursor: pointer; user-select: none; }
+.dt-tbl thead tr.dt-f th { top: 27px; cursor: default; padding: 2px 4px; }
+.dt-tbl thead tr.dt-f input { width: 100%; height: 22px; font-size: 11.5px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-elev); padding: 0 5px; color: var(--text); }
+.dt-tbl td { font-family: var(--mono); font-size: 12px; cursor: copy; }
+.dt-tbl td.dt-n { color: var(--text-faint); text-align: right; cursor: default; background: var(--bg-sunk); }
+.dt-tbl td.dt-num { text-align: right; color: var(--syn-num); }
+.dt-tbl td.dt-null { color: var(--text-faint); font-style: italic; }
+.dt-tbl tbody tr:hover td { background: var(--bg-hover); }
+.dt-tbl th .dt-s { color: var(--accent); margin-left: 3px; }
+.td-cols { display: flex; flex-direction: column; gap: 4px; overflow: auto; max-height: 46vh; padding: 2px; }
+.td-col { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 5px 6px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-elev); }
+.td-col .td-params { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; flex: 1; min-width: 200px; }
+.td-col .td-params label { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; color: var(--text-dim); }
+`);
+
+const JD_SAMPLE_ORDERS = '{"code":"0000","data":{"total":2,"orders":[{"orderId":"ORD-2026-0001","orderNo":10001,"customer":{"name":"홍길동","email":"hong@example.com","phone":"010-1234-5678","address":"서울특별시 강남구 테헤란로 123"},"status":"PAID","items":[{"sku":"A-100","name":"무선 마우스","price":25000,"qty":1},{"sku":"B-220","name":"키보드","price":59000,"qty":2}],"totalAmount":143000,"paid":true,"memo":"부재 시 경비실에 맡겨 주세요","orderedAt":"2026-10-28T09:15:22+09:00"},{"orderId":"ORD-2026-0002","orderNo":10002,"customer":{"name":"김철수","email":"kim@example.co.kr","phone":"010-9876-5432","address":"부산광역시 해운대구 해운대로 45"},"status":"SHIPPED","items":[{"sku":"C-310","name":"모니터","price":289000,"qty":1}],"totalAmount":289000,"paid":true,"memo":null,"orderedAt":"2026-10-27T18:02:11+09:00"}]}}';
+
+defineTool({
+  id: 'json-mock', group: 'data', abbr: 'MCK', name: 'JSON Mock 생성',
+  desc: '샘플 JSON 구조를 유지한 더미 데이터 1~10,000건 생성 · 한국어 이름/주소/전화',
+  keywords: 'mock fake dummy data generator faker 목업 더미 데이터 생성 샘플 테스트 json',
+  inputs: { input: '샘플 JSON' }, fill: true,
+  help: `샘플 JSON의 구조와 값 모양을 유지한 더미 데이터를 만듭니다. 키 이름으로 값 종류를 추정합니다 — <code>id/no/seq</code> 일련번호, <code>name/이름</code> 한국어 이름, <code>email</code>, <code>phone/tel</code>, <code>address/주소</code>, <code>*At/*_dt</code> 날짜(샘플과 같은 형식), <code>price/amount</code> 금액, <code>status/type</code>은 샘플 값 중에서 선택합니다.<br>
+    응답 래퍼(<code>{"data":{"orders":[…]},"total":2}</code>)는 그대로 두고 안의 배열만 늘리며 <code>total/count</code> 값도 맞춥니다. <b>시드</b>를 지정하면 같은 결과를 다시 만들 수 있습니다.`,
+  init(root) {
+    const cnt = bindPersist(h('<input class="inp sm" type="number" min="1" max="10000" value="20" style="width:80px">'), 'jmk:n');
+    const seed = bindPersist(h('<input class="inp sm mono" placeholder="시드 (선택)" style="width:100px" title="같은 시드 → 같은 결과">'), 'jmk:seed');
+    const fmt = sel([['pretty', 'JSON (정렬)'], ['min', 'JSON (한 줄)'], ['ndjson', 'NDJSON']], 'jmk:fmt', 'pretty');
+    const oWrap = chk('응답 래퍼 유지', 'jmk:wrap', true, '{data:{list:[…]}} 구조면 배열만 늘림');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('생성', run, 'primary', 'Ctrl+Enter'), h('<span class="lbl">건수</span>'), cnt, seed, fmt, oWrap.el, btn('데이터 표로 보기', () => { if (out.get()) sendTo('data-table', 'input', out.get()); }, 'sm ghost'),
+      h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(JSON.stringify(JSON.parse(JD_SAMPLE_ORDERS), null, 2)); run(); }));
+    const inp = Pane({ title: '샘플 JSON', persist: 'jmk', placeholder: '구조의 기준이 될 샘플 JSON (객체, 배열, API 응답)', sendFrom: 'json-mock' });
+    const out = Pane({ title: '생성 결과', readonly: true, lang: 'json', filename: 'mock.json', sendFrom: 'json-mock' });
+    const split = h('<div class="split"></div>'); split.append(inp.el, out.el);
+    root.append(bar, split);
+    function run() {
+      if (!inp.get().trim()) return;
+      let node; try { node = jaParse(inp, '샘플'); } catch (e) { out.status(e.message, 'err'); return; }
+      try {
+        const t0 = performance.now();
+        const r = JMock.generate(node, +cnt.value || 20, { seed: seed.value.trim(), keepWrapper: oWrap.get() });
+        const text = fmt.value === 'ndjson' ? r.items.map(x => JSONX.stringify(x)).join('\n') : JSONX.stringify(r.node, fmt.value === 'pretty' ? { indent: 2 } : {});
+        out.set(text, { lang: fmt.value === 'ndjson' ? null : 'json' });
+        out.status(`${fmtNum(r.items.length)}건 생성${r.wrapped ? ` · 래퍼 유지 (${r.wrapped})` : ''} · ${fmtBytes(text.length)} · ${Math.round(performance.now() - t0)}ms`, 'ok');
+      } catch (e) { out.status('✕ ' + e.message, 'err'); }
+    }
+    [fmt, oWrap.input].forEach(x => on(x, 'change', run));
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+defineTool({
+  id: 'data-table', group: 'data', abbr: 'TBL', name: '데이터 표 뷰어',
+  desc: 'JSON 배열 · CSV · TSV · NDJSON을 엑셀처럼 정렬 · 필터 · 열 숨기기 · 10만 행',
+  keywords: 'data table viewer grid csv json excel 표 엑셀 정렬 필터 조회 그리드 spreadsheet',
+  inputs: { input: '데이터' }, fill: true,
+  help: `JSON 배열(또는 배열이 들어있는 응답), NDJSON, CSV/TSV를 표로 봅니다. 화면에 보이는 행만 그려서 10만 행 이상도 빠르게 스크롤됩니다.<br>
+    <b>열 필터</b>: 그냥 입력하면 부분 일치, <code>&gt;100</code> <code>&lt;=5</code> 숫자 비교, <code>=값</code> 정확히 일치, <code>!값</code> 제외, <code>/정규식/</code>, <code>null</code> 빈 값.<br>
+    머리글 클릭: 오름차순 → 내림차순 → 정렬 해제. 셀을 클릭하면 값을 복사합니다. <b>내보내기</b>는 현재 필터·정렬·보이는 열 기준입니다.`,
+  init(root) {
+    const ROW_H = 27;
+    const oFlat = chk('중첩 객체 펼치기 (a.b)', 'dt:flat', true);
+    const q = h('<input class="inp sm" placeholder="전체 검색" style="width:200px">');
+    const stat = h('<span class="dim" style="font-size:12px"></span>');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('표로 보기', load, 'primary', 'Ctrl+Enter'), btn('입력 접기', () => inp.el.classList.toggle('hidden'), 'sm ghost'), oFlat.el, q, btn('열 선택', colPicker, 'sm'), btn('필터 초기화', () => { filters = {}; q.value = ''; sortCol = -1; renderHead(); apply(); }, 'sm ghost'),
+      btn('내보내기 ▾', ev => openMenu(ev.currentTarget, [['csv', 'CSV 파일 (Excel용 BOM)'], ['json', 'JSON 파일'], ['md', 'Markdown 표 (복사)'], ['tool', 'CSV · 표 변환 도구로']].map(([k, l]) => ({ label: l, onClick: () => exportAs(k) }))), 'sm'),
+      stat, h('<span class="sp"></span>'), sampleBtn('예제 (1만 행)', () => {
+        const rows = TestDataGen.build([{ name: 'id', type: 'seq', p: { start: 1 } }, { name: 'name', type: 'name' }, { name: 'dept', type: 'dept' }, { name: 'salary', type: 'int', p: { min: 3000000, max: 9000000 } }, { name: 'email', type: 'email' }, { name: 'joined', type: 'date', p: { from: '2015-01-01', to: '2026-10-01', fmt: 'yyyy-MM-dd' } }, { name: 'active', type: 'bool', p: { p: 80 } }], 10000, 'demo');
+        src.set(TestDataGen.render([{ name: 'id' }, { name: 'name' }, { name: 'dept' }, { name: 'salary' }, { name: 'email' }, { name: 'joined' }, { name: 'active' }], rows, 'json')); load();
+      }));
+    const inp = Pane({ title: '데이터 입력', persist: 'dtI', placeholder: 'JSON 배열 · CSV · TSV(엑셀 복사) · NDJSON', sendFrom: 'data-table' });
+    inp.el.style.height = '22vh'; inp.el.style.minHeight = '120px'; inp.el.style.flex = 'none';
+    const wrap = h('<div class="dt-wrap"><table class="dt-tbl"><colgroup></colgroup><thead></thead><tbody></tbody></table></div>');
+    root.append(bar, inp.el, wrap);
+    const tbl = $('table', wrap), colg = $('colgroup', wrap), thead = $('thead', wrap), tbody = $('tbody', wrap);
+    const src = jaBigInput(inp, () => load());
+    let cols = [], rows = [], view = [], hidden = new Set(), filters = {}, sortCol = -1, sortDir = 1, widths = [], numCol = [];
+    const collator = new Intl.Collator('ko', { numeric: true });
+    function load() {
+      let r;
+      try { r = DataTbl.load(src.get(), oFlat.get()); inp.status(`✓ ${r.src || ''} ${fmtNum(r.rows.length)}행${src.isBig() ? ' (대용량 입력)' : ''}`, 'ok'); }
+      catch (e) { paneError(inp, e); return; }
+      cols = r.cols; rows = r.rows; hidden = new Set(); filters = {}; sortCol = -1; q.value = '';
+      numCol = cols.map((_, i) => { let n = 0, t = 0; for (let k = 0; k < Math.min(rows.length, 300); k++) { const v = rows[k][i]; if (v === null || v === '') continue; t++; if (typeof v === 'number') n++; } return t > 0 && n / t > 0.8; });
+      widths = cols.map((c, i) => { let m = String(c).length + 2; for (let k = 0; k < Math.min(rows.length, 200); k++) { const v = rows[k][i]; const l = v === null ? 4 : typeof v === 'object' ? 20 : String(v).length; if (l > m) m = l; } return clamp(m * 8 + 18, 60, 360); });
+      if (rows.length > 50) inp.el.classList.add('hidden');
+      renderHead(); apply();
+    }
+    function visCols() { return cols.map((c, i) => i).filter(i => !hidden.has(i)); }
+    function renderHead() {
+      const vc = visCols();
+      colg.innerHTML = '<col style="width:58px">' + vc.map(i => `<col style="width:${widths[i]}px">`).join('');
+      tbl.style.width = (58 + vc.reduce((a, i) => a + widths[i], 0)) + 'px';
+      thead.innerHTML = `<tr><th>#</th>${vc.map(i => `<th data-c="${i}" title="${esc(cols[i])} — 클릭하여 정렬">${esc(cols[i])}${sortCol === i ? `<span class="dt-s">${sortDir > 0 ? '▲' : '▼'}</span>` : ''}</th>`).join('')}</tr><tr class="dt-f"><th></th>${vc.map(i => `<th><input data-f="${i}" placeholder="필터" value="${esc(filters[i] || '')}"></th>`).join('')}</tr>`;
+    }
+    on(thead, 'click', e => {
+      const th = e.target.closest('th[data-c]'); if (!th) return;
+      const c = +th.dataset.c;
+      if (sortCol !== c) { sortCol = c; sortDir = 1; } else if (sortDir === 1) sortDir = -1; else sortCol = -1;
+      renderHead(); apply();
+    });
+    on(thead, 'input', debounce(e => { const f = e.target.dataset.f; if (f === undefined) return; filters[f] = e.target.value; apply(true); }, 200));
+    on(q, 'input', debounce(() => apply(), 200));
+    function apply(keepFocus) {
+      const t0 = performance.now();
+      const fs = Object.entries(filters).map(([i, s]) => [+i, DataTbl.compileFilter(s)]).filter(x => x[1]);
+      const g = q.value.trim().toLowerCase();
+      view = [];
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r]; let ok = true;
+        for (let k = 0; k < fs.length; k++) if (!fs[k][1](row[fs[k][0]])) { ok = false; break; }
+        if (ok && g) { ok = false; for (let k = 0; k < row.length; k++) { const v = row[k]; if (v !== null && String(v).toLowerCase().includes(g)) { ok = true; break; } } }
+        if (ok) view.push(r);
+      }
+      if (sortCol >= 0) {
+        const c = sortCol, num = numCol[c];
+        view.sort((a, b) => {
+          const x = rows[a][c], y = rows[b][c];
+          if (x === y) return a - b; if (x === null || x === '') return 1; if (y === null || y === '') return -1;
+          if (num && typeof x === 'number' && typeof y === 'number') return (x - y) * sortDir;
+          return collator.compare(String(x), String(y)) * sortDir;
+        });
+      }
+      wrap.scrollTop = 0; paint();
+      stat.textContent = cols.length ? `표시 ${fmtNum(view.length)} / ${fmtNum(rows.length)}행 · ${visCols().length}열${hidden.size ? ` (숨김 ${hidden.size})` : ''} · ${Math.round(performance.now() - t0)}ms` : '';
+    }
+    let raf = 0;
+    function paint() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (!cols.length) { tbody.innerHTML = '<tr><td class="empty-state">데이터를 입력하고 [표로 보기]를 누르세요</td></tr>'; return; }
+        const vc = visCols(); const top = wrap.scrollTop, hgt = wrap.clientHeight || 600;
+        const start = Math.max(0, Math.floor(top / ROW_H) - 10), end = Math.min(view.length, Math.ceil((top + hgt) / ROW_H) + 10);
+        const html = [`<tr style="height:${start * ROW_H}px"></tr>`];
+        for (let k = start; k < end; k++) {
+          const r = view[k], row = rows[r];
+          html.push(`<tr data-r="${r}"><td class="dt-n">${r + 1}</td>${vc.map(i => { const v = row[i]; if (v === null || v === undefined) return '<td class="dt-null">null</td>'; const s = typeof v === 'object' ? JSON.stringify(v) : String(v); return `<td${typeof v === 'number' ? ' class="dt-num"' : ''} title="${esc(s.length > 300 ? s.slice(0, 300) + '…' : s)}">${esc(s.length > 500 ? s.slice(0, 500) + '…' : s)}</td>`; }).join('')}</tr>`);
+        }
+        html.push(`<tr style="height:${Math.max(0, (view.length - end) * ROW_H)}px"></tr>`);
+        tbody.innerHTML = html.join('');
+      });
+    }
+    on(wrap, 'scroll', paint);
+    on(tbody, 'click', e => {
+      const td = e.target.closest('td'); const tr = e.target.closest('tr[data-r]'); if (!td || !tr || td.classList.contains('dt-n')) return;
+      const vc = visCols(); const ci = vc[td.cellIndex - 1]; const v = rows[+tr.dataset.r][ci];
+      copyText(v === null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v), `복사: ${cols[ci]}`);
+    });
+    function colPicker() {
+      if (!cols.length) return;
+      const body = h('<div style="display:flex;flex-direction:column;gap:6px"><div class="row"><button class="btn xs" data-a="all" type="button">모두 보기</button><button class="btn xs" data-a="none" type="button">모두 숨기기</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px;max-height:50vh;overflow:auto"></div></div>');
+      const grid = body.children[1];
+      cols.forEach((c, i) => { const l = h('<label class="chk"><input type="checkbox"> <span></span></label>'); l.lastChild.textContent = c; l.firstChild.checked = !hidden.has(i); on(l.firstChild, 'change', () => { if (l.firstChild.checked) hidden.delete(i); else hidden.add(i); renderHead(); apply(); }); grid.appendChild(l); });
+      on(body.firstChild, 'click', e => { const a = e.target.dataset.a; if (!a) return; hidden = a === 'all' ? new Set() : new Set(cols.map((_, i) => i)); $$('input', grid).forEach(x => { x.checked = a === 'all'; }); renderHead(); apply(); });
+      openModal({ title: `열 선택 (${cols.length}개)`, body });
+    }
+    function exportAs(kind) {
+      if (!view.length) { toast('내보낼 행이 없습니다', 'warn'); return; }
+      const vc = visCols(); const names = vc.map(i => cols[i]); const data = view.map(r => vc.map(i => rows[r][i]));
+      if (kind === 'json') { download('table.json', JSON.stringify(data.map(r => Object.fromEntries(names.map((n, k) => [n, r[k]]))), null, 2), 'application/json'); return; }
+      const csv = [names.map(x => Csv.cell(x, ',')).join(',')].concat(data.map(r => r.map(x => Csv.cell(x, ',')).join(','))).join('\n');
+      if (kind === 'csv') { download('table.csv', new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })); return; }
+      if (kind === 'tool') { sendTo('csv', 'input', csv); return; }
+      const c = v => (v === null || v === undefined ? '' : String(typeof v === 'object' ? JSON.stringify(v) : v)).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      copyText([`| ${names.map(c).join(' | ')} |`, `| ${names.map(() => '---').join(' | ')} |`].concat(data.slice(0, 5000).map(r => `| ${r.map(c).join(' | ')} |`)).join('\n'), 'Markdown 표를 복사했습니다');
+    }
+    on(oFlat.input, 'change', load);
+    paint();
+    if (inp.get()) load();
+    return { run: load, receive(slot, t) { src.set(t); inp.el.classList.remove('hidden'); load(); }, onShow() { paint(); } };
+  },
+});
+
+defineTool({
+  id: 'test-data', group: 'data', abbr: 'TDB', name: '테스트 데이터 빌더',
+  desc: '열마다 규칙(이름·날짜·범위·목록·패턴)을 정해 N건 생성 → JSON · CSV · SQL INSERT',
+  keywords: 'test data builder generator dummy sql insert csv 테스트 데이터 생성 더미 대량 insert 시퀀스 패턴',
+  inputs: {},
+  help: `열을 추가하고 생성 방식을 고르면 원하는 건수만큼 데이터를 만듭니다. <b>목록에서 선택</b>은 <code>ACTIVE:3, INACTIVE:1</code>처럼 가중치를 줄 수 있고, <b>패턴</b>은 <code>#</code> 숫자 · <code>?</code> 대문자 · <code>@</code> 소문자 · <code>*</code> 영숫자입니다.<br>
+    <b>NULL 비율</b>(%)만큼 null을 섞습니다. <b>시드</b>를 지정하면 같은 데이터를 다시 만들 수 있습니다. 자주 쓰는 열 구성은 템플릿으로 저장하세요.`,
+  init(root) {
+    const DEF = [{ name: 'USER_ID', type: 'seq', p: { start: '1', step: '1', prefix: 'U', pad: '5' }, nul: 0 }, { name: 'USER_NM', type: 'name', p: {}, nul: 0 }, { name: 'EMAIL', type: 'email', p: {}, nul: 10 },
+      { name: 'DEPT_NM', type: 'dept', p: {}, nul: 0 }, { name: 'STATUS', type: 'pick', p: { values: 'ACTIVE:3, INACTIVE:1, LOCKED' }, nul: 0 }, { name: 'SALARY', type: 'int', p: { min: '3000000', max: '9000000' }, nul: 0 },
+      { name: 'REG_DT', type: 'date', p: { from: '2024-01-01', to: '2026-10-28', fmt: 'yyyy-MM-dd HH:mm:ss' }, nul: 0 }];
+    let colsDef = persistGet('tdb:cols', null) || DEF.map(c => JSON.parse(JSON.stringify(c)));
+    const n = bindPersist(h('<input class="inp sm" type="number" min="1" max="1000000" value="100" style="width:90px">'), 'tdb:n');
+    const seed = bindPersist(h('<input class="inp sm mono" placeholder="시드 (선택)" style="width:100px">'), 'tdb:seed');
+    const fmt = sel([['json', 'JSON'], ['ndjson', 'NDJSON'], ['csv', 'CSV'], ['tsv', 'TSV'], ['sql', 'SQL INSERT']], 'tdb:fmt', 'json');
+    const table = bindPersist(h('<input class="inp sm mono" value="TB_USER" style="width:110px" title="INSERT 테이블명">'), 'tdb:table');
+    const bstyle = sel([['tf', 'TRUE/FALSE'], ['10', '1/0'], ['yn', "'Y'/'N'"]], 'tdb:bs', 'yn', 'SQL 불리언 표현');
+    const oMulti = chk('다중 행 INSERT', 'tdb:multi', false, 'INSERT INTO … VALUES (…), (…) 한 문장');
+    const tplSel = h('<select class="inp sm" style="max-width:180px"></select>');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('생성', run, 'primary', 'Ctrl+Enter'), h('<span class="lbl">건수</span>'), n, seed, fmt, table, bstyle, oMulti.el, h('<span class="sep"></span>'), tplSel, btn('템플릿 저장', saveTpl, 'sm'), btn('삭제', delTpl, 'sm ghost'),
+      h('<span class="sp"></span>'), btn('데이터 표로 보기', () => { if (out.get()) sendTo('data-table', 'input', out.get()); }, 'sm ghost'));
+    const list = h('<div class="td-cols"></div>');
+    const addRow = h('<div class="row"></div>');
+    addRow.append(btn('+ 열 추가', () => { colsDef.push({ name: 'COL' + (colsDef.length + 1), type: 'name', p: {}, nul: 0 }); renderCols(); save(); }, 'sm'), btn('기본 예제로', () => { colsDef = DEF.map(c => JSON.parse(JSON.stringify(c))); renderCols(); save(); run(); }, 'sm ghost'));
+    const out = Pane({ title: '생성 결과', readonly: true, filename: 'test-data.json', sendFrom: 'test-data' });
+    out.el.style.flex = '1'; out.el.style.minHeight = '260px';
+    root.append(bar, list, addRow, out.el);
+    const save = () => persistSet('tdb:cols', colsDef);
+    function renderCols() {
+      list.innerHTML = '';
+      colsDef.forEach((c, i) => {
+        const row = h(`<div class="td-col"><span class="faint mono" style="width:20px;text-align:right">${i + 1}</span><input class="inp sm mono" style="width:130px" title="열 이름"><select class="inp sm"></select><span class="td-params"></span>
+          <label class="chk" title="NULL 비율 (%)">NULL <input class="inp sm" type="number" min="0" max="100" style="width:58px"> %</label><button class="btn xs ghost" data-a="up" type="button">▲</button><button class="btn xs ghost" data-a="down" type="button">▼</button><button class="btn xs ghost" data-a="del" type="button">✕</button></div>`);
+        const nm = $('input.mono', row), ty = $('select', row), pp = $('.td-params', row), nul = $('label input', row);
+        nm.value = c.name; nul.value = c.nul || 0;
+        TestDataGen.TYPES.forEach(([id, label]) => { const o = document.createElement('option'); o.value = id; o.textContent = label; ty.appendChild(o); });
+        ty.value = c.type;
+        const paramsUi = () => {
+          pp.innerHTML = '';
+          const def = TestDataGen.TYPE_MAP[c.type]; if (!def) return;
+          def[2].forEach(([k, label, dv]) => {
+            if (c.p[k] === undefined) c.p[k] = dv;
+            const l = h('<label><span></span><input class="inp sm mono"></label>'); l.firstChild.textContent = label;
+            const inEl = l.lastChild; inEl.value = c.p[k]; inEl.style.width = k === 'values' || k === 'fmt' || k === 'p' ? '210px' : '90px';
+            on(inEl, 'input', () => { c.p[k] = inEl.value; save(); lazy(); });
+            pp.appendChild(l);
+          });
+        };
+        paramsUi();
+        on(nm, 'input', () => { c.name = nm.value; save(); lazy(); });
+        on(ty, 'change', () => { c.type = ty.value; c.p = {}; paramsUi(); save(); run(); });
+        on(nul, 'input', () => { c.nul = clamp(+nul.value || 0, 0, 100); save(); lazy(); });
+        on(row, 'click', e => {
+          const a = e.target.dataset && e.target.dataset.a; if (!a) return;
+          if (a === 'del') colsDef.splice(i, 1);
+          if (a === 'up' && i > 0) [colsDef[i - 1], colsDef[i]] = [colsDef[i], colsDef[i - 1]];
+          if (a === 'down' && i < colsDef.length - 1) [colsDef[i + 1], colsDef[i]] = [colsDef[i], colsDef[i + 1]];
+          renderCols(); save(); run();
+        });
+        list.appendChild(row);
+      });
+    }
+    const tpls = () => store.get('tdb:tpl', []);
+    function fillTpl() { tplSel.innerHTML = '<option value="">템플릿 불러오기…</option>' + tpls().map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join(''); }
+    on(tplSel, 'change', () => { const t = tpls()[+tplSel.value]; if (!t) return; colsDef = JSON.parse(JSON.stringify(t.cols)); renderCols(); save(); run(); });
+    function saveTpl() { const name = prompt('템플릿 이름'); if (!name) return; const l = tpls().filter(t => t.name !== name); l.unshift({ name, cols: colsDef }); store.set('tdb:tpl', l); fillTpl(); toast('템플릿을 저장했습니다', 'ok'); }
+    function delTpl() { const i = +tplSel.value; const l = tpls(); if (!tplSel.value || !l[i]) { toast('삭제할 템플릿을 고르세요', 'warn'); return; } if (!confirm(`'${l[i].name}' 템플릿을 삭제할까요?`)) return; l.splice(i, 1); store.set('tdb:tpl', l); fillTpl(); }
+    function run() {
+      if (!colsDef.length) { out.set(''); out.status('열을 추가하세요', 'warn'); return; }
+      try {
+        const t0 = performance.now(); const cnt = clamp(+n.value || 1, 1, 1000000);
+        if (cnt > 200000 && !confirm(`${fmtNum(cnt)}건은 시간이 걸리고 메모리를 많이 씁니다. 계속할까요?`)) return;
+        const rows = TestDataGen.build(colsDef, cnt, seed.value.trim());
+        const text = TestDataGen.render(colsDef, rows, fmt.value, { table: table.value.trim(), boolStyle: bstyle.value, multiRow: oMulti.get() });
+        out.set(text, { lang: fmt.value === 'json' ? 'json' : fmt.value === 'sql' ? 'sql' : null });
+        out.status(`${fmtNum(rows.length)}건 · ${fmtBytes(text.length)} · ${Math.round(performance.now() - t0)}ms`, 'ok');
+      } catch (e) { out.status('✕ ' + e.message, 'err'); }
+    }
+    const lazy = debounce(run, 400);
+    [fmt, bstyle, oMulti.input].forEach(x => on(x, 'change', run)); [n, seed, table].forEach(x => on(x, 'input', lazy));
+    const updVis = () => { const sql = fmt.value === 'sql'; table.classList.toggle('hidden', !sql); bstyle.classList.toggle('hidden', !sql); oMulti.el.classList.toggle('hidden', !sql); };
+    on(fmt, 'change', updVis); updVis();
+    renderCols(); fillTpl(); run();
+    return { run };
+  },
+});
+
+/* ---------- Smart Paste 연동 ---------- */
+defineDetector({ id: 'data-adv', test(text, c) {
+  const out = [];
+  if (c.lines.length >= 2 && !c.json) {
+    const d = Csv.detectDelim(c.t.slice(0, 5000));
+    const counts = c.lines.slice(0, 6).map(l => (Csv.parse(l, d)[0] || []).length);
+    if (counts[0] >= 2 && counts.every(x => x === counts[0])) out.push({ key: 'csv', score: 1, label: 'CSV / TSV', actions: [spAct('데이터 표로 보기', 'data-table')] });
+  }
+  return out;
+} });
 
 /* =====================================================================
  * 부팅
