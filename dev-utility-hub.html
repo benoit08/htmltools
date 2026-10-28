@@ -593,6 +593,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 [data-design="monocolor"] [data-group="format"] { --g: #0369a1; --gl: #38bdf8; } [data-design="monocolor"] [data-group="text"] { --g: #db2777; --gl: #f472b6; }
 [data-design="monocolor"] [data-group="java"] { --g: #dc2626; --gl: #f87171; } [data-design="monocolor"] [data-group="time"] { --g: #9333ea; --gl: #c084fc; }
 [data-design="monocolor"] [data-group="misc"] { --g: #475569; --gl: #94a3b8; }
+[data-design="monocolor"] [data-group="shell"] { --g: #be123c; --gl: #fb7185; } [data-design="monocolor"] [data-group="ops"] { --g: #a21caf; --gl: #e879f9; }
 [data-design="monocolor"] [data-group] { --gt: #ffffff; }
 [data-design="monocolor"][data-theme="dark"] [data-group] { --g: var(--gl); --gt: #0a0a0a; }
 /* 사이드바: 분류 색 사각형 + 색 글자 아이콘 */
@@ -649,6 +650,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 [data-design="aurora"] [data-group="format"] { --g: #0ea5e9; } [data-design="aurora"] [data-group="text"] { --g: #ec4899; }
 [data-design="aurora"] [data-group="java"] { --g: #ef4444; } [data-design="aurora"] [data-group="time"] { --g: #a855f7; }
 [data-design="aurora"] [data-group="misc"] { --g: #64748b; }
+[data-design="aurora"] [data-group="shell"] { --g: #e11d48; } [data-design="aurora"] [data-group="ops"] { --g: #c026d3; }
 [data-design="aurora"] #view { background: radial-gradient(900px 420px at 15% -12%, rgba(99, 102, 241, .13), transparent 62%), radial-gradient(800px 420px at 105% -5%, rgba(236, 72, 153, .10), transparent 60%), var(--bg); }
 [data-design="aurora"][data-theme="dark"] #view { background: radial-gradient(900px 420px at 15% -12%, rgba(124, 124, 255, .20), transparent 62%), radial-gradient(800px 420px at 105% -5%, rgba(244, 114, 182, .14), transparent 60%), var(--bg); }
 [data-design="aurora"] .brand-logo { background: var(--grad); border-radius: 11px; box-shadow: 0 6px 16px rgba(168, 85, 247, .35); }
@@ -732,6 +734,10 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 [data-design="nova"][data-theme="dark"] [data-group="java"] { --g: #ec7f82; --gw: rgba(236, 127, 130, .14); --gh: rgba(236, 127, 130, .22); --gb: rgba(236, 127, 130, .4); }
 [data-design="nova"][data-theme="dark"] [data-group="time"] { --g: #7cc46f; --gw: rgba(124, 196, 111, .14); --gh: rgba(124, 196, 111, .22); --gb: rgba(124, 196, 111, .4); }
 [data-design="nova"][data-theme="dark"] [data-group="misc"] { --g: #b3b0ad; --gw: rgba(179, 176, 173, .14); --gh: rgba(179, 176, 173, .22); --gb: rgba(179, 176, 173, .4); }
+[data-design="nova"] [data-group="shell"] { --g: #bc1948; --gw: rgba(188, 25, 72, .08); --gh: rgba(188, 25, 72, .15); --gb: rgba(188, 25, 72, .32); }
+[data-design="nova"] [data-group="ops"] { --g: #b4009e; --gw: rgba(180, 0, 158, .08); --gh: rgba(180, 0, 158, .15); --gb: rgba(180, 0, 158, .32); }
+[data-design="nova"][data-theme="dark"] [data-group="shell"] { --g: #f0708f; --gw: rgba(240, 112, 143, .14); --gh: rgba(240, 112, 143, .22); --gb: rgba(240, 112, 143, .4); }
+[data-design="nova"][data-theme="dark"] [data-group="ops"] { --g: #e070d4; --gw: rgba(224, 112, 212, .14); --gh: rgba(224, 112, 212, .22); --gb: rgba(224, 112, 212, .4); }
 [data-design="nova"] .tool[data-group] { --accent: var(--g); --accent-hover: var(--g); --accent-weak: var(--gw); --btn-soft: var(--gw); --btn-soft-hover: var(--gh); --btn-soft-line: var(--gb); --btn-soft-text: var(--g); }
 [data-design="nova"] #view { background: radial-gradient(1000px 440px at 105% -12%, rgba(109, 93, 252, .12), transparent 60%), radial-gradient(900px 440px at -12% 112%, rgba(6, 182, 212, .09), transparent 60%), var(--bg); }
 [data-design="nova"][data-theme="dark"] #view { background: radial-gradient(1100px 480px at 105% -12%, rgba(139, 125, 255, .20), transparent 60%), radial-gradient(900px 460px at -12% 112%, rgba(34, 211, 238, .12), transparent 60%), var(--bg); }
@@ -1373,6 +1379,8 @@ const GROUPS = [
   { id: 'format', name: '포매터' },
   { id: 'text', name: '텍스트' },
   { id: 'java', name: 'Java · 서버' },
+  { id: 'shell', name: '명령어 · 리눅스' },
+  { id: 'ops', name: '운영 · 배포' },
   { id: 'time', name: '시간 · 스케줄' },
   { id: 'misc', name: '기타 유틸' },
 ];
@@ -3233,6 +3241,87 @@ const HttpUtil = (() => {
       const hs = headers.map(([k, v]) => /^content-type$/i.test(k) ? `headers.setContentType(MediaType.parseMediaType(${jstr(v)}));` : `headers.add(${jstr(k)}, ${jstr(v)});`).join('\n');
       return `// Spring RestTemplate\nRestTemplate restTemplate = new RestTemplate();\nHttpHeaders headers = new HttpHeaders();\n${hs}\nHttpEntity<String> entity = new HttpEntity<>(${hasBody && bodyType !== 'multipart' ? jstr(bodyText) : 'null'}, headers);\nResponseEntity<String> response = restTemplate.exchange(\n        ${jstr(url)},\n        HttpMethod.${method},\n        entity,\n        String.class);\nSystem.out.println(response.getStatusCodeValue());\nSystem.out.println(response.getBody());`;
     }
+    const ctOf = () => { const x = headers.find(([k]) => /^content-type$/i.test(k)); return x ? x[1] : ''; };
+    const noCt = headers.filter(([k]) => !/^content-type$/i.test(k));
+    const mp = bodyType === 'multipart';
+    if (lang === 'restclient' || lang === 'webclient') {
+      const isRc = lang === 'restclient';
+      const lines = [isRc ? '// Spring Framework 6.1+ RestClient' : '// Spring WebFlux WebClient', isRc ? 'RestClient client = RestClient.create();' : 'WebClient client = WebClient.create();'];
+      if (mp) {
+        if (isRc) { lines.push('MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();'); form.forEach(f => lines.push(`parts.add(${jstr(f.k)}, ${jstr(f.v)});`)); multipart.forEach(f => lines.push(`parts.add(${jstr(f.k)}, new FileSystemResource(${jstr(f.name || 'file')}));`)); }
+        else { lines.push('MultipartBodyBuilder parts = new MultipartBodyBuilder();'); form.forEach(f => lines.push(`parts.part(${jstr(f.k)}, ${jstr(f.v)});`)); multipart.forEach(f => lines.push(`parts.part(${jstr(f.k)}, new FileSystemResource(${jstr(f.name || 'file')}));`)); }
+      }
+      lines.push(`ResponseEntity<String> response = client.method(HttpMethod.${method})`, `        .uri(${jstr(url)})`);
+      (mp ? noCt : headers).forEach(([k, v]) => lines.push(`        .header(${jstr(k)}, ${jstr(v)})`));
+      if (hasBody) {
+        if (mp) lines.push('        .contentType(MediaType.MULTIPART_FORM_DATA)', isRc ? '        .body(parts)' : '        .body(BodyInserters.fromMultipartData(parts.build()))');
+        else if (bodyText) lines.push(isRc ? `        .body(${jstr(bodyText)})` : `        .bodyValue(${jstr(bodyText)})`);
+      }
+      lines.push('        .retrieve()', isRc ? '        .toEntity(String.class);' : '        .toEntity(String.class)\n        .block();');
+      lines.push('System.out.println(response.getStatusCode());', 'System.out.println(response.getBody());');
+      return lines.join('\n');
+    }
+    if (lang === 'okhttp') {
+      const lines = ['// OkHttp 4.x', 'OkHttpClient client = new OkHttpClient();'];
+      let bodyVar = 'null';
+      if (hasBody && mp) {
+        lines.push('RequestBody body = new MultipartBody.Builder()', '        .setType(MultipartBody.FORM)');
+        form.forEach(f => lines.push(`        .addFormDataPart(${jstr(f.k)}, ${jstr(f.v)})`));
+        multipart.forEach(f => lines.push(`        .addFormDataPart(${jstr(f.k)}, ${jstr(f.name || 'file')}, RequestBody.create(new File(${jstr(f.name || 'file')}), MediaType.parse("application/octet-stream")))`));
+        lines.push('        .build();'); bodyVar = 'body';
+      } else if (hasBody && bodyText) { lines.push(`RequestBody body = RequestBody.create(${jstr(bodyText)}, MediaType.parse(${jstr(ctOf() || 'text/plain; charset=utf-8')}));`); bodyVar = 'body'; }
+      else if (['POST', 'PUT', 'PATCH'].includes(method)) { lines.push('RequestBody body = RequestBody.create(new byte[0], null);'); bodyVar = 'body'; }
+      lines.push('Request request = new Request.Builder()', `        .url(${jstr(url)})`, `        .method(${jstr(method)}, ${bodyVar})`);
+      (bodyVar === 'body' ? noCt : headers).forEach(([k, v]) => lines.push(`        .addHeader(${jstr(k)}, ${jstr(v)})`));
+      lines.push('        .build();', 'try (Response response = client.newCall(request).execute()) {', '    System.out.println(response.code());', '    System.out.println(response.body().string());', '}');
+      return lines.join('\n');
+    }
+    if (lang === 'axios') {
+      const o = [`  method: ${jstr(method.toLowerCase())}`, `  url: ${jstr(url)}`];
+      const hs = mp ? noCt : headers;
+      if (hs.length) o.push(`  headers: {\n${hs.map(([k, v]) => `    ${jstr(k)}: ${jstr(v)}`).join(',\n')}\n  }`);
+      let pre = '';
+      if (hasBody) {
+        if (mp) { pre = `const form = new FormData();\n${form.map(f => `form.append(${jstr(f.k)}, ${jstr(f.v)});`).join('\n')}${multipart.map(f => `\nform.append(${jstr(f.k)}, fileInput.files[0]); // ${f.name || '파일'}`).join('')}\n\n`; o.push('  data: form'); }
+        else if (bodyType === 'json' && bodyText.trim()) { let lit; try { lit = JSON.stringify(JSON.parse(bodyText), null, 2).replace(/\n/g, '\n  '); } catch (e) { lit = jstr(bodyText); } o.push(`  data: ${lit}`); }
+        else if (bodyText) o.push(`  data: ${jstr(bodyText)}`);
+      }
+      return `import axios from 'axios';\n\n${pre}const response = await axios({\n${o.join(',\n')}\n});\nconsole.log(response.status, response.data);`;
+    }
+    if (lang === 'python') {
+      const py = s => JSON.stringify(String(s));
+      const lines = ['import requests', '', `url = ${py(url)}`];
+      const hs = mp ? noCt : headers;
+      lines.push(hs.length ? `headers = {\n${hs.map(([k, v]) => `    ${py(k)}: ${py(v)},`).join('\n')}\n}` : 'headers = {}');
+      let args = 'headers=headers';
+      if (hasBody) {
+        if (mp) { lines.push(`data = {${form.map(f => `${py(f.k)}: ${py(f.v)}`).join(', ')}}`, `files = {${multipart.map(f => `${py(f.k)}: open(${py(f.name || 'file')}, "rb")`).join(', ')}}`); args += ', data=data, files=files'; }
+        else if (bodyType === 'form') { lines.push(`data = {${form.map(f => `${py(f.k)}: ${py(f.v)}`).join(', ')}}`); args += ', data=data'; }
+        else if (bodyText) { lines.push(`payload = ${py(bodyText)}`); args += ', data=payload.encode("utf-8")'; }
+      }
+      lines.push('', `response = requests.request(${py(method)}, url, ${args}, timeout=30)`, 'print(response.status_code)', 'print(response.text)');
+      return lines.join('\n');
+    }
+    if (lang === 'powershell') {
+      const ps = s => "'" + String(s).replace(/'/g, "''") + "'";
+      const m = method[0] + method.slice(1).toLowerCase();
+      const lines = ['# Windows PowerShell 5.1 / PowerShell 7'];
+      const hs = noCt.filter(([k]) => !/^(content-length|host|connection)$/i.test(k));
+      if (hs.length) lines.push('$headers = @{', ...hs.map(([k, v]) => `    ${ps(k)} = ${ps(v)}`), '}');
+      const args = [`-Uri ${ps(url)}`, `-Method ${m}`]; if (hs.length) args.push('-Headers $headers');
+      if (hasBody && mp) {
+        lines.push('# multipart/form-data는 PowerShell 7 이상에서 -Form 지원', '$form = @{', ...form.map(f => `    ${ps(f.k)} = ${ps(f.v)}`), ...multipart.map(f => `    ${ps(f.k)} = Get-Item ${ps(f.name || 'file')}`), '}');
+        args.push('-Form $form');
+      } else if (hasBody && bodyText) {
+        const lit = bodyText.includes("\n'@") || bodyText.startsWith("'@") ? ps(bodyText) : `@'\n${bodyText}\n'@`;
+        lines.push(`$body = ${lit}`);
+        const ct = ctOf() || (bodyType === 'json' ? 'application/json' : 'text/plain');
+        args.push('-Body ([System.Text.Encoding]::UTF8.GetBytes($body))', `-ContentType ${ps(/charset/i.test(ct) ? ct : ct + '; charset=utf-8')}`);
+      }
+      args.push('-UseBasicParsing');
+      lines.push(`$response = Invoke-WebRequest ${args.join(' ')}`, '$response.StatusCode', '$response.Content');
+      return lines.join('\n');
+    }
     return '';
   }
   return { encodeQ, decodeQ, splitUrl, parseQuery, buildQuery, substitute, parseCurl, shellSplit, toCode, uuid4 };
@@ -3272,22 +3361,419 @@ function hexDump(bytes, max = 4096) {
 }
 DU.guessKind = guessKind;
 
+/* =====================================================================
+ * HttpEngine — 요청 생성 · 전송(직접/프록시/Mock) · 응답 해석 · 테스트 · 변수 추출
+ *   테스터와 컬렉션 러너가 함께 사용합니다.
+ * ===================================================================== */
+const HTTP_STATUS_TEXT = { 200: 'OK', 201: 'Created', 202: 'Accepted', 204: 'No Content', 301: 'Moved Permanently', 302: 'Found', 304: 'Not Modified', 307: 'Temporary Redirect', 308: 'Permanent Redirect', 400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed', 406: 'Not Acceptable', 409: 'Conflict', 413: 'Payload Too Large', 415: 'Unsupported Media Type', 422: 'Unprocessable Entity', 429: 'Too Many Requests', 500: 'Internal Server Error', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout' };
+/** 이름이 민감해 보이는 변수 (추출 시 기본으로 메모리에만 보관) */
+const HTTP_SENS_VAR = /token|secret|passw|pwd|api[-_]?key|auth|session|cookie|credential|jwt|bearer/i;
+/** 메모리 전용 변수 (새로고침하면 사라짐). 환경변수보다 우선 적용 */
+const HTTP_RUNTIME = {};
+/** 화면·보고서 표시용 비밀값 가림 (JSON "token":"…", Bearer …, URL ?access_token=…) */
+const HTTP_SENS_KEY = /token|secret|passw|pwd|api[-_]?key|authorization|^auth$|session|cookie|credential|jwt|bearer|private[-_]?key/i;
+function httpMaskVal(v) { v = String(v); return (v.length > 8 ? v.slice(0, 4) : '') + '…(가림)'; }
+function httpRedact(s) {
+  return String(s)
+    .replace(/"([^"\\]{1,60})"(\s*:\s*)"((?:[^"\\]|\\.)*)"/g, (m, k, c, v) => (v && HTTP_SENS_KEY.test(k) ? `"${k}"${c}"${httpMaskVal(v)}"` : m))
+    .replace(/\b(Bearer|Basic)\s+([\w.~+\/=-]{8,})/g, (m, a, v) => a + ' ' + httpMaskVal(v))
+    .replace(/([?&])([^=&#\s]{1,60})=([^&#\s]+)/g, (m, a, k, v) => (HTTP_SENS_KEY.test(k) && !/^\{\{/.test(v) ? `${a}${k}=${httpMaskVal(v)}` : m));
+}
+function httpHdrVal(hs, name) { const n = String(name || '').toLowerCase(); const x = (hs || []).find(([k]) => String(k).toLowerCase() === n); return x ? x[1] : null; }
+/** {{변수}} 참조만 있고 비밀값이 직접 들어있지 않은 값 (예: "Bearer {{token}}") */
+const httpIsVarRef = v => /\{\{[^}]+\}\}/.test(v || '') && !String(v).replace(/\{\{[^}]+\}\}/g, '').replace(/^\s*(Bearer|Basic|Token|Digest)\b/i, '').trim();
+
+const HttpEngine = (() => {
+  const CFG_DEF = { mode: 'direct', proxyUrl: 'http://127.0.0.1:8099/proxy', proxyToken: '', timeout: 30, redirect: 'follow', credentials: 'omit', insecure: false, saveSensitive: false, mock: false };
+  const cfg = () => Object.assign({}, CFG_DEF, store.get('http:cfg', {}));
+  const saveCfg = c => store.set('http:cfg', c);
+  const envs = () => store.get('http:envs', [{ name: 'local', vars: [{ on: true, k: 'baseUrl', v: 'http://localhost:8080' }] }]);
+  const envIdx = () => store.get('http:envIdx', 0);
+  function vars(idx = envIdx()) {
+    const e = envs()[idx]; const o = {};
+    if (e) e.vars.filter(v => v.on !== false && v.k).forEach(v => { o[v.k] = v.v; });
+    return Object.assign(o, HTTP_RUNTIME);
+  }
+  /** target: auto(민감하면 메모리, 아니면 환경) | runtime | env */
+  function setVar(name, value, target = 'auto', idx = envIdx()) {
+    const where = target === 'env' ? 'env' : target === 'runtime' ? 'runtime' : HTTP_SENS_VAR.test(name) ? 'runtime' : 'env';
+    if (where === 'env') {
+      const all = envs(); const e = all[idx];
+      if (e) {
+        const v = e.vars.find(x => x.k === name);
+        if (v) { v.v = value; v.on = true; } else e.vars.push({ on: true, k: name, v: value });
+        store.set('http:envs', all); delete HTTP_RUNTIME[name]; return 'env';
+      }
+    }
+    HTTP_RUNTIME[name] = value; return 'runtime';
+  }
+  /** 저장용으로 민감값 제거 */
+  function strip(st, keepSens) {
+    const keep = v => (httpIsVarRef(v) || keepSens ? v : '');
+    const a = st.auth || { type: 'none' }; const out = { type: a.type };
+    if (a.type === 'bearer') out.token = keep(a.token || '');
+    if (a.type === 'basic') { out.user = a.user || ''; out.pass = keep(a.pass || ''); }
+    if (a.type === 'apikey') { out.name = a.name || ''; out.in = a.in || 'header'; out.value = keep(a.value || ''); }
+    return Object.assign({}, st, {
+      headers: (st.headers || []).filter(x => keepSens || !SENSITIVE_HDR.test(x.k) || httpIsVarRef(x.v)),
+      body: (st.body || '').length < 200000 ? st.body || '' : '', auth: out,
+      tests: (st.tests || []).map(t => Object.assign({}, t)), extract: (st.extract || []).map(x => Object.assign({}, x)),
+    });
+  }
+  /** 상태(st) → 실제 요청. files: { multipart: [{k, file}], binary: File } */
+  async function build(st, o = {}) {
+    const vs = o.vars || vars(); const unresolved = new Set();
+    const sub = x => HttpUtil.substitute(x == null ? '' : x, vs, unresolved);
+    const method = (st.method || 'GET').toUpperCase();
+    let url = sub((st.url || '').trim());
+    if (!url) throw new Error('URL을 입력하세요');
+    if (!/^[a-z][a-z\d+.-]*:\/\//i.test(url)) url = 'http://' + url;
+    const hs = (st.headers || []).filter(x => x.on !== false && x.k && x.k.trim()).map(x => [sub(x.k.trim()), sub(x.v)]);
+    const has = name => hs.some(([k]) => k.toLowerCase() === name.toLowerCase());
+    const a = st.auth || { type: 'none' };
+    if (a.type === 'bearer' && (a.token || '').trim()) hs.push(['Authorization', 'Bearer ' + sub(a.token.trim())]);
+    if (a.type === 'basic') hs.push(['Authorization', 'Basic ' + bytesToB64(utf8(sub(a.user) + ':' + sub(a.pass)))]);
+    if (a.type === 'apikey' && (a.name || '').trim()) {
+      if (a.in === 'query') url += (url.includes('?') ? '&' : '?') + encodeURIComponent(sub(a.name.trim())) + '=' + encodeURIComponent(sub(a.value));
+      else hs.push([sub(a.name.trim()), sub(a.value)]);
+    }
+    let body = null, bodyText = '';
+    const bt = st.bodyType || 'none';
+    const formRows = (st.form || []).filter(x => x.on !== false && x.k);
+    const files = o.files || {};
+    if (bt === 'json' || bt === 'text' || bt === 'xml') {
+      bodyText = sub(st.body); body = bodyText;
+      if (!has('content-type')) hs.push(['Content-Type', bt === 'json' ? 'application/json' : bt === 'xml' ? 'application/xml; charset=UTF-8' : 'text/plain; charset=UTF-8']);
+      if (bt === 'json' && bodyText.trim()) { try { JSONX.parse(bodyText); } catch (e) { throw new Error(`본문 JSON 오류: ${e.message} (줄 ${e.line}, 열 ${e.col})`); } }
+    } else if (bt === 'form') {
+      bodyText = HttpUtil.buildQuery(formRows.map(x => ({ on: true, k: sub(x.k), v: sub(x.v) }))); body = bodyText;
+      if (!has('content-type')) hs.push(['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']);
+    } else if (bt === 'multipart') {
+      const fd = new FormData();
+      formRows.forEach(x => fd.append(sub(x.k), sub(x.v)));
+      const mfs = files.multipart || (st.multipart || []).map(f => ({ k: f.k, file: null, name: f.name }));
+      for (const f of mfs) { if (!f.file) throw new Error(`파일 필드 '${f.k}'의 파일을 선택하세요${f.name ? ` (${f.name})` : ''}`); fd.append(f.k, f.file, f.file.name); }
+      body = fd; bodyText = '(multipart/form-data)';
+      const ci = hs.findIndex(([k]) => k.toLowerCase() === 'content-type'); if (ci >= 0) hs.splice(ci, 1);
+    } else if (bt === 'binary') {
+      if (!files.binary) throw new Error('보낼 파일을 선택하세요');
+      body = files.binary; bodyText = `(파일 ${files.binary.name})`;
+      if (!has('content-type')) hs.push(['Content-Type', files.binary.type || 'application/octet-stream']);
+    }
+    try { new URL(url); } catch (e) { throw new Error('URL 형식이 올바르지 않습니다: ' + url); }
+    return { method, url, headers: hs, body, bodyText, bodyType: bt, form: formRows, multipart: (files.multipart || st.multipart || []).map(f => ({ k: f.k, name: f.file ? f.file.name : f.name })), unresolved: Array.from(unresolved) };
+  }
+  async function direct(rq, c, signal) {
+    const init = { method: rq.method, headers: new Headers(), signal, redirect: c.redirect, credentials: c.credentials, cache: 'no-store' };
+    const skipped = [];
+    rq.headers.forEach(([k, v]) => { if (FORBIDDEN_HDR.test(k)) skipped.push(k); try { init.headers.append(k, v); } catch (e) { skipped.push(k); } });
+    if (rq.body != null && rq.method !== 'GET' && rq.method !== 'HEAD') init.body = rq.body;
+    const t0 = performance.now();
+    const res = await fetch(rq.url, init);
+    const t1 = performance.now();
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const t2 = performance.now();
+    return { status: res.status, statusText: res.statusText, headers: Array.from(res.headers.entries()), bytes, ttfb: t1 - t0, ms: t2 - t0, url: res.url, redirected: res.redirected, type: res.type, via: 'direct', skipped,
+      droppedBody: rq.body != null && (rq.method === 'GET' || rq.method === 'HEAD') };
+  }
+  async function viaProxy(rq, c, signal) {
+    let bodyB64 = null; const hs = rq.headers.slice();
+    if (rq.body != null) {
+      let ab;
+      if (typeof rq.body === 'string') ab = utf8(rq.body);
+      else if (rq.body instanceof FormData) { const tmp = new Response(rq.body); hs.push(['Content-Type', tmp.headers.get('content-type')]); ab = new Uint8Array(await tmp.arrayBuffer()); }
+      else ab = new Uint8Array(await rq.body.arrayBuffer());
+      bodyB64 = bytesToB64(ab);
+    }
+    let res;
+    try {
+      res = await fetch(c.proxyUrl, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', 'X-DevHub-Token': c.proxyToken },
+        body: JSON.stringify({ method: rq.method, url: rq.url, headers: hs, bodyBase64: bodyB64, timeoutMs: c.timeout * 1000, followRedirects: c.redirect === 'follow', insecure: c.insecure }) });
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      const err = new Error(`프록시(${c.proxyUrl})에 연결할 수 없습니다. DevHubProxy가 실행 중인지 확인하세요.`); err.proxy = true; throw err;
+    }
+    let j; try { j = await res.json(); } catch (e) { throw new Error(`프록시 응답을 해석할 수 없습니다 (HTTP ${res.status})`); }
+    if (!res.ok || j.error) { const err = new Error(j.error || `프록시 오류 HTTP ${res.status}`); err.proxy = true; throw err; }
+    return { status: j.status, statusText: j.statusText || '', headers: j.headers || [], bytes: b64ToBytes(j.bodyBase64 || ''), ms: j.timeMs, ttfb: j.ttfbMs, url: j.finalUrl || rq.url, redirected: !!j.redirected, type: 'proxy', via: 'proxy', httpVersion: j.httpVersion };
+  }
+  /* ---- Mock (브라우저 안에서만 동작하는 가짜 응답 — 서버가 아님) ---- */
+  const mocks = () => store.get('http:mocks', []);
+  function patternMatch(p, url) {
+    p = String(p || '').trim(); if (!p) return false;
+    if (/^re:/i.test(p)) { try { return new RegExp(p.slice(3)).test(url); } catch (e) { return false; } }
+    let target = url;
+    if (p.startsWith('/')) { try { const u = new URL(url); target = u.pathname + (p.includes('?') ? u.search : ''); } catch (e) { /* 그대로 */ } }
+    const re = new RegExp('^' + p.split('*').map(x => x.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+    return re.test(target);
+  }
+  function matchMock(method, url) {
+    for (const m of mocks()) {
+      if (m.on === false) continue;
+      if (m.method && m.method !== '*' && m.method.toUpperCase() !== method.toUpperCase()) continue;
+      if (patternMatch(m.pattern, url)) return m;
+    }
+    return null;
+  }
+  function parseHeaderLines(t) { return String(t || '').split(/\r?\n/).map(l => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : null; }).filter(Boolean); }
+  async function mockResponse(m, rq, signal) {
+    const d = clamp(+m.delay || 0, 0, 60000);
+    if (d) await new Promise((res, rej) => { const t = setTimeout(res, d); if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('aborted', 'AbortError')); }); });
+    const body = HttpUtil.substitute(m.body || '', {}, null);
+    const hs = parseHeaderLines(m.headers);
+    if (!hs.some(([k]) => /^content-type$/i.test(k))) hs.push(['content-type', /^\s*[{[]/.test(body) ? 'application/json; charset=utf-8' : 'text/plain; charset=utf-8']);
+    const st = +m.status || 200;
+    return { status: st, statusText: HTTP_STATUS_TEXT[st] || '', headers: hs, bytes: utf8(body), ms: d, ttfb: d, url: rq.url, via: 'mock', mockName: m.name || m.pattern };
+  }
+  async function send(rq, c, signal) {
+    if (c.mock) { const m = matchMock(rq.method, rq.url); if (m) return mockResponse(m, rq, signal); }
+    return c.mode === 'proxy' ? viaProxy(rq, c, signal) : direct(rq, c, signal);
+  }
+  /** 타임아웃 포함 실행. 실패 시 e.timedOut / e.proxy 표시 */
+  async function exec(rq, c = cfg(), ctrl = new AbortController(), charset = 'auto') {
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, (c.timeout || 30) * 1000);
+    const t0 = performance.now();
+    try {
+      const resp = await send(rq, c, ctrl.signal);
+      resp.totalMs = performance.now() - t0; resp.req = rq;
+      decode(resp, charset);
+      return resp;
+    } catch (e) { if (e.name === 'AbortError') e.timedOut = timedOut; throw e; }
+    finally { clearTimeout(timer); }
+  }
+  function decode(resp, charset = 'auto') {
+    const ct = httpHdrVal(resp.headers, 'content-type') || '';
+    const cs = charset !== 'auto' ? charset : (charsetOf(ct) || 'utf-8');
+    resp.kind = guessKind(ct, resp.bytes);
+    let txt; try { txt = new TextDecoder(cs).decode(resp.bytes); } catch (e) { txt = decodeUtf8(resp.bytes); }
+    resp.charset = cs; resp.text = txt; delete resp._json;
+    return resp;
+  }
+  function jsonOf(resp) {
+    if (resp._json === undefined) { try { resp._json = JSONX.parse((resp.text || '').trim()).node; } catch (e) { resp._json = null; } }
+    if (!resp._json) throw new Error('응답 본문이 JSON이 아닙니다');
+    return resp._json;
+  }
+  /* ---- 테스트 (응답 검증) ---- */
+  const TEST_TYPES = [['status', '상태 코드'], ['time', '응답 시간(ms)'], ['header', '응답 헤더'], ['body', '본문 텍스트'], ['json', 'JSONPath 값']];
+  const TEST_OPS = {
+    status: [['eq', '='], ['ne', '≠'], ['range', '범위 (200-299)'], ['in', '목록 (200,201)']],
+    time: [['lt', '<'], ['lte', '≤']],
+    header: [['exists', '존재'], ['notexists', '없음'], ['eq', '='], ['contains', '포함'], ['regex', '정규식']],
+    body: [['contains', '포함'], ['notcontains', '미포함'], ['regex', '정규식'], ['eq', '= (전체)']],
+    json: [['eq', '='], ['ne', '≠'], ['gt', '>'], ['gte', '≥'], ['lt', '<'], ['lte', '≤'], ['contains', '포함'], ['regex', '정규식'], ['exists', '존재'], ['notexists', '없음'], ['type', '타입 ='], ['len', '길이 ='], ['lenGt', '길이 >']],
+  };
+  const opLabel = (type, op) => ((TEST_OPS[type] || []).find(x => x[0] === op) || [op, op])[1];
+  const NOVAL = new Set(['exists', 'notexists']);
+  function testLabel(t) {
+    const tn = (TEST_TYPES.find(x => x[0] === t.type) || [t.type, t.type])[1];
+    return `${tn}${t.path && (t.type === 'header' || t.type === 'json') ? ' ' + t.path : ''} ${opLabel(t.type, t.op)}${NOVAL.has(t.op) ? '' : ' ' + (t.value == null ? '' : t.value)}`;
+  }
+  const typeEn = n => ({ O: 'object', A: 'array', S: 'string', N: 'number', B: 'boolean', Z: 'null' })[n.T];
+  const TYPE_ALIAS = { object: 'object', 객체: 'object', array: 'array', 배열: 'array', string: 'string', 문자열: 'string', number: 'number', 숫자: 'number', boolean: 'boolean', bool: 'boolean', 불리언: 'boolean', null: 'null' };
+  function cmpNum(a, b, op) { const x = Number(a), y = Number(b); if (isNaN(x) || isNaN(y)) { a = String(a); b = String(b); return op === 'gt' ? a > b : op === 'gte' ? a >= b : op === 'lt' ? a < b : a <= b; } return op === 'gt' ? x > y : op === 'gte' ? x >= y : op === 'lt' ? x < y : x <= y; }
+  function nodeEquals(n, exp) {
+    if (n.T === 'S') return n.v === exp;
+    if (n.T === 'N') return n.v === exp || (exp.trim() !== '' && Number(n.v) === Number(exp));
+    if (n.T === 'B') return String(n.v) === exp.trim();
+    if (n.T === 'Z') return exp.trim() === 'null';
+    try { return JSONX.stringify(n, { sortKeys: true }) === JSONX.stringify(JSONX.parse(exp).node, { sortKeys: true }); } catch (e) { return false; }
+  }
+  function nodeText(n) { return n.T === 'S' ? n.v : n.T === 'O' || n.T === 'A' ? JSONX.stringify(n) : n.T === 'Z' ? 'null' : String(n.v); }
+  function evalOne(t, resp) {
+    const exp = t.value == null ? '' : String(t.value); let ok = false, actual = '';
+    switch (t.type) {
+      case 'status': {
+        actual = String(resp.status);
+        if (t.op === 'eq') ok = resp.status === +exp;
+        else if (t.op === 'ne') ok = resp.status !== +exp;
+        else if (t.op === 'range') { const [a, b] = exp.split(/\s*[-~]\s*/).map(Number); ok = resp.status >= a && resp.status <= (isNaN(b) ? a : b); }
+        else if (t.op === 'in') ok = exp.split(/[,\s]+/).filter(Boolean).map(Number).includes(resp.status);
+        break;
+      }
+      case 'time': { const ms = Math.round(resp.ms != null ? resp.ms : resp.totalMs || 0); actual = ms + 'ms'; ok = t.op === 'lte' ? ms <= +exp : ms < +exp; break; }
+      case 'header': {
+        const v = httpHdrVal(resp.headers, t.path); actual = v == null ? '(없음)' : v;
+        if (t.op === 'exists') ok = v != null; else if (t.op === 'notexists') ok = v == null;
+        else if (v == null) ok = false;
+        else if (t.op === 'eq') ok = v === exp; else if (t.op === 'contains') ok = v.toLowerCase().includes(exp.toLowerCase()); else if (t.op === 'regex') ok = new RegExp(exp, 'i').test(v);
+        break;
+      }
+      case 'body': {
+        const b = resp.text || ''; actual = b.length > 120 ? b.slice(0, 120) + '…' : b;
+        if (t.op === 'contains') ok = b.includes(exp); else if (t.op === 'notcontains') ok = !b.includes(exp); else if (t.op === 'regex') ok = new RegExp(exp, 'm').test(b); else if (t.op === 'eq') ok = b === exp;
+        break;
+      }
+      case 'json': {
+        const r = JSONPath.query(jsonOf(resp), t.path || '$');
+        if (t.op === 'exists') { ok = r.length > 0; actual = r.length ? nodeText(r[0].node) : '(없음)'; break; }
+        if (t.op === 'notexists') { ok = !r.length; actual = r.length ? nodeText(r[0].node) : '(없음)'; break; }
+        if (!r.length) { actual = '(없음)'; ok = false; break; }
+        const n = r[0].node; actual = nodeText(n);
+        if (t.op === 'eq') ok = nodeEquals(n, exp);
+        else if (t.op === 'ne') ok = !nodeEquals(n, exp);
+        else if (['gt', 'gte', 'lt', 'lte'].includes(t.op)) ok = cmpNum(n.T === 'N' ? n.v : nodeText(n), exp, t.op);
+        else if (t.op === 'contains') ok = n.T === 'A' ? n.v.some(x => nodeEquals(x, exp)) : n.T === 'O' ? n.p.some(([k]) => k === exp) : nodeText(n).includes(exp);
+        else if (t.op === 'regex') ok = new RegExp(exp).test(nodeText(n));
+        else if (t.op === 'type') { ok = typeEn(n) === (TYPE_ALIAS[exp.trim().toLowerCase()] || exp.trim()); actual = typeEn(n); }
+        else if (t.op === 'len' || t.op === 'lenGt') { const len = n.T === 'A' ? n.v.length : n.T === 'O' ? n.p.length : n.T === 'S' ? n.v.length : NaN; actual = '길이 ' + len; ok = t.op === 'len' ? len === +exp : len > +exp; }
+        break;
+      }
+      default: throw new Error('알 수 없는 테스트 종류');
+    }
+    let act = String(actual);
+    const last = String(t.path || '').split(/[.[\]'"$]+/).filter(Boolean).pop() || '';
+    if (act !== '(없음)' && !['type', 'len', 'lenGt'].includes(t.op) && ((t.type === 'header' && (SENSITIVE_HDR.test(t.path || '') || HTTP_SENS_KEY.test(t.path || ''))) || (t.type === 'json' && HTTP_SENS_KEY.test(last)))) act = httpMaskVal(act);
+    else act = httpRedact(act);
+    return { ok, label: testLabel(t), actual: act.slice(0, 300), expected: exp };
+  }
+  function evalTests(tests, resp) {
+    return (tests || []).filter(t => t.on !== false && t.type).map(t => { try { return evalOne(t, resp); } catch (e) { return { ok: false, label: testLabel(t), actual: '', msg: e.message }; } });
+  }
+  /* ---- 변수 추출 (요청 체이닝) ---- */
+  const EXTRACT_FROM = [['json', 'JSONPath'], ['header', '응답 헤더'], ['regex', '정규식 (본문)'], ['status', '상태 코드']];
+  const EXTRACT_TARGET = [['auto', '자동 (민감하면 메모리)'], ['runtime', '메모리만'], ['env', '환경변수에 저장']];
+  function runExtract(rules, resp, o = {}) {
+    return (rules || []).filter(x => x.on !== false && x.name && x.name.trim()).map(x => {
+      const name = x.name.trim(); let v = null;
+      try {
+        if (x.from === 'header') v = httpHdrVal(resp.headers, x.expr);
+        else if (x.from === 'regex') { const m = new RegExp(x.expr || '(.*)', 'm').exec(resp.text || ''); if (m) v = m[x.group !== undefined && x.group !== '' ? +x.group : (m.length > 1 ? 1 : 0)]; }
+        else if (x.from === 'status') v = String(resp.status);
+        else { const r = JSONPath.query(jsonOf(resp), x.expr || '$'); if (r.length) v = nodeText(r[0].node); }
+      } catch (e) { return { name, ok: false, msg: e.message }; }
+      if (v == null) return { name, ok: false, msg: '값을 찾지 못했습니다' };
+      const where = o.dryRun ? null : setVar(name, v, x.target || 'auto', o.envIdx);
+      return { name, ok: true, value: v, where, sensitive: HTTP_SENS_VAR.test(name) };
+    });
+  }
+  return { cfg, saveCfg, envs, envIdx, vars, setVar, strip, build, send, exec, decode, mocks, matchMock, patternMatch, parseHeaderLines, evalTests, testLabel, runExtract, TEST_TYPES, TEST_OPS, EXTRACT_FROM, EXTRACT_TARGET, NOVAL };
+})();
+DU.HttpEngine = HttpEngine;
+
+/** 테스트 · 추출 규칙 편집기 (행 단위 표) */
+function httpRuleEditor(kind, onChange) {
+  const el = h('<div style="display:flex;flex-direction:column;gap:6px"><table class="kv"><tbody></tbody></table><div class="row" data-presets></div></div>');
+  const tb = $('tbody', el); let rows = [];
+  const mkSel = (opts, v) => { const s = h('<select class="inp sm"></select>'); opts.forEach(([a, b]) => { const o = document.createElement('option'); o.value = a; o.textContent = b; s.appendChild(o); }); s.value = v; return s; };
+  function render() {
+    tb.innerHTML = '';
+    if (!rows.length) tb.appendChild(h(`<tr><td colspan="7" class="faint" style="padding:8px">${kind === 'tests' ? '응답 검증 조건이 없습니다. 아래 버튼으로 추가하세요.' : '응답에서 값을 꺼내 변수로 저장합니다 (예: 로그인 응답의 토큰 → {{token}}).'}</td></tr>`));
+    rows.forEach((rw, i) => {
+      const tr = h('<tr><td><input type="checkbox"></td></tr>');
+      const cb = $('input', tr); cb.checked = rw.on !== false; on(cb, 'change', () => { rw.on = cb.checked; changed(); });
+      const td = c => { const x = document.createElement('td'); x.appendChild(c); tr.appendChild(x); return c; };
+      const txt = (k, ph, w) => { const inp = h(`<input type="text" style="min-width:${w || 80}px">`); inp.placeholder = ph; inp.value = rw[k] == null ? '' : rw[k]; on(inp, 'input', () => { rw[k] = inp.value; changed(); }); return inp; };
+      if (kind === 'tests') {
+        const ty = td(mkSel(HttpEngine.TEST_TYPES, rw.type || 'status'));
+        const needPath = rw.type === 'header' || rw.type === 'json';
+        const path = td(txt('path', rw.type === 'header' ? '헤더 이름' : rw.type === 'json' ? '$.data.id' : '-', 110)); path.disabled = !needPath;
+        const op = td(mkSel(HttpEngine.TEST_OPS[rw.type || 'status'], rw.op));
+        const val = td(txt('value', rw.type === 'status' ? '200' : rw.type === 'time' ? '1000' : '기대값', 80)); val.disabled = HttpEngine.NOVAL.has(rw.op);
+        on(ty, 'change', () => { rw.type = ty.value; rw.op = HttpEngine.TEST_OPS[rw.type][0][0]; changed(); render(); });
+        on(op, 'change', () => { rw.op = op.value; val.disabled = HttpEngine.NOVAL.has(rw.op); changed(); });
+      } else {
+        td(txt('name', '변수명 (예: token)', 90));
+        const fr = td(mkSel(HttpEngine.EXTRACT_FROM, rw.from || 'json'));
+        const ex = td(txt('expr', rw.from === 'header' ? '헤더 이름' : rw.from === 'regex' ? '"token":"([^"]+)"' : rw.from === 'status' ? '-' : '$.data.token', 120)); ex.disabled = rw.from === 'status';
+        const tg = td(mkSel(HttpEngine.EXTRACT_TARGET, rw.target || 'auto'));
+        on(fr, 'change', () => { rw.from = fr.value; changed(); render(); });
+        on(tg, 'change', () => { rw.target = tg.value; changed(); });
+      }
+      const del = h('<button class="btn xs ghost" type="button" title="삭제">✕</button>'); on(del, 'click', () => { rows.splice(i, 1); changed(); render(); }); td(del);
+      tb.appendChild(tr);
+    });
+  }
+  function changed() { if (onChange) onChange(); }
+  const pr = $('[data-presets]', el);
+  const add = r => { rows.push(Object.assign({ on: true }, r)); changed(); render(); };
+  if (kind === 'tests') {
+    [['+ 상태 200', { type: 'status', op: 'eq', value: '200' }], ['+ 2xx 성공', { type: 'status', op: 'range', value: '200-299' }], ['+ 1초 이내', { type: 'time', op: 'lt', value: '1000' }],
+      ['+ JSON 값', { type: 'json', path: '$.success', op: 'eq', value: 'true' }], ['+ JSON 존재', { type: 'json', path: '$.data', op: 'exists' }], ['+ 헤더', { type: 'header', path: 'Content-Type', op: 'contains', value: 'json' }], ['+ 본문 포함', { type: 'body', op: 'contains', value: '' }]]
+      .forEach(([l, r]) => pr.appendChild(btn(l, () => add(r), 'xs')));
+  } else {
+    [['+ JSONPath', { name: 'token', from: 'json', expr: '$.token', target: 'auto' }], ['+ 헤더', { name: 'location', from: 'header', expr: 'Location', target: 'auto' }], ['+ 정규식', { name: 'id', from: 'regex', expr: '"id"\\s*:\\s*(\\d+)', target: 'auto' }]]
+      .forEach(([l, r]) => pr.appendChild(btn(l, () => add(r), 'xs')));
+  }
+  render();
+  return { el, get: () => rows.map(r => Object.assign({}, r)), set(rs) { rows = (rs || []).map(r => Object.assign({}, r)); render(); }, count: () => rows.filter(r => r.on !== false).length };
+}
+
+/** 테스트 · 추출 결과 HTML */
+function httpResultHtml(tests, extracts) {
+  let s = '';
+  if (tests && tests.length) {
+    const pass = tests.filter(x => x.ok).length;
+    s += `<div class="section-title">테스트 ${pass}/${tests.length} 통과</div><div class="findings card">${tests.map(x => `<div class="f"><span class="badge ${x.ok ? 'ok' : 'err'}">${x.ok ? '통과' : '실패'}</span><span class="mono" style="flex:1">${esc(x.label)}</span><span class="faint mono" style="max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(x.msg || x.actual)}">${esc(x.msg ? '오류: ' + x.msg : '실제: ' + x.actual)}</span></div>`).join('')}</div>`;
+  }
+  if (extracts && extracts.length) {
+    s += `<div class="section-title" style="margin-top:8px">변수 추출</div><div class="findings card">${extracts.map(x => `<div class="f"><span class="badge ${x.ok ? 'ok' : 'err'}">${x.ok ? (x.where === 'env' ? '환경' : '메모리') : '실패'}</span><span class="mono"><b>{{${esc(x.name)}}}</b></span><span class="faint mono" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.ok ? esc(x.sensitive ? String(x.value).slice(0, 8) + '…(가림)' : String(x.value).slice(0, 200)) : esc(x.msg)}</span></div>`).join('')}</div>`;
+  }
+  return s;
+}
+
+/** Mock 관리 창 */
+function httpMockManager(seed) {
+  let list = HttpEngine.mocks(); let sel = 0;
+  if (seed) { list.unshift(Object.assign({ id: Date.now(), on: true, name: '새 Mock', method: '*', pattern: '/api/*', status: 200, delay: 0, headers: '', body: '' }, seed)); }
+  const body = h(`<div style="display:flex;flex-direction:column;gap:10px">
+    <div class="note warn" style="font-size:12px"><b>브라우저 안에서만 동작하는 가짜 응답</b>입니다 (서버가 아님). [설정] 탭의 "Mock 응답 사용"을 켜면 일치하는 요청은 네트워크로 나가지 않고 여기 정의한 응답을 돌려받습니다. 다른 프로그램이 호출할 수 있는 Mock 서버는 HTML만으로는 만들 수 없습니다.</div>
+    <div style="display:flex;gap:12px;min-height:340px"><div style="width:220px;display:flex;flex-direction:column;gap:4px;overflow:auto" data-ref="list"></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px" data-ref="edit"></div></div></div>`);
+  const br = refs(body);
+  function save() { store.set('http:mocks', list); }
+  function renderList() {
+    br.list.innerHTML = '';
+    list.forEach((m, i) => { const b = btn(`${m.on === false ? '○' : '●'} ${m.method || '*'} ${m.pattern || ''}`, () => { sel = i; renderList(); renderEdit(); }, 'sm' + (i === sel ? ' primary' : '')); b.style.justifyContent = 'flex-start'; b.title = m.name || ''; br.list.appendChild(b); });
+    br.list.appendChild(btn('+ Mock 추가', () => { list.push({ id: Date.now(), on: true, name: '새 Mock', method: 'GET', pattern: '/api/*', status: 200, delay: 0, headers: '', body: '{\n  "success": true\n}' }); sel = list.length - 1; save(); renderList(); renderEdit(); }, 'sm ghost'));
+  }
+  function renderEdit() {
+    br.edit.innerHTML = '';
+    const m = list[sel]; if (!m) { br.edit.innerHTML = '<div class="empty-state">Mock을 추가하세요</div>'; return; }
+    const f = h(`<div style="display:flex;flex-direction:column;gap:8px">
+      <div class="row"><label class="chk"><input type="checkbox" data-ref="on"> 사용</label><input class="inp sm" data-ref="name" placeholder="이름" style="flex:1"></div>
+      <div class="row"><select class="inp sm" data-ref="method">${['*'].concat(HTTP_METHODS).map(x => `<option>${x}</option>`).join('')}</select><input class="inp sm mono" data-ref="pattern" style="flex:1" placeholder="/api/users/*  ·  http://host/api/*  ·  re:^https?://.*/login$"></div>
+      <div class="row"><span class="lbl">상태 코드</span><input class="inp sm" type="number" data-ref="status" style="width:80px"><span class="lbl">지연(ms)</span><input class="inp sm" type="number" data-ref="delay" style="width:90px"></div>
+      <label class="field"><span>응답 헤더 (한 줄에 "이름: 값")</span><textarea class="inp" rows="3" data-ref="headers"></textarea></label>
+      <label class="field"><span>응답 본문 ({{$uuid}} {{$timestamp}} 사용 가능)</span><textarea class="inp" rows="9" data-ref="body"></textarea></label>
+      <div class="row"><span class="dim" style="font-size:12px">패턴: <code>*</code> 와일드카드, <code>/</code>로 시작하면 경로만 비교, <code>re:</code>로 시작하면 정규식</span><span class="sp"></span><button class="btn sm danger" data-ref="del" type="button">삭제</button></div></div>`);
+    const r = refs(f);
+    r.on.checked = m.on !== false; r.name.value = m.name || ''; r.method.value = m.method || '*'; r.pattern.value = m.pattern || ''; r.status.value = m.status || 200; r.delay.value = m.delay || 0; r.headers.value = m.headers || ''; r.body.value = m.body || '';
+    const upd = () => { m.on = r.on.checked; m.name = r.name.value; m.method = r.method.value; m.pattern = r.pattern.value; m.status = +r.status.value || 200; m.delay = +r.delay.value || 0; m.headers = r.headers.value; m.body = r.body.value; save(); };
+    $$('input, select, textarea', f).forEach(x => on(x, x.tagName === 'SELECT' || x.type === 'checkbox' ? 'change' : 'input', () => { upd(); if (x === r.pattern || x === r.method || x === r.on) renderList(); }));
+    on(r.del, 'click', () => { if (!confirm('이 Mock을 삭제할까요?')) return; list.splice(sel, 1); sel = Math.max(0, sel - 1); save(); renderList(); renderEdit(); });
+    br.edit.appendChild(f);
+  }
+  if (seed) save();
+  renderList(); renderEdit();
+  const foot = h('<div class="row"></div>');
+  const m = openModal({ title: 'Mock 응답 관리', body, wide: true, foot });
+  foot.append(btn('내보내기', () => download('devhub-mocks.json', JSON.stringify({ app: 'devhub-mock', version: 1, mocks: list }, null, 2), 'application/json'), 'sm'),
+    btn('가져오기', async () => {
+      const f = await pickFile('.json'); if (!f) return;
+      try { const j = JSON.parse((await readFileText(f)).text); if (j.app !== 'devhub-mock' || !Array.isArray(j.mocks)) throw new Error('Mock 파일이 아닙니다'); j.mocks.forEach(x => { const i = list.findIndex(y => y.id === x.id); if (i >= 0) list[i] = x; else list.push(x); }); save(); renderList(); renderEdit(); toast(`Mock ${j.mocks.length}개를 가져왔습니다`, 'ok'); } catch (e) { toast(e.message, 'err'); }
+    }, 'sm'), h('<span class="sp"></span>'), btn('닫기', () => m.close(), 'primary'));
+}
+
+const HTTP_CODE_LANGS = [['curl', 'cURL (bash / Git Bash)'], ['curl-win', 'cURL (Windows cmd)'], ['powershell', 'PowerShell (Invoke-WebRequest)'], ['fetch', 'JavaScript fetch'], ['axios', 'JavaScript axios'], ['python', 'Python requests'],
+  ['java', 'Java 11 HttpClient'], ['okhttp', 'Java OkHttp'], ['java-resttemplate', 'Spring RestTemplate'], ['restclient', 'Spring RestClient (6.1+)'], ['webclient', 'Spring WebClient']];
+
 defineTool({
   id: 'http', group: 'http', abbr: 'API', name: 'HTTP API 테스터',
-  desc: 'GET/POST/PUT/PATCH/DELETE · 헤더 · 인증 · 환경변수 · cURL 변환 · 히스토리',
-  keywords: 'http api rest tester postman request curl fetch get post put delete 요청 테스트 포스트맨 환경변수',
+  desc: 'GET/POST/PUT/PATCH/DELETE · 헤더 · 인증 · 환경변수 · 테스트 · 변수 추출 · Mock · cURL 변환',
+  keywords: 'http api rest tester postman request curl fetch get post put delete 요청 테스트 포스트맨 환경변수 assertion 검증 체이닝 추출 mock',
   inputs: { curl: 'cURL 명령', url: 'URL' },
-  help: `<b>환경변수</b> — URL·헤더·본문에 <code>{{baseUrl}}</code>, <code>{{token}}</code>처럼 쓰고 [환경] 에서 값을 정의합니다. 내장 변수: <code>{{$uuid}}</code> <code>{{$timestamp}}</code> <code>{{$isoDate}}</code> <code>{{$today}}</code>.<br><br>
+  help: `<b>환경변수</b> — URL·헤더·본문에 <code>{{baseUrl}}</code>, <code>{{token}}</code>처럼 쓰고 [환경] 에서 값을 정의합니다. 내장 변수: <code>{{$uuid}}</code> <code>{{$timestamp}}</code> <code>{{$isoDate}}</code> <code>{{$today}}</code>.<br>
+    <b>Tests</b> — 응답 상태·시간·헤더·본문·JSONPath 값을 자동 검증합니다. <b>변수 추출</b> — 응답에서 값을 꺼내 변수로 저장해 다음 요청에 씁니다 (로그인 → <code>{{token}}</code> → 다음 API). 토큰처럼 민감해 보이는 이름은 기본으로 메모리에만 보관합니다.<br>
+    <b>Mock</b> — [설정]에서 켜면 일치하는 요청에 미리 정의한 응답을 돌려줍니다 (브라우저 안에서만, 서버 아님).<br><br>
     <b>CORS 안내</b> — 이 파일을 로컬(file://)로 열면 브라우저는 <code>Origin: null</code>로 요청합니다. 서버가 CORS를 허용하지 않으면 응답을 읽을 수 없습니다. 해결 방법:<br>
-    ① 개발 서버에서 CORS 허용 (Spring 예: <code>registry.addMapping("/**").allowedOriginPatterns("*").allowedMethods("*")</code>)<br>
+    ① 개발 서버에서 CORS 허용 (Spring 예: <code>registry.addMapping("/**").allowedOriginPatterns("*").allowedMethods("*")</code>) — 원인 분석은 <b>CORS 진단</b> 도구를 사용하세요<br>
     ② <b>로컬 프록시 모드</b> — 함께 제공되는 <code>proxy/DevHubProxy.java</code>를 실행(<code>java DevHubProxy.java</code>, JDK 11+)하고 [설정] 탭에서 프록시 모드를 선택합니다. CORS·금지 헤더(Cookie, Host 등)·자체 서명 인증서 제약 없이 요청할 수 있고 Set-Cookie를 포함한 모든 응답 헤더가 보입니다.<br><br>
     <b>보안</b> — Authorization/Cookie/토큰류 헤더와 인증 탭 값은 히스토리에 저장하지 않습니다. 토큰은 환경변수(<code>{{token}}</code>)로 관리하세요.`,
   init(root) {
     /* ---- 상태 ---- */
-    let envs = store.get('http:envs', [{ name: 'local', vars: [{ on: true, k: 'baseUrl', v: 'http://localhost:8080' }] }]);
-    let envIdx = store.get('http:envIdx', 0);
-    const cfg = Object.assign({ mode: 'direct', proxyUrl: 'http://127.0.0.1:8099/proxy', proxyToken: '', timeout: 30, redirect: 'follow', credentials: 'omit', insecure: false, saveSensitive: false }, store.get('http:cfg', {}));
-    const saveCfg = () => store.set('http:cfg', cfg);
+    const cfg = HttpEngine.cfg();
+    const saveCfg = () => HttpEngine.saveCfg(cfg);
     let respHist = [], current = null, inflight = null;
     const uid = Math.random().toString(36).slice(2, 8);
 
@@ -3295,10 +3781,11 @@ defineTool({
     const top = h(`<div class="toolbar">
       <span class="lbl">환경</span><select class="inp sm" data-ref="env" style="min-width:110px"></select>
       <button class="btn sm" data-ref="envEdit" type="button">환경 편집</button>
-      <span class="badge" data-ref="modeBadge"></span>
+      <span class="badge" data-ref="modeBadge"></span><span class="badge warn hidden" data-ref="mockBadge" title="Mock 응답 사용 중 — 일치하는 요청은 네트워크로 나가지 않습니다">MOCK 사용</span>
       <span class="sp"></span>
       <button class="btn sm" data-ref="curlIn" type="button">cURL 가져오기</button>
       <button class="btn sm" data-ref="code" type="button">코드 생성 ▾</button>
+      <button class="btn sm" data-ref="mockBtn" type="button">Mock</button>
       <button class="btn sm" data-ref="save" type="button">★ 저장</button>
       <button class="btn sm" data-ref="hist" type="button">히스토리 · 저장됨</button>
       <button class="btn sm ghost" data-ref="newReq" type="button">새 요청</button></div>`);
@@ -3354,10 +3841,13 @@ defineTool({
       <div class="note" style="font-size:12px">인증 값은 히스토리·저장된 요청·새로고침 복원에 저장되지 않습니다. 값을 <code>{{token}}</code>처럼 환경변수로 쓰면 변수 참조만 저장됩니다.</div></div>`);
     const ar = refs(authBox);
     Object.values(ar).forEach(x => on(x, 'input', saveDraft));
+    const tests = httpRuleEditor('tests', () => { updTabCounts(); saveDraft(); });
+    const extracts = httpRuleEditor('extract', () => { updTabCounts(); saveDraft(); });
     const setBox = h(`<div style="display:flex;flex-direction:column;gap:10px">
       <div class="field"><span>요청 방식</span><div class="row"><label class="chk"><input type="radio" name="hmode${uid}" value="direct"> 브라우저 직접 요청 (fetch)</label><label class="chk"><input type="radio" name="hmode${uid}" value="proxy"> 로컬 프록시 경유</label></div></div>
       <div class="grid2"><label class="field"><span>프록시 URL</span><input class="inp mono" data-ref="pxUrl"></label><label class="field"><span>프록시 토큰 (프록시 실행 시 출력됨)</span><input class="inp mono" data-ref="pxTok" autocomplete="off"></label></div>
       <div class="row"><label class="chk"><input type="checkbox" data-ref="insecure"> 인증서 검증 안 함 (프록시 모드, 자체 서명 인증서용)</label><button class="btn xs" data-ref="pxTest" type="button">프록시 연결 확인</button><span class="dim" data-ref="pxRes" style="font-size:12px"></span></div>
+      <div class="row"><label class="chk"><input type="checkbox" data-ref="mock"> Mock 응답 사용 (일치하는 요청은 네트워크 대신 Mock 응답 반환)</label><button class="btn xs" data-ref="mockMgr" type="button">Mock 관리</button></div>
       <div class="grid3"><label class="field"><span>타임아웃 (초)</span><input class="inp" type="number" min="1" max="600" data-ref="timeout"></label>
         <label class="field"><span>리다이렉트</span><select class="inp" data-ref="redirect"><option value="follow">자동 따라가기</option><option value="manual">따라가지 않음</option></select></label>
         <label class="field"><span>쿠키 전송 (직접 요청)</span><select class="inp" data-ref="cred"><option value="omit">보내지 않음</option><option value="include">포함 (include)</option></select></label></div>
@@ -3366,7 +3856,7 @@ defineTool({
         <b>로컬 프록시</b>는 <code>proxy/DevHubProxy.java</code>를 실행해야 합니다: <code>java DevHubProxy.java</code> (JDK 11+, 127.0.0.1:8099).</div></div>`);
     const sr = refs(setBox);
     $$(`input[name=hmode${uid}]`, setBox).forEach(x => { x.checked = x.value === cfg.mode; on(x, 'change', () => { cfg.mode = x.value; saveCfg(); updMode(); }); });
-    sr.pxUrl.value = cfg.proxyUrl; sr.pxTok.value = cfg.proxyToken; sr.insecure.checked = cfg.insecure; sr.timeout.value = cfg.timeout; sr.redirect.value = cfg.redirect; sr.cred.value = cfg.credentials; sr.saveSens.checked = cfg.saveSensitive;
+    sr.pxUrl.value = cfg.proxyUrl; sr.pxTok.value = cfg.proxyToken; sr.insecure.checked = cfg.insecure; sr.timeout.value = cfg.timeout; sr.redirect.value = cfg.redirect; sr.cred.value = cfg.credentials; sr.saveSens.checked = cfg.saveSensitive; sr.mock.checked = cfg.mock;
     on(sr.pxUrl, 'input', () => { cfg.proxyUrl = sr.pxUrl.value.trim(); saveCfg(); });
     on(sr.pxTok, 'input', () => { cfg.proxyToken = sr.pxTok.value.trim(); saveCfg(); });
     on(sr.insecure, 'change', () => { cfg.insecure = sr.insecure.checked; saveCfg(); });
@@ -3374,6 +3864,8 @@ defineTool({
     on(sr.redirect, 'change', () => { cfg.redirect = sr.redirect.value; saveCfg(); });
     on(sr.cred, 'change', () => { cfg.credentials = sr.cred.value; saveCfg(); });
     on(sr.saveSens, 'change', () => { cfg.saveSensitive = sr.saveSens.checked; saveCfg(); });
+    on(sr.mock, 'change', () => { cfg.mock = sr.mock.checked; saveCfg(); updMode(); });
+    on(sr.mockMgr, 'click', () => httpMockManager());
     on(sr.pxTest, 'click', async () => {
       sr.pxRes.textContent = '확인 중…';
       try {
@@ -3381,10 +3873,21 @@ defineTool({
         const j = await res.json(); sr.pxRes.textContent = res.ok ? `✓ 연결됨 (${j.name || 'proxy'} ${j.version || ''})` : `✕ ${res.status} ${j.error || ''}`;
       } catch (e) { sr.pxRes.textContent = '✕ 연결 실패 — 프록시가 실행 중인지 확인하세요'; }
     });
-    function updMode() { r.modeBadge.textContent = cfg.mode === 'proxy' ? '프록시 모드' : '직접 요청'; r.modeBadge.className = 'badge ' + (cfg.mode === 'proxy' ? 'info' : ''); }
+    function updMode() {
+      r.modeBadge.textContent = cfg.mode === 'proxy' ? '프록시 모드' : '직접 요청'; r.modeBadge.className = 'badge ' + (cfg.mode === 'proxy' ? 'info' : '');
+      r.mockBadge.classList.toggle('hidden', !cfg.mock);
+    }
     updMode();
+    on(r.mockBtn, 'click', ev => openMenu(ev.currentTarget, [
+      { label: cfg.mock ? 'Mock 응답 사용 끄기' : 'Mock 응답 사용 켜기', onClick: () => { cfg.mock = !cfg.mock; sr.mock.checked = cfg.mock; saveCfg(); updMode(); toast(cfg.mock ? 'Mock 응답을 사용합니다 (일치하는 요청만)' : 'Mock 응답 사용을 껐습니다'); } },
+      { label: 'Mock 관리…', onClick: () => httpMockManager() },
+      { label: '현재 요청 · 응답으로 Mock 만들기', onClick: () => {
+        let path = r.url.value.trim(); try { const u = new URL(HttpUtil.substitute(path, HttpEngine.vars(), null)); path = u.pathname; } catch (e) { path = path.split('?')[0]; }
+        httpMockManager({ name: `${r.method.value} ${path}`, method: r.method.value, pattern: path, status: current ? current.status : 200, body: current ? current.text : '', headers: current ? `content-type: ${httpHdrVal(current.headers, 'content-type') || 'application/json'}` : '' });
+      } },
+    ]));
 
-    const reqTabs = Tabs([{ id: 'params', label: 'Params' }, { id: 'headers', label: 'Headers' }, { id: 'body', label: 'Body' }, { id: 'auth', label: 'Auth' }, { id: 'settings', label: '설정' }], id => showReqTab(id));
+    const reqTabs = Tabs([{ id: 'params', label: 'Params' }, { id: 'headers', label: 'Headers' }, { id: 'body', label: 'Body' }, { id: 'auth', label: 'Auth' }, { id: 'tests', label: 'Tests' }, { id: 'extract', label: '변수 추출' }, { id: 'settings', label: '설정' }], id => showReqTab(id));
     r.reqTabs.appendChild(reqTabs.el);
     function showReqTab(id) {
       const b = r.reqBody; b.innerHTML = '';
@@ -3392,6 +3895,8 @@ defineTool({
       else if (id === 'headers') { b.append(hdrPresets, headers.el, hdrWarn); }
       else if (id === 'body') { b.append(bodyType.el); showBodyEditor(); }
       else if (id === 'auth') { b.append(authType.el, authBox); showAuth(); }
+      else if (id === 'tests') { b.append(h('<div class="dim" style="font-size:12px">응답을 받을 때마다 자동으로 검증합니다. 결과는 오른쪽 [테스트] 탭에 표시되고 컬렉션 러너에서도 사용됩니다.</div>'), tests.el); }
+      else if (id === 'extract') { b.append(h('<div class="dim" style="font-size:12px">응답에서 값을 꺼내 변수로 저장합니다. 다음 요청에서 <code>{{변수명}}</code>으로 사용하세요. token·password처럼 민감해 보이는 이름은 기본으로 <b>메모리에만</b> 보관합니다 (새로고침하면 사라짐).</div>'), extracts.el); }
       else b.append(setBox);
       persistSet('http:reqTab', id);
     }
@@ -3410,11 +3915,13 @@ defineTool({
     }
     function showAuth() { $$('[data-a]', authBox).forEach(x => x.classList.toggle('hidden', x.dataset.a !== authType.value)); updTabCounts(); }
     function updTabCounts() {
-      const pc = params.active().length, hc = headers.active().length;
+      const pc = params.active().length, hc = headers.active().length, tc = tests.count(), ec = extracts.count();
       reqTabs.setLabel('params', `Params${pc ? `<span class="cnt">${pc}</span>` : ''}`);
       reqTabs.setLabel('headers', `Headers${hc ? `<span class="cnt">${hc}</span>` : ''}`);
       reqTabs.setLabel('body', `Body${bodyType.value !== 'none' ? `<span class="cnt">${bodyType.value === 'multipart' ? 'form-data' : bodyType.value}</span>` : ''}`);
       reqTabs.setLabel('auth', `Auth${authType.value !== 'none' ? '<span class="cnt">●</span>' : ''}`);
+      reqTabs.setLabel('tests', `Tests${tc ? `<span class="cnt">${tc}</span>` : ''}`);
+      reqTabs.setLabel('extract', `변수 추출${ec ? `<span class="cnt">${ec}</span>` : ''}`);
     }
     function checkHeaders() {
       const bad = headers.active().filter(x => FORBIDDEN_HDR.test(x.k.trim())).map(x => x.k);
@@ -3447,17 +3954,18 @@ defineTool({
 
     /* ---- 환경 ---- */
     function renderEnv() {
+      const envs = HttpEngine.envs(); let idx = HttpEngine.envIdx();
       r.env.innerHTML = '<option value="-1">(환경 없음)</option>' + envs.map((e, i) => `<option value="${i}">${esc(e.name)}</option>`).join('');
-      if (envIdx >= envs.length) envIdx = -1;
-      r.env.value = String(envIdx);
+      if (idx >= envs.length) idx = -1;
+      r.env.value = String(idx);
     }
-    on(r.env, 'change', () => { envIdx = +r.env.value; store.set('http:envIdx', envIdx); });
-    function envVars() { const e = envs[envIdx]; const o = {}; if (e) e.vars.filter(v => v.on !== false && v.k).forEach(v => { o[v.k] = v.v; }); return o; }
+    on(r.env, 'change', () => { store.set('http:envIdx', +r.env.value); });
     on(r.envEdit, 'click', () => {
-      let sel = Math.max(0, envIdx);
-      const body = h(`<div style="display:flex;gap:12px;min-height:300px">
+      const envs = HttpEngine.envs();
+      let sel = Math.max(0, HttpEngine.envIdx());
+      const body = h(`<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;min-height:300px">
         <div style="width:170px;display:flex;flex-direction:column;gap:4px" data-ref="list"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0" data-ref="edit"></div></div>`);
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0" data-ref="edit"></div></div><div data-ref="rt"></div></div>`);
       const br = refs(body);
       let kv = null;
       function renderList() {
@@ -3475,92 +3983,56 @@ defineTool({
           btn('삭제', () => { if (!confirm(`'${e.name}' 환경을 삭제할까요?`)) return; envs.splice(sel, 1); sel = 0; kv = null; renderList(); renderEdit(); }, 'sm danger'));
         br.edit.append(row, kv.el, h('<div class="dim" style="font-size:12px">사용: <code>{{baseUrl}}/api/users</code>, 헤더 값 <code>Bearer {{token}}</code>. 환경변수는 이 브라우저(localStorage)에 저장됩니다.</div>'));
       }
-      renderList(); renderEdit();
+      function renderRt() {
+        const names = Object.keys(HTTP_RUNTIME);
+        br.rt.innerHTML = '';
+        if (!names.length) return;
+        const box = h('<div class="card card-pad" style="display:flex;flex-direction:column;gap:6px"><div class="row"><b>메모리 변수</b><span class="dim" style="font-size:12px">변수 추출로 만든 값 · 새로고침하면 사라짐 · 환경변수보다 우선</span><span class="sp"></span></div><table class="tbl"><tbody></tbody></table></div>');
+        box.querySelector('.row').appendChild(btn('모두 지우기', () => { names.forEach(n => delete HTTP_RUNTIME[n]); renderRt(); }, 'xs'));
+        const tb = $('tbody', box);
+        names.forEach(n => {
+          const v = String(HTTP_RUNTIME[n]); const tr = h(`<tr><td class="mono"><b>{{${esc(n)}}}</b></td><td class="mono">${esc(HTTP_SENS_VAR.test(n) ? v.slice(0, 8) + '…(가림)' : v.slice(0, 120))}</td><td></td></tr>`);
+          tr.lastChild.append(btn('환경에 저장', () => { commit(); const e = envs[sel]; if (!e) return; const x = e.vars.find(y => y.k === n); if (x) x.v = v; else e.vars.push({ on: true, k: n, v }); delete HTTP_RUNTIME[n]; renderEdit(); renderRt(); }, 'xs'), btn('삭제', () => { delete HTTP_RUNTIME[n]; renderRt(); }, 'xs ghost'));
+          tb.appendChild(tr);
+        });
+        br.rt.appendChild(box);
+      }
+      renderList(); renderEdit(); renderRt();
       const foot = h('<div class="row"></div>');
       const m = openModal({ title: '환경변수', body, wide: true, foot, onClose: () => { commit(); store.set('http:envs', envs); renderEnv(); } });
       foot.append(btn('닫기', () => m.close(), 'primary'));
     });
 
-    /* ---- 초안 저장/로드 ---- */
-    /** 비밀값 없이 {{변수}} 참조만 있는 값 (예: "Bearer {{token}}") */
-    const isVarRef = v => /\{\{[^}]+\}\}/.test(v || '') && !String(v).replace(/\{\{[^}]+\}\}/g, '').replace(/^\s*(Bearer|Basic|Token|Digest)\b/i, '').trim();
-    /** 저장용 스냅샷: 민감 헤더·인증 비밀값은 {{변수}} 참조일 때만 유지 (설정에서 허용 시 전부 유지) */
-    function snapshot() {
-      const keepSens = cfg.saveSensitive;
-      const keep = v => (isVarRef(v) || keepSens ? v : '');
+    /* ---- 상태 · 저장 · 로드 ---- */
+    /** 현재 화면 전체 상태 (전송용, 민감값 포함) */
+    function state() {
       return {
-        method: r.method.value, url: r.url.value,
-        headers: headers.get().filter(x => keepSens || !SENSITIVE_HDR.test(x.k) || isVarRef(x.v)),
-        bodyType: bodyType.value, body: bodyPane.get().length < 200000 ? bodyPane.get() : '',
-        form: formKV.get(),
+        method: r.method.value, url: r.url.value, headers: headers.get(), bodyType: bodyType.value, body: bodyPane.get(), form: formKV.get(),
         multipart: multipartFiles.map(f => ({ k: f.k, name: f.file ? f.file.name : f.name })),
-        auth: (() => {
-          const t = authType.value; const a = { type: t };
-          if (t === 'bearer') a.token = keep(ar.token.value);
-          if (t === 'basic') { a.user = ar.user.value; a.pass = keep(ar.pass.value); }
-          if (t === 'apikey') { a.name = ar.akName.value; a.in = ar.akIn.value; a.value = keep(ar.akVal.value); }
-          return a;
-        })(),
+        auth: { type: authType.value, token: ar.token.value, user: ar.user.value, pass: ar.pass.value, name: ar.akName.value, value: ar.akVal.value, in: ar.akIn.value },
+        tests: tests.get(), extract: extracts.get(),
       };
     }
+    /** 저장용 스냅샷: 민감 헤더·인증 비밀값은 {{변수}} 참조일 때만 유지 */
+    function snapshot() { return HttpEngine.strip(state(), cfg.saveSensitive); }
     function load(s, opt = {}) {
       r.method.value = s.method || 'GET'; r.method.className = 'inp method m-' + r.method.value;
       r.url.value = s.url || '';
       params.set(HttpUtil.parseQuery(HttpUtil.splitUrl(r.url.value).query));
       headers.set(s.headers || []);
-      bodyType.set(s.bodyType || 'none'); bodyPane.set(s.body || '');
+      bodyType.set(s.bodyType || 'none'); bodyPane.set(s.body || '', { snap: false });
       formKV.set(s.form || []);
       multipartFiles = (s.multipart || []).map(f => ({ k: f.k, file: null, name: f.name }));
       const a = s.auth || { type: 'none' };
       authType.set(a.type || 'none');
       ar.token.value = a.token || ''; ar.user.value = a.user || ''; ar.pass.value = a.pass || ''; ar.akName.value = a.name || ''; ar.akVal.value = a.value || ''; ar.akIn.value = a.in || 'header';
+      tests.set(s.tests || []); extracts.set(s.extract || []);
       showReqTab(reqTabs.cur || 'params'); checkHeaders(); updTabCounts();
       if (!opt.silent) saveDraft();
     }
     let draftTimer = null;
     function saveDraft() { clearTimeout(draftTimer); draftTimer = setTimeout(() => store.set('http:draft', snapshot()), 400); }
-
-    /* ---- 요청 생성 ---- */
-    async function build() {
-      const vars = envVars(); const unresolved = new Set();
-      const sub = s => HttpUtil.substitute(s, vars, unresolved);
-      const method = r.method.value;
-      let url = sub(r.url.value.trim());
-      if (!url) throw new Error('URL을 입력하세요');
-      if (!/^[a-z][a-z\d+.-]*:\/\//i.test(url)) url = 'http://' + url;
-      const hs = headers.active().map(x => [sub(x.k.trim()), sub(x.v)]);
-      const has = name => hs.some(([k]) => k.toLowerCase() === name.toLowerCase());
-      const at = authType.value;
-      if (at === 'bearer' && ar.token.value.trim()) hs.push(['Authorization', 'Bearer ' + sub(ar.token.value.trim())]);
-      if (at === 'basic') { const raw = sub(ar.user.value) + ':' + sub(ar.pass.value); hs.push(['Authorization', 'Basic ' + bytesToB64(utf8(raw))]); }
-      if (at === 'apikey' && ar.akName.value.trim()) {
-        if (ar.akIn.value === 'query') url += (url.includes('?') ? '&' : '?') + encodeURIComponent(sub(ar.akName.value.trim())) + '=' + encodeURIComponent(sub(ar.akVal.value));
-        else hs.push([sub(ar.akName.value.trim()), sub(ar.akVal.value)]);
-      }
-      let body = null, bodyText = '';
-      const bt = bodyType.value;
-      if (bt === 'json' || bt === 'text' || bt === 'xml') {
-        bodyText = sub(bodyPane.get()); body = bodyText;
-        if (!has('content-type')) hs.push(['Content-Type', bt === 'json' ? 'application/json' : bt === 'xml' ? 'application/xml; charset=UTF-8' : 'text/plain; charset=UTF-8']);
-        if (bt === 'json' && bodyText.trim()) { try { JSONX.parse(bodyText); } catch (e) { throw new Error(`본문 JSON 오류: ${e.message} (줄 ${e.line}, 열 ${e.col})`); } }
-      } else if (bt === 'form') {
-        bodyText = HttpUtil.buildQuery(formKV.get().map(x => ({ on: x.on, k: sub(x.k), v: sub(x.v) })));
-        body = bodyText;
-        if (!has('content-type')) hs.push(['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']);
-      } else if (bt === 'multipart') {
-        const fd = new FormData();
-        formKV.get().filter(x => x.on && x.k).forEach(x => fd.append(sub(x.k), sub(x.v)));
-        for (const f of multipartFiles) { if (!f.file) throw new Error(`파일 필드 '${f.k}'의 파일을 선택하세요`); fd.append(f.k, f.file, f.file.name); }
-        body = fd; bodyText = '(multipart/form-data)';
-        const ci = hs.findIndex(([k]) => k.toLowerCase() === 'content-type'); if (ci >= 0) hs.splice(ci, 1);
-      } else if (bt === 'binary') {
-        if (!binaryFile) throw new Error('보낼 파일을 선택하세요');
-        body = binaryFile; bodyText = `(파일 ${binaryFile.name})`;
-        if (!has('content-type')) hs.push(['Content-Type', binaryFile.type || 'application/octet-stream']);
-      }
-      try { new URL(url); } catch (e) { throw new Error('URL 형식이 올바르지 않습니다: ' + url); }
-      return { method, url, headers: hs, body, bodyText, bodyType: bt, form: formKV.get().filter(x => x.on && x.k), multipart: multipartFiles.map(f => ({ k: f.k, name: f.file && f.file.name })), unresolved: Array.from(unresolved) };
-    }
+    function build() { return HttpEngine.build(state(), { files: { multipart: multipartFiles, binary: binaryFile } }); }
 
     /* ---- 전송 ---- */
     async function send() {
@@ -3569,87 +4041,44 @@ defineTool({
       try { rq = await build(); } catch (e) { showError(e.message); return; }
       if (rq.unresolved.length && !confirm(`정의되지 않은 변수: ${rq.unresolved.map(v => '{{' + v + '}}').join(', ')}\n그대로 보낼까요?`)) return;
       const ctrl = new AbortController(); inflight = ctrl;
-      let timedOut = false;
-      const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, cfg.timeout * 1000);
       r.send.textContent = '취소'; r.send.classList.remove('primary');
       r.resHead.innerHTML = `<span class="dim">요청 중… ${esc(rq.method)} ${esc(rq.url)}</span>`;
-      const t0 = performance.now(); let resp;
       try {
-        if (cfg.mode === 'proxy') resp = await viaProxy(rq, ctrl.signal);
-        else resp = await direct(rq, ctrl.signal);
-        resp.totalMs = performance.now() - t0;
-        resp.req = rq;
+        const resp = await HttpEngine.exec(rq, cfg, ctrl, csSel.value);
+        resp.tests = HttpEngine.evalTests(tests.get(), resp);
+        resp.extracts = HttpEngine.runExtract(extracts.get(), resp);
         showResponse(resp);
         addHistory(rq, resp);
       } catch (e) {
-        if (e.name === 'AbortError') showError(timedOut ? `시간 초과 (${cfg.timeout}초). [설정] 탭에서 타임아웃을 늘릴 수 있습니다.` : '요청을 취소했습니다.');
+        if (e.name === 'AbortError') showError(e.timedOut ? `시간 초과 (${cfg.timeout}초). [설정] 탭에서 타임아웃을 늘릴 수 있습니다.` : '요청을 취소했습니다.');
         else showError(e.message, e.name === 'TypeError' && cfg.mode !== 'proxy' ? rq : null, e.proxy);
       } finally {
-        clearTimeout(timer); inflight = null; r.send.textContent = '보내기'; r.send.classList.add('primary');
+        inflight = null; r.send.textContent = '보내기'; r.send.classList.add('primary');
       }
-    }
-    async function direct(rq, signal) {
-      const init = { method: rq.method, headers: new Headers(), signal, redirect: cfg.redirect, credentials: cfg.credentials, cache: 'no-store' };
-      const skipped = [];
-      rq.headers.forEach(([k, v]) => { if (FORBIDDEN_HDR.test(k)) skipped.push(k); try { init.headers.append(k, v); } catch (e) { skipped.push(k); } });
-      if (rq.body != null && rq.method !== 'GET' && rq.method !== 'HEAD') init.body = rq.body;
-      const t0 = performance.now();
-      const res = await fetch(rq.url, init);
-      const t1 = performance.now();
-      const bytes = new Uint8Array(await res.arrayBuffer());
-      const t2 = performance.now();
-      return { status: res.status, statusText: res.statusText, headers: Array.from(res.headers.entries()), bytes, ttfb: t1 - t0, ms: t2 - t0, url: res.url, redirected: res.redirected, type: res.type, via: 'direct', skipped,
-        droppedBody: rq.body != null && (rq.method === 'GET' || rq.method === 'HEAD') };
-    }
-    async function viaProxy(rq, signal) {
-      let bodyB64 = null; let hs = rq.headers.slice();
-      if (rq.body != null) {
-        let ab;
-        if (typeof rq.body === 'string') ab = utf8(rq.body);
-        else if (rq.body instanceof FormData) { const tmp = new Response(rq.body); hs.push(['Content-Type', tmp.headers.get('content-type')]); ab = new Uint8Array(await tmp.arrayBuffer()); }
-        else ab = new Uint8Array(await rq.body.arrayBuffer());
-        bodyB64 = bytesToB64(ab);
-      }
-      let res;
-      try {
-        res = await fetch(cfg.proxyUrl, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', 'X-DevHub-Token': cfg.proxyToken },
-          body: JSON.stringify({ method: rq.method, url: rq.url, headers: hs, bodyBase64: bodyB64, timeoutMs: cfg.timeout * 1000, followRedirects: cfg.redirect === 'follow', insecure: cfg.insecure }) });
-      } catch (e) {
-        if (e.name === 'AbortError') throw e;
-        const err = new Error(`프록시(${cfg.proxyUrl})에 연결할 수 없습니다. DevHubProxy가 실행 중인지 확인하세요.`); err.proxy = true; throw err;
-      }
-      let j; try { j = await res.json(); } catch (e) { throw new Error(`프록시 응답을 해석할 수 없습니다 (HTTP ${res.status})`); }
-      if (!res.ok || j.error) { const err = new Error(j.error || `프록시 오류 HTTP ${res.status}`); err.proxy = true; throw err; }
-      return { status: j.status, statusText: j.statusText || '', headers: j.headers || [], bytes: b64ToBytes(j.bodyBase64 || ''), ms: j.timeMs, ttfb: j.ttfbMs, url: j.finalUrl || rq.url, redirected: !!j.redirected, type: 'proxy', via: 'proxy', httpVersion: j.httpVersion };
     }
 
     /* ---- 응답 표시 ---- */
-    const resTabs = Tabs([{ id: 'body', label: '본문' }, { id: 'headers', label: '헤더' }, { id: 'preview', label: '미리보기' }, { id: 'info', label: '요청 정보' }], id => showResTab(id));
+    const resTabs = Tabs([{ id: 'body', label: '본문' }, { id: 'headers', label: '헤더' }, { id: 'tests', label: '테스트' }, { id: 'preview', label: '미리보기' }, { id: 'info', label: '요청 정보' }], id => showResTab(id));
     r.resTabs.appendChild(resTabs.el); resTabs.set('body', true);
     const resPane = Pane({ title: '응답 본문', readonly: true, filename: 'response.txt', sendFrom: 'http' });
     const viewSeg = Seg([['pretty', 'Pretty'], ['raw', 'Raw']], persistGet('http:view', 'pretty'), v => { persistSet('http:view', v); renderBody(); });
     const csSel = sel([['auto', '문자셋 자동'], ['utf-8', 'UTF-8'], ['euc-kr', 'EUC-KR'], ['iso-8859-1', 'ISO-8859-1']], null, 'auto');
-    on(csSel, 'change', () => { if (current) { decodeCurrent(); renderBody(); } });
+    on(csSel, 'change', () => { if (current) { HttpEngine.decode(current, csSel.value); renderBody(); } });
     resPane.extra.append(viewSeg.el, csSel);
-    function decodeCurrent() {
-      const ct = hdrVal(current.headers, 'content-type');
-      const cs = csSel.value !== 'auto' ? csSel.value : (charsetOf(ct) || 'utf-8');
-      current.kind = guessKind(ct, current.bytes);
-      let txt; try { txt = new TextDecoder(cs).decode(current.bytes); } catch (e) { txt = decodeUtf8(current.bytes); }
-      current.charset = cs; current.text = txt;
-    }
-    function hdrVal(hs, name) { const x = hs.find(([k]) => k.toLowerCase() === name); return x ? x[1] : ''; }
     function showResponse(resp) {
-      current = resp; decodeCurrent();
+      current = resp;
       respHist.unshift({ text: resp.text, label: `${resp.req.method} ${resp.req.url} → ${resp.status}`, kind: resp.kind }); respHist = respHist.slice(0, 5);
       const sc = statusClass(resp.status);
-      r.resHead.innerHTML = `<span class="status-pill badge ${sc}">${resp.status} ${esc(resp.statusText || STATUS_TEXT[resp.status] || '')}</span>
+      const tp = resp.tests || [], passN = tp.filter(x => x.ok).length;
+      r.resHead.innerHTML = `<span class="status-pill badge ${sc}">${resp.status} ${esc(resp.statusText || HTTP_STATUS_TEXT[resp.status] || '')}</span>
         <span class="dim">시간 <b class="mono">${Math.round(resp.ms != null ? resp.ms : resp.totalMs)} ms</b></span>
         <span class="dim">크기 <b class="mono">${fmtBytes(resp.bytes.length)}</b></span>
-        <span class="dim" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(hdrVal(resp.headers, 'content-type') || '')}</span>
-        <span class="sp"></span><span class="badge">${resp.via === 'proxy' ? '프록시' + (resp.httpVersion ? ' · ' + esc(resp.httpVersion) : '') : '직접'}</span>${resp.redirected ? '<span class="badge info">리다이렉트됨</span>' : ''}`;
+        <span class="dim" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(httpHdrVal(resp.headers, 'content-type') || '')}</span>
+        <span class="sp"></span>${tp.length ? `<span class="badge ${passN === tp.length ? 'ok' : 'err'}" data-tt title="테스트 결과 보기" style="cursor:pointer">테스트 ${passN}/${tp.length}</span>` : ''}<span class="badge${resp.via === 'mock' ? ' warn' : ''}">${resp.via === 'proxy' ? '프록시' + (resp.httpVersion ? ' · ' + esc(resp.httpVersion) : '') : resp.via === 'mock' ? 'MOCK 응답' : '직접'}</span>${resp.redirected ? '<span class="badge info">리다이렉트됨</span>' : ''}`;
+      const tt = $('[data-tt]', r.resHead); if (tt) on(tt, 'click', () => resTabs.set('tests'));
       if (resp.type === 'opaqueredirect') r.resHead.innerHTML += '<span class="badge warn">리다이렉트 응답 (브라우저 정책상 내용 확인 불가 — 프록시 모드 사용)</span>';
       resTabs.setLabel('headers', `헤더<span class="cnt">${resp.headers.length}</span>`);
+      resTabs.setLabel('tests', `테스트${tp.length ? `<span class="cnt">${passN}/${tp.length}</span>` : ''}`);
       renderActs(); showResTab(resTabs.cur);
     }
     function renderBody() {
@@ -3667,7 +4096,7 @@ defineTool({
         else if (k === 'html') lang = 'xml';
       }
       resPane.set(text, { lang });
-      resPane.status(`${current.charset.toUpperCase()}${note}`, note.includes('실패') ? 'warn' : 'info');
+      resPane.status(`${current.charset.toUpperCase()}${note}${current.via === 'mock' ? ` · Mock: ${current.mockName}` : ''}`, note.includes('실패') ? 'warn' : 'info');
     }
     function showResTab(id) {
       const b = r.resBody; b.innerHTML = '';
@@ -3678,14 +4107,18 @@ defineTool({
         wrap.innerHTML = `<table class="tbl"><thead><tr><th>이름</th><th>값</th></tr></thead><tbody>${current.headers.map(([k, v]) => `<tr><td class="mono nowrap">${esc(k)}</td><td class="mono">${esc(v)}</td></tr>`).join('')}</tbody></table>`;
         b.appendChild(wrap);
         if (current.via === 'direct') b.appendChild(h('<div class="note" style="font-size:12px">직접 요청에서는 CORS 정책상 서버가 <code>Access-Control-Expose-Headers</code>로 허용한 헤더만 보입니다. Set-Cookie는 표시되지 않습니다. 전체 헤더는 프록시 모드에서 확인하세요.</div>'));
-        b.appendChild(btn('헤더 분석기로 보내기', () => sendTo('headers', 'input', `HTTP/1.1 ${current.status} ${current.statusText}\n` + current.headers.map(([k, v]) => `${k}: ${v}`).join('\n')), 'sm'));
+        b.appendChild(btn('헤더 분석기로 보내기 (보안 · 캐시 분석)', () => sendTo('headers', 'input', `HTTP/1.1 ${current.status} ${current.statusText}\n` + current.headers.map(([k, v]) => `${k}: ${v}`).join('\n')), 'sm'));
+      } else if (id === 'tests') {
+        const html = httpResultHtml(current.tests, current.extracts);
+        if (html) { const d = h('<div></div>'); d.innerHTML = html; b.appendChild(d); }
+        else b.appendChild(h('<div class="empty-state">테스트·변수 추출 규칙이 없습니다<br><span style="font-size:12px">왼쪽 [Tests] · [변수 추출] 탭에서 추가하세요</span></div>'));
       } else if (id === 'preview') {
-        if (current.kind === 'image') { const url = URL.createObjectURL(new Blob([current.bytes], { type: hdrVal(current.headers, 'content-type') || 'image/png' })); const img = h('<img class="img-preview">'); img.src = url; b.appendChild(img); }
+        if (current.kind === 'image') { const url = URL.createObjectURL(new Blob([current.bytes], { type: httpHdrVal(current.headers, 'content-type') || 'image/png' })); const img = h('<img class="img-preview">'); img.src = url; b.appendChild(img); }
         else if (current.kind === 'html') { const f = h('<iframe class="preview-frame" sandbox=""></iframe>'); f.srcdoc = current.text; b.appendChild(f); b.appendChild(h('<div class="dim" style="font-size:12px">스크립트는 실행되지 않습니다 (sandbox).</div>')); }
         else b.appendChild(h('<div class="empty-state">미리보기는 HTML · 이미지 응답에서 사용할 수 있습니다</div>'));
       } else {
         const rq = current.req;
-        const rows = [['최종 URL', current.url || rq.url], ['메서드', rq.method], ['요청 방식', current.via === 'proxy' ? `프록시 (${cfg.proxyUrl})` : '브라우저 fetch'],
+        const rows = [['최종 URL', current.url || rq.url], ['메서드', rq.method], ['요청 방식', current.via === 'proxy' ? `프록시 (${cfg.proxyUrl})` : current.via === 'mock' ? `Mock (${current.mockName})` : '브라우저 fetch'],
           ['첫 바이트까지', current.ttfb != null ? Math.round(current.ttfb) + ' ms' : '-'], ['전체 시간', Math.round(current.ms != null ? current.ms : current.totalMs) + ' ms'], ['응답 크기', fmtBytes(current.bytes.length)]];
         b.appendChild(kvList(rows));
         b.appendChild(h('<div class="section-title">보낸 헤더</div>'));
@@ -3710,8 +4143,8 @@ defineTool({
         }, 'sm', '직전 응답(왼쪽)과 현재 응답(오른쪽)을 비교'),
         btn('복사', () => copyText(current.text), 'sm'),
         btn('응답 저장', () => {
-          const ct = hdrVal(current.headers, 'content-type'); const ext = current.kind === 'json' ? 'json' : current.kind === 'xml' ? 'xml' : current.kind === 'html' ? 'html' : /png/.test(ct) ? 'png' : /jpe?g/.test(ct) ? 'jpg' : /pdf/.test(ct) ? 'pdf' : current.kind === 'binary' ? 'bin' : 'txt';
-          const cd = hdrVal(current.headers, 'content-disposition'); const fm = /filename\*?=(?:UTF-8'')?"?([^";]+)/i.exec(cd);
+          const ct = httpHdrVal(current.headers, 'content-type') || ''; const ext = current.kind === 'json' ? 'json' : current.kind === 'xml' ? 'xml' : current.kind === 'html' ? 'html' : /png/.test(ct) ? 'png' : /jpe?g/.test(ct) ? 'jpg' : /pdf/.test(ct) ? 'pdf' : current.kind === 'binary' ? 'bin' : 'txt';
+          const cd = httpHdrVal(current.headers, 'content-disposition') || ''; const fm = /filename\*?=(?:UTF-8'')?"?([^";]+)/i.exec(cd);
           download(fm ? decodeURIComponent(fm[1]) : 'response.' + ext, new Blob([current.bytes], { type: ct || 'application/octet-stream' }));
         }, 'sm'),
         h('<span class="sp"></span>'),
@@ -3731,6 +4164,8 @@ defineTool({
           <li><b>서버 미실행 / 주소·포트 오류</b>: <code>${esc(rq.url)}</code></li>
           <li><b>HTTPS 인증서 문제</b>: 자체 서명 인증서라면 새 탭에서 해당 주소를 먼저 열어 신뢰 처리하세요.</li>${mixed}</ul>
           해결: 개발 서버에서 CORS를 허용하거나, <b>[설정] 탭 → 로컬 프록시 경유</b>를 사용하세요. 개발자 도구(F12) 콘솔에서 정확한 원인을 볼 수 있습니다.</div>`));
+        const diag = btn('CORS 진단 도구로 원인 분석', () => sendTo('cors', 'request', JSON.stringify({ url: rq.url, method: rq.method, headers: rq.headers.map(([k]) => k), credentials: cfg.credentials })), 'sm');
+        r.resBody.appendChild(diag);
         r.resBody.appendChild(h(`<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap">// Spring Boot 개발 환경 CORS 허용 예시
 @Configuration
 public class DevCorsConfig implements WebMvcConfigurer {
@@ -3744,20 +4179,21 @@ public class DevCorsConfig implements WebMvcConfigurer {
 }</pre>`));
       } else if (isProxy) r.resBody.appendChild(h('<div class="note warn">프록시 실행: <code>java DevHubProxy.java</code> (JDK 11+) → 콘솔에 출력되는 토큰을 [설정] 탭의 프록시 토큰에 입력하세요.</div>'));
     }
-    const STATUS_TEXT = { 200: 'OK', 201: 'Created', 202: 'Accepted', 204: 'No Content', 301: 'Moved Permanently', 302: 'Found', 304: 'Not Modified', 307: 'Temporary Redirect', 308: 'Permanent Redirect', 400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed', 406: 'Not Acceptable', 409: 'Conflict', 413: 'Payload Too Large', 415: 'Unsupported Media Type', 422: 'Unprocessable Entity', 429: 'Too Many Requests', 500: 'Internal Server Error', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout' };
 
     /* ---- 히스토리 / 저장됨 ---- */
     function addHistory(rq, resp) {
       const hist = store.get('http:hist', []);
-      const s = snapshot();
-      hist.unshift({ t: Date.now(), req: s, status: resp.status, ms: Math.round(resp.ms != null ? resp.ms : resp.totalMs), size: resp.bytes.length });
+      const tp = resp.tests || [];
+      hist.unshift({ t: Date.now(), req: snapshot(), status: resp.status, ms: Math.round(resp.ms != null ? resp.ms : resp.totalMs), size: resp.bytes.length, tests: tp.length ? `${tp.filter(x => x.ok).length}/${tp.length}` : undefined, mock: resp.via === 'mock' || undefined });
       store.set('http:hist', hist.slice(0, 100));
     }
     on(r.save, 'click', () => {
-      const name = prompt('저장할 요청 이름', `${r.method.value} ${r.url.value.replace(/^\{\{\w+\}\}/, '').split('?')[0] || '요청'}`);
+      const name = prompt('저장할 요청 이름 (폴더는 "폴더/이름" 형식)', `${r.method.value} ${r.url.value.replace(/^\{\{\w+\}\}/, '').split('?')[0] || '요청'}`);
       if (!name) return;
       const saved = store.get('http:saved', []);
-      saved.unshift({ id: Date.now(), name, req: snapshot() });
+      const ex = saved.findIndex(x => x.name === name);
+      if (ex >= 0 && confirm(`'${name}' 요청이 이미 있습니다. 덮어쓸까요?`)) saved[ex] = { id: saved[ex].id, name, req: snapshot() };
+      else saved.unshift({ id: Date.now(), name, req: snapshot() });
       store.set('http:saved', saved); toast('저장했습니다 (인증 비밀값 제외)', 'ok');
     });
     on(r.hist, 'click', () => {
@@ -3774,7 +4210,7 @@ public class DevCorsConfig implements WebMvcConfigurer {
         const f = items.filter(x => !q || (x.req.url + ' ' + (x.name || '')).toLowerCase().includes(q));
         br.list.innerHTML = f.length ? '' : '<div class="empty-state">항목 없음</div>';
         f.forEach(x => {
-          const it = h(`<div class="hist-item"><span class="mth m-${esc(x.req.method)}">${esc(x.req.method)}</span><span class="u"></span>${x.status != null ? `<span class="badge ${statusClass(x.status)}">${x.status}</span><span class="faint mono">${x.ms}ms</span>` : ''}<span class="faint" style="font-size:11px">${new Date(x.t || x.id).toLocaleString('ko-KR')}</span><button class="btn xs ghost" type="button" title="삭제">✕</button></div>`);
+          const it = h(`<div class="hist-item"><span class="mth m-${esc(x.req.method)}">${esc(x.req.method)}</span><span class="u"></span>${x.mock ? '<span class="badge warn">MOCK</span>' : ''}${x.tests ? `<span class="badge">${esc(x.tests)}</span>` : ''}${x.status != null ? `<span class="badge ${statusClass(x.status)}">${x.status}</span><span class="faint mono">${x.ms}ms</span>` : ''}<span class="faint" style="font-size:11px">${new Date(x.t || x.id).toLocaleString('ko-KR')}</span><button class="btn xs ghost" type="button" title="삭제">✕</button></div>`);
           $('.u', it).textContent = x.name ? `${x.name} — ${x.req.url}` : x.req.url;
           on(it, 'click', e => {
             if (e.target.closest('button')) { const all = which === 'hist' ? store.get('http:hist', []) : store.get('http:saved', []); const i = all.findIndex(y => (y.t || y.id) === (x.t || x.id)); if (i >= 0) { all.splice(i, 1); store.set(which === 'hist' ? 'http:hist' : 'http:saved', all); } render(); return; }
@@ -3785,14 +4221,14 @@ public class DevCorsConfig implements WebMvcConfigurer {
       }
       on(br.q, 'input', render);
       on(br.clr, 'click', () => { if (confirm('히스토리를 모두 삭제할까요?')) { store.set('http:hist', []); render(); } });
-      on(br.exp, 'click', () => download('devhub-http-collection.json', JSON.stringify({ app: 'devhub-http', version: 1, envs, saved: store.get('http:saved', []) }, null, 2), 'application/json'));
+      on(br.exp, 'click', () => download('devhub-http-collection.json', JSON.stringify({ app: 'devhub-http', version: 1, envs: HttpEngine.envs(), saved: store.get('http:saved', []) }, null, 2), 'application/json'));
       on(br.imp, 'click', async () => {
         const f = await pickFile('.json'); if (!f) return;
         try {
           const j = JSON.parse((await readFileText(f)).text);
           if (j.app !== 'devhub-http') throw new Error('Dev Utility Hub HTTP 컬렉션 파일이 아닙니다');
           const saved = store.get('http:saved', []); (j.saved || []).forEach(s => { if (!saved.some(x => x.id === s.id)) saved.push(s); }); store.set('http:saved', saved);
-          if (j.envs && confirm('환경변수도 가져올까요? (같은 이름은 덮어씀)')) { j.envs.forEach(e => { const i = envs.findIndex(x => x.name === e.name); if (i >= 0) envs[i] = e; else envs.push(e); }); store.set('http:envs', envs); renderEnv(); }
+          if (j.envs && confirm('환경변수도 가져올까요? (같은 이름은 덮어씀)')) { const envs = HttpEngine.envs(); j.envs.forEach(e => { const i = envs.findIndex(x => x.name === e.name); if (i >= 0) envs[i] = e; else envs.push(e); }); store.set('http:envs', envs); renderEnv(); }
           tb.set('saved'); toast('가져왔습니다', 'ok');
         } catch (e) { toast(e.message, 'err'); }
       });
@@ -3818,9 +4254,7 @@ public class DevCorsConfig implements WebMvcConfigurer {
       const ta = $('textarea', body); ta.focus();
       foot.append(btn('가져오기', () => { if (importCurl(ta.value)) m.close(); }, 'primary'));
     });
-    on(r.code, 'click', ev => openMenu(ev.currentTarget, [
-      ['curl', 'cURL (bash / Git Bash)'], ['curl-win', 'cURL (Windows cmd)'], ['fetch', 'JavaScript fetch'], ['java', 'Java 11 HttpClient'], ['java-resttemplate', 'Spring RestTemplate'],
-    ].map(([id, label]) => ({ label, onClick: async () => {
+    on(r.code, 'click', ev => openMenu(ev.currentTarget, HTTP_CODE_LANGS.map(([id, label]) => ({ label, onClick: async () => {
       let rq; try { rq = await build(); } catch (e) { toast(e.message, 'err'); return; }
       const code = HttpUtil.toCode(id, rq);
       const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:8px;padding:10px;max-height:56vh;overflow:auto;white-space:pre-wrap;word-break:break-all"></pre>'); pre.textContent = code;
@@ -3841,8 +4275,8 @@ public class DevCorsConfig implements WebMvcConfigurer {
         if (slot === 'curl' || /^\s*curl(\.exe)?\s/i.test(text)) importCurl(text);
         else { r.url.value = text.trim(); r.url.dispatchEvent(new Event('input')); }
       },
-      onShow() { r.url.focus(); },
-      _load: load, _build: build, _snapshot: snapshot,
+      onShow() { r.url.focus(); renderEnv(); },
+      _load: load, _build: build, _snapshot: snapshot, _state: state,
     };
   },
 });
@@ -3930,10 +4364,85 @@ const HeaderAna = (() => {
   return { parse, parseSetCookie, audit };
 })();
 DU.HeaderAna = HeaderAna;
+
+/* ---------- HTTP 캐시 분석 (RFC 9111) ---------- */
+const HttpCacheAna = (() => {
+  const DIR_DOC = {
+    'max-age': '이 시간(초) 동안은 서버에 묻지 않고 캐시를 그대로 사용', 's-maxage': '공유 캐시(프록시·CDN)에만 적용되는 max-age (max-age보다 우선)',
+    'no-cache': '저장은 하되, 사용할 때마다 서버에 재검증(304 확인) 필요 — "저장 금지"가 아님', 'no-store': '어디에도 저장 금지 (민감 정보에 사용)',
+    'private': '브라우저(개인 캐시)에만 저장, 프록시·CDN 저장 금지', 'public': '공유 캐시도 저장 가능 (인증 응답도 저장될 수 있음)',
+    'must-revalidate': '만료(stale)된 뒤에는 반드시 재검증, 서버 장애 시에도 오래된 응답 사용 금지', 'proxy-revalidate': '공유 캐시에만 must-revalidate 적용',
+    'immutable': '수명 안에서는 새로고침해도 재검증하지 않음 (버전이 붙은 정적 파일용)', 'stale-while-revalidate': '만료 후 이 시간(초) 동안은 오래된 응답을 먼저 쓰고 뒤에서 갱신',
+    'stale-if-error': '서버 오류 시 이 시간(초) 동안 오래된 응답 사용 허용', 'no-transform': '프록시가 본문을 변환(압축·이미지 변환)하지 못하게 함', 'must-understand': '캐시가 상태 코드를 이해할 때만 저장',
+  };
+  const HEUR_OK = new Set([200, 203, 204, 206, 300, 301, 308, 404, 405, 410, 414, 501]);
+  function parseCC(v) {
+    const o = {};
+    String(v || '').split(',').forEach(part => { const m = /^\s*([\w-]+)\s*(?:=\s*"?([^",]*)"?)?\s*$/.exec(part); if (m) o[m[1].toLowerCase()] = m[2] === undefined ? true : m[2]; });
+    return o;
+  }
+  const dur = s => { if (s == null || isNaN(s)) return '-'; s = Math.round(s); if (s < 0) return '-' + dur(-s); if (s < 60) return s + '초'; if (s < 3600) return Math.floor(s / 60) + '분' + (s % 60 ? ' ' + (s % 60) + '초' : ''); if (s < 86400) return Math.floor(s / 3600) + '시간' + (s % 3600 >= 60 ? ' ' + Math.floor(s % 3600 / 60) + '분' : ''); return Math.floor(s / 86400) + '일' + (s % 86400 >= 3600 ? ' ' + Math.floor(s % 86400 / 3600) + '시간' : ''); };
+  function analyze(headers, opt = {}) {
+    const now = opt.now || Date.now(); const status = opt.status || 200;
+    const all = n => headers.filter(([k]) => k.toLowerCase() === n).map(([, v]) => v);
+    const one = n => all(n)[0];
+    const ccRaw = all('cache-control').join(', ');
+    const cc = parseCC(ccRaw);
+    const date = Date.parse(one('date') || ''), lm = Date.parse(one('last-modified') || ''), expH = one('expires'), expT = Date.parse(expH || '');
+    const ageH = parseInt(one('age'), 10); const etag = one('etag'); const vary = one('vary'); const pragma = one('pragma');
+    const setCookie = all('set-cookie').length > 0;
+    const notes = []; const add = (lv, msg) => notes.push({ lv, msg });
+    const base = isNaN(date) ? now : date;
+    const num = k => (cc[k] !== undefined && cc[k] !== true && !isNaN(parseInt(cc[k], 10)) ? parseInt(cc[k], 10) : null);
+    const maxAge = num('max-age'), sMax = num('s-maxage');
+    let expLife = null;
+    if (expH !== undefined) expLife = isNaN(expT) ? 0 : (expT - base) / 1000;
+    const heuristic = !isNaN(lm) && HEUR_OK.has(status) ? Math.max(0, (base - lm) / 1000 * 0.1) : null;
+    function life(shared) {
+      if (shared && sMax != null) return { v: sMax, src: 's-maxage' };
+      if (maxAge != null) return { v: maxAge, src: 'max-age' };
+      if (expLife != null) return { v: Math.max(0, expLife), src: 'Expires − Date' };
+      if (heuristic != null) return { v: heuristic, src: '휴리스틱 (Last-Modified 경과 시간의 10%)' };
+      return { v: 0, src: '명시 없음 (휴리스틱 불가)' };
+    }
+    const storeNone = !!cc['no-store'] || (vary || '').trim() === '*';
+    const storePriv = !storeNone; const storeShared = !storeNone && !cc.private;
+    const lp = life(false), ls = life(true);
+    const curAge = Math.max(0, isNaN(ageH) ? 0 : ageH) + (isNaN(date) ? 0 : Math.max(0, (now - date) / 1000));
+    const mustReval = !!cc['no-cache'];
+    const freshPriv = storePriv && !mustReval && lp.v > curAge;
+    const validators = [];
+    if (etag) validators.push(`ETag ${/^W\//.test(etag) ? '(약한 검증자 W/)' : '(강한 검증자)'} → 재요청 시 If-None-Match`);
+    if (!isNaN(lm)) validators.push('Last-Modified → 재요청 시 If-Modified-Since');
+    // 진단
+    if (cc['no-store']) add('ok', 'no-store: 어떤 캐시에도 저장되지 않습니다 (민감 정보에 적합).');
+    if (cc['no-cache'] && !cc['no-store']) add('info', 'no-cache는 "저장 금지"가 아니라 "매번 재검증"입니다. 저장 자체를 막으려면 no-store를 쓰세요.');
+    if (mustReval && !validators.length) add('warn', 'no-cache인데 ETag·Last-Modified가 없어 재검증 때마다 본문 전체를 다시 받습니다.');
+    if (setCookie && storeShared && (cc.public || sMax != null)) add('err', 'Set-Cookie 응답이 공유 캐시(public / s-maxage)에 저장될 수 있습니다 — 다른 사용자에게 쿠키가 노출될 위험. private 또는 no-store를 사용하세요.');
+    else if (setCookie && !cc['no-store'] && !cc.private) add('warn', 'Set-Cookie 응답에 private / no-store가 없습니다. 프록시가 저장하지 않도록 명시하는 것이 안전합니다.');
+    if (!ccRaw && expH === undefined) add(heuristic != null ? 'warn' : 'info', heuristic != null ? `Cache-Control·Expires가 없어 브라우저가 휴리스틱으로 약 ${dur(heuristic)} 동안 캐시할 수 있습니다. API 응답이라면 Cache-Control을 명시하세요.` : 'Cache-Control·Expires가 없습니다. 대부분의 브라우저는 저장하지 않거나 매번 재검증합니다. 의도를 명시하세요.');
+    if (maxAge != null && expH !== undefined) add('info', 'max-age와 Expires가 함께 있으면 max-age가 우선합니다 (Expires는 무시).');
+    if (expH !== undefined && isNaN(expT)) add('info', `Expires 값 "${expH}"는 날짜가 아니어서 "이미 만료됨"으로 취급됩니다 (0, -1 등).`);
+    if (pragma && /no-cache/i.test(pragma) && !ccRaw) add('warn', 'Pragma: no-cache는 HTTP/1.0용 요청 헤더입니다. 응답 캐시 제어에는 Cache-Control을 사용하세요.');
+    else if (pragma && ccRaw) add('info', 'Cache-Control이 있으면 Pragma는 무시됩니다 (구형 호환용).');
+    if (cc.immutable && (lp.v < 86400)) add('warn', 'immutable은 긴 max-age(예: 1년)와 파일명에 버전/해시가 붙은 정적 리소스에만 쓰세요.');
+    if (cc.private && sMax != null) add('info', 'private 응답에서는 s-maxage가 의미가 없습니다 (공유 캐시가 저장하지 않음).');
+    if ((vary || '').trim() === '*') add('warn', 'Vary: * 는 사실상 캐시 불가입니다.');
+    else if (vary && /cookie|authorization/i.test(vary)) add('info', `Vary: ${vary} — 사용자별로 캐시가 분리되어 공유 캐시 효율이 떨어집니다.`);
+    else if (vary) add('info', `Vary: ${vary} — 이 요청 헤더 값별로 캐시가 따로 저장됩니다.`);
+    if (cc['must-revalidate']) add('info', 'must-revalidate: 만료 후에는 반드시 서버 확인이 필요하고, 서버가 응답하지 않으면 504 오류가 납니다.');
+    if (cc['stale-while-revalidate']) add('info', `stale-while-revalidate=${cc['stale-while-revalidate']}: 만료 후 ${dur(+cc['stale-while-revalidate'])} 동안은 오래된 응답을 즉시 보여주고 뒤에서 갱신합니다.`);
+    if (status === 304) add('info', '304 Not Modified: 캐시된 본문을 재사용하라는 응답입니다 (본문 없음).');
+    return { cc, ccRaw, storeNone, storePriv, storeShared, lifePriv: lp, lifeShared: ls, curAge, mustReval, freshPriv, validators, notes,
+      expiresAt: storePriv && !mustReval && lp.v > 0 ? base + (lp.v - (isNaN(ageH) ? 0 : ageH)) * 1000 : null, dur, DIR_DOC };
+  }
+  return { analyze, parseCC, dur, DIR_DOC };
+})();
+DU.HttpCacheAna = HttpCacheAna;
 defineTool({
   id: 'headers', group: 'http', abbr: 'HDR', name: 'HTTP 헤더 · 쿠키 분석',
-  desc: '요청/응답 헤더 설명 · 보안 헤더 점검 · Set-Cookie 속성 · 만료 확인',
-  keywords: 'http header headers cookie set-cookie samesite httponly secure cors security 헤더 쿠키 보안 점검 jsessionid',
+  desc: '요청/응답 헤더 설명 · 보안 헤더 점검 · 캐시 분석 · Set-Cookie 속성 · 만료 확인',
+  keywords: 'http header headers cookie set-cookie samesite httponly secure cors security cache cache-control etag expires 헤더 쿠키 보안 점검 캐시 분석 jsessionid',
   inputs: { input: '헤더' },
   init(root) {
     const bar = h('<div class="toolbar"></div>');
@@ -3956,6 +4465,7 @@ defineTool({
         f.sort((a, b) => ord[a.lv] - ord[b.lv]).forEach(x => box.appendChild(h(`<div class="f"><span class="badge ${cls[x.lv]}">${icon[x.lv]}</span><span>${esc(x.msg)}</span></div>`)));
         res.appendChild(box);
       }
+      if (p.isResp || p.headers.some(([k]) => /^(cache-control|expires|etag|last-modified|age)$/i.test(k))) res.appendChild(cacheCard(p));
       const tw = h('<div class="tbl-wrap"></div>');
       tw.innerHTML = `<table class="tbl"><thead><tr><th>이름</th><th>값</th><th>설명</th></tr></thead><tbody>${p.headers.map(([k, v]) => {
         const lk = k.toLowerCase(); let extra = '';
@@ -3986,6 +4496,30 @@ defineTool({
         cw.innerHTML = `<table class="tbl"><thead><tr><th>Cookie 이름</th><th>값</th><th>디코딩</th></tr></thead><tbody>${items.map(([k, v]) => { let d = ''; try { d = decodeURIComponent(v); } catch (e) { d = ''; } return `<tr><td class="mono"><b>${esc(k)}</b></td><td class="mono">${esc(v)}</td><td class="mono">${d !== v ? esc(d) : ''}</td></tr>`; }).join('')}</tbody></table>`;
         res.appendChild(cw);
       }
+    }
+    function cacheCard(p) {
+      const st = p.start && /^HTTP\/[\d.]+\s+(\d{3})/.exec(p.start);
+      const a = HttpCacheAna.analyze(p.headers, { status: st ? +st[1] : 200 });
+      const card = h('<div class="card"><div class="pane-head"><span class="pane-title">캐시 분석</span><span class="sp"></span><span data-v></span></div><div style="padding:8px;display:flex;flex-direction:column;gap:8px" data-b></div></div>');
+      const verdict = a.storeNone ? '<span class="badge ok">저장 안 함</span>' : a.mustReval ? '<span class="badge info">매번 재검증</span>' : a.freshPriv ? '<span class="badge ok">신선 (캐시 사용)</span>' : a.lifePriv.v > 0 ? '<span class="badge warn">만료됨 (재검증 필요)</span>' : '<span class="badge warn">캐시 수명 0</span>';
+      $('[data-v]', card).innerHTML = verdict;
+      const b = $('[data-b]', card);
+      const D = a.dur;
+      b.appendChild(kvList([
+        ['저장 가능', a.storeNone ? '아니요 (no-store / Vary: *)' : `브라우저 예 · 공유 캐시(프록시·CDN) ${a.storeShared ? '예' : '아니요 (private)'}`],
+        ['브라우저 신선도 수명', a.storeNone ? '-' : `${D(a.lifePriv.v)}  (${a.lifePriv.src})`],
+        ['공유 캐시 신선도 수명', a.storeShared ? `${D(a.lifeShared.v)}  (${a.lifeShared.src})` : '-'],
+        ['현재 나이', `${D(a.curAge)}  (Age 헤더 + Date 이후 경과)`],
+        ['만료 시각', a.expiresAt ? `${fmtKst(a.expiresAt)} (${relTime(a.expiresAt)})` : '-'],
+        ['재검증 방법', a.validators.length ? a.validators.join(' · ') : '검증자 없음 → 만료되면 전체를 다시 받음'],
+      ]));
+      const dirs = Object.keys(a.cc);
+      if (dirs.length) b.appendChild(h(`<div class="findings card">${dirs.map(d => `<div class="f"><code class="mono" style="min-width:150px">${esc(d)}${a.cc[d] === true ? '' : '=' + esc(a.cc[d])}</code><span class="dim">${esc(HttpCacheAna.DIR_DOC[d] || '알 수 없는 지시어')}</span></div>`).join('')}</div>`));
+      if (a.notes.length) {
+        const icon = { err: '✕', warn: '⚠', info: 'ℹ', ok: '✓' };
+        b.appendChild(h(`<div class="findings card">${a.notes.map(x => `<div class="f"><span class="badge ${x.lv}">${icon[x.lv]}</span><span>${esc(x.msg)}</span></div>`).join('')}</div>`));
+      }
+      return card;
     }
     inp.onInput(debounce(run, 300)); run();
     return { run, receive(slot, t) { inp.set(t); run(); } };
@@ -9282,6 +9816,977 @@ defineDetector({ id: 'data-adv', test(text, c) {
 } });
 
 /* =====================================================================
+ * HTTP 확장 도구: 컬렉션 러너 · HAR 분석 · WebSocket/SSE · CORS 진단
+ * ===================================================================== */
+injectCss(`
+.hb-wf { position: relative; height: 10px; min-width: 120px; background: var(--bg-sunk); border-radius: 3px; overflow: hidden; }
+.hb-wf > i { position: absolute; top: 1px; bottom: 1px; background: var(--accent); border-radius: 2px; min-width: 2px; }
+.hb-wf > i.e { background: var(--err); }
+.hb-row { cursor: pointer; }
+.hb-row.sel td { background: var(--accent-weak) !important; }
+.hb-tm { display: grid; grid-template-columns: 90px minmax(0, 1fr) 70px; gap: 4px 8px; align-items: center; font-size: 12px; }
+.hb-tm > i { display: block; height: 10px; background: var(--accent); border-radius: 2px; min-width: 2px; }
+.hb-log { font: 12.5px/18px var(--mono); }
+.hb-log .le { display: grid; grid-template-columns: 84px 22px 60px minmax(0, 1fr); gap: 0 8px; padding: 3px 8px; border-bottom: 1px solid var(--border); align-items: baseline; }
+.hb-log .le:hover { background: var(--bg-hover); }
+.hb-log .le .d { text-align: center; font-weight: 700; }
+.hb-log .le.in .d { color: var(--ok); } .hb-log .le.out .d { color: var(--accent); } .hb-log .le.sys .d { color: var(--text-faint); }
+.hb-log .le.sys .c { color: var(--text-dim); font-family: var(--font); }
+.hb-log .le.err .c { color: var(--err); }
+.hb-log .le .c { white-space: pre-wrap; word-break: break-all; min-width: 0; }
+.hb-log .le .t, .hb-log .le .s { color: var(--text-faint); font-size: 11.5px; }
+.hb-rq { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.hb-rq.drag { opacity: .4; }
+.hb-rq.over { box-shadow: 0 -2px 0 var(--accent) inset; }
+.hb-rq .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-step { display: flex; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); align-items: baseline; font-size: 12.5px; }
+.hb-step:last-child { border-bottom: 0; }
+.hb-har th, .hb-har td { white-space: nowrap; }
+.hb-har td.mono { word-break: normal; }
+.hb-har td.u { max-width: 0; width: 60%; overflow: hidden; text-overflow: ellipsis; }
+.hb-har td.w { width: 22%; min-width: 120px; }
+`);
+
+/* ---------- 공통: 메시지 로그 (WebSocket · SSE) ---------- */
+function hbLogView() {
+  const el = h('<div style="display:flex;flex-direction:column;gap:6px;flex:1;min-height:0"><div class="toolbar"><input class="inp sm" placeholder="로그 필터" style="width:180px"><label class="chk"><input type="checkbox" checked> JSON 정렬</label><span class="dim" data-c style="font-size:12px"></span><span class="sp"></span></div><div class="card hb-log" style="flex:1;overflow:auto;min-height:220px"></div></div>');
+  const q = $('input.inp', el), pretty = $('input[type=checkbox]', el), box = $('.hb-log', el), cnt = $('[data-c]', el);
+  let items = [];
+  const tbar = $('.toolbar', el);
+  tbar.append(btn('지우기', () => { items = []; render(); }, 'xs'), btn('내보내기', () => {
+    if (!items.length) { toast('내보낼 로그가 없습니다', 'warn'); return; }
+    download('message-log.jsonl', items.map(x => JSON.stringify({ time: new Date(x.t).toISOString(), dir: x.dir, event: x.ev, data: x.data instanceof Uint8Array ? 'hex:' + bytesToHex(x.data) : x.data })).join('\n'), 'application/x-ndjson');
+  }, 'xs'));
+  function fmt(x) {
+    if (x.data instanceof Uint8Array) return hexDump(x.data, 1024);
+    const s = String(x.data);
+    if (pretty.checked && x.dir !== 'sys' && s.length < 100000 && /^\s*[{[]/.test(s)) { try { return { html: HL.json(JSONX.stringify(JSONX.parse(s).node, { indent: 2 })) }; } catch (e) { /* 원문 */ } }
+    return s.length > 4000 ? s.slice(0, 4000) + `\n… (${fmtNum(s.length - 4000)}자 생략 — [내보내기]로 전체 확인)` : s;
+  }
+  function row(x) {
+    const d = h(`<div class="le ${x.dir}${x.err ? ' err' : ''}"><span class="t"></span><span class="d">${x.dir === 'in' ? '←' : x.dir === 'out' ? '→' : '•'}</span><span class="s"></span><span class="c"></span></div>`);
+    const tt = new Date(x.t); d.children[0].textContent = `${pad(tt.getHours())}:${pad(tt.getMinutes())}:${pad(tt.getSeconds())}.${pad(tt.getMilliseconds(), 3)}`;
+    d.children[2].textContent = x.dir === 'sys' ? '' : fmtBytes(x.size);
+    const f = fmt(x); const c = d.children[3];
+    if (x.ev) c.appendChild(h(`<span class="badge info" style="margin-right:6px">${esc(x.ev)}${x.id ? ' #' + esc(x.id) : ''}</span>`));
+    if (typeof f === 'object') { const sp = document.createElement('span'); sp.innerHTML = f.html; c.appendChild(sp); } else c.appendChild(document.createTextNode(f));
+    return d;
+  }
+  function match(x) { const s = q.value.trim().toLowerCase(); if (!s) return true; return (x.data instanceof Uint8Array ? bytesToHex(x.data) : String(x.data)).toLowerCase().includes(s) || String(x.ev || '').toLowerCase().includes(s); }
+  function render() { box.innerHTML = ''; const f = items.filter(match).slice(-2000); f.forEach(x => box.appendChild(row(x))); cnt.textContent = `${fmtNum(items.length)}건`; box.scrollTop = box.scrollHeight; }
+  on(q, 'input', debounce(render, 200)); on(pretty, 'change', render);
+  return {
+    el,
+    add(dir, data, o = {}) {
+      const x = Object.assign({ t: Date.now(), dir, data, size: data instanceof Uint8Array ? data.length : utf8(String(data)).length }, o);
+      items.push(x); if (items.length > 5000) items.splice(0, items.length - 5000);
+      if (match(x)) { const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40; box.appendChild(row(x)); if (box.children.length > 2000) box.firstChild.remove(); if (atBottom) box.scrollTop = box.scrollHeight; }
+      cnt.textContent = `${fmtNum(items.length)}건`;
+    },
+    items: () => items,
+  };
+}
+
+/* =====================================================================
+ * 컬렉션 러너
+ * ===================================================================== */
+const RunnerReport = (() => {
+  function summary(results) {
+    const s = { total: results.length, ok: 0, fail: 0, err: 0, tPass: 0, tFail: 0, ms: 0 };
+    results.forEach(x => { if (x.error) s.err++; else if (x.ok) s.ok++; else s.fail++; (x.tests || []).forEach(t => (t.ok ? s.tPass++ : s.tFail++)); s.ms += x.resp ? Math.round(x.resp.ms) : 0; });
+    return s;
+  }
+  function plain(results, meta) {
+    return {
+      app: 'devhub-runner', version: 1, generated: new Date().toISOString(), meta, summary: summary(results),
+      results: results.map(x => ({ iteration: x.it, name: x.name, method: x.method, url: httpRedact(x.rq ? x.rq.url : x.url), status: x.resp ? x.resp.status : null, ms: x.resp ? Math.round(x.resp.ms) : null, size: x.resp ? x.resp.size : null, via: x.resp ? x.resp.via : null,
+        ok: !!x.ok, error: x.error || null, warn: x.warn || null, tests: (x.tests || []).map(t => ({ label: t.label, ok: t.ok, actual: t.actual, error: t.msg })),
+        extracts: (x.extracts || []).map(e => ({ name: e.name, ok: e.ok, where: e.where, value: e.ok && !e.sensitive ? String(e.value).slice(0, 200) : undefined })) })),
+    };
+  }
+  function markdown(results, meta) {
+    const p = plain(results, meta), s = p.summary;
+    const cell = v => String(v == null ? '' : v).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    const lines = [`# 컬렉션 실행 보고서`, '', `- 실행 시각: ${new Date(p.generated).toLocaleString('ko-KR')}`, `- 환경: ${meta.env} · 방식: ${meta.mode} · 반복: ${meta.iterations}회`, `- 요청 ${s.total}건 · 성공 ${s.ok} · 테스트 실패 ${s.fail} · 오류 ${s.err} · 테스트 ${s.tPass}/${s.tPass + s.tFail} 통과 · 총 ${s.ms}ms`, '',
+      '| # | 반복 | 요청 | 메서드 | 상태 | 시간(ms) | 테스트 | 결과 |', '|---|---|---|---|---|---|---|---|'];
+    p.results.forEach((x, i) => lines.push(`| ${i + 1} | ${x.iteration} | ${cell(x.name)} | ${x.method} | ${x.status == null ? '-' : x.status} | ${x.ms == null ? '-' : x.ms} | ${x.tests.filter(t => t.ok).length}/${x.tests.length} | ${x.error ? '오류: ' + cell(x.error) : x.ok ? '성공' : '실패'} |`));
+    const fails = p.results.filter(x => x.tests.some(t => !t.ok));
+    if (fails.length) { lines.push('', '## 실패한 테스트'); fails.forEach(x => { lines.push('', `### ${cell(x.name)} (반복 ${x.iteration})`); x.tests.filter(t => !t.ok).forEach(t => lines.push(`- ✕ ${cell(t.label)} — 실제: ${cell(t.error ? '오류 ' + t.error : t.actual)}`)); }); }
+    return lines.join('\n');
+  }
+  function html(results, meta) {
+    const p = plain(results, meta), s = p.summary;
+    const e = v => esc(v == null ? '' : v);
+    const rows = p.results.map((x, i) => `<tr class="${x.error ? 'er' : x.ok ? 'ok' : 'fl'}"><td>${i + 1}</td><td>${x.iteration}</td><td>${e(x.name)}<div class="u">${e(x.url)}</div></td><td>${x.method}</td><td>${x.status == null ? '-' : x.status}</td><td>${x.ms == null ? '-' : x.ms}</td><td>${x.tests.filter(t => t.ok).length}/${x.tests.length}${x.tests.filter(t => !t.ok).map(t => `<div class="u">✕ ${e(t.label)} — ${e(t.error || t.actual)}</div>`).join('')}</td><td>${x.error ? '오류: ' + e(x.error) : x.ok ? '성공' : '실패'}</td></tr>`).join('');
+    return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>컬렉션 실행 보고서</title><style>body{font:13px/1.5 "Malgun Gothic",sans-serif;margin:24px;color:#1c2230}table{border-collapse:collapse;width:100%}td,th{border:1px solid #dde1e7;padding:5px 8px;text-align:left;vertical-align:top}th{background:#f0f2f5}.u{color:#5a6474;font-size:12px;word-break:break-all}tr.ok td:last-child{color:#1d8a4c}tr.fl td:last-child,tr.er td:last-child{color:#c73636;font-weight:700}</style></head><body><h1>컬렉션 실행 보고서</h1><p>${e(new Date(p.generated).toLocaleString('ko-KR'))} · 환경 ${e(meta.env)} · ${e(meta.mode)} · 반복 ${meta.iterations}회</p><p><b>요청 ${s.total}건</b> · 성공 ${s.ok} · 테스트 실패 ${s.fail} · 오류 ${s.err} · 테스트 ${s.tPass}/${s.tPass + s.tFail} 통과 · 총 ${s.ms}ms</p><table><thead><tr><th>#</th><th>반복</th><th>요청</th><th>메서드</th><th>상태</th><th>시간(ms)</th><th>테스트</th><th>결과</th></tr></thead><tbody>${rows}</tbody></table><p class="u">Dev Utility Hub 컬렉션 러너</p></body></html>`;
+  }
+  return { summary, plain, markdown, html };
+})();
+DU.RunnerReport = RunnerReport;
+
+defineTool({
+  id: 'runner', group: 'http', abbr: 'RUN', name: '컬렉션 러너',
+  desc: '저장된 API 요청을 순서대로 실행 · 테스트 검증 · 변수 체이닝 · 반복 · 보고서',
+  keywords: 'collection runner 컬렉션 러너 api 자동 테스트 순차 실행 체이닝 assertion newman 시나리오 보고서',
+  help: `HTTP API 테스터에서 <b>★ 저장</b>한 요청들을 순서대로 실행합니다. 각 요청의 <b>Tests</b>(응답 검증)와 <b>변수 추출</b>이 그대로 적용되므로 <code>로그인 → {{token}} 추출 → 다음 API</code> 같은 시나리오를 자동화할 수 있습니다.<br>
+    요청 방식(직접 / 로컬 프록시 / Mock)과 타임아웃은 HTTP 테스터의 [설정]을 따릅니다. 직접 요청은 서버의 CORS 허용이 필요합니다.<br>
+    파일 업로드(form-data 파일, 바이너리 본문) 요청은 파일이 저장되지 않으므로 러너에서 실행할 수 없습니다.`,
+  init(root) {
+    let saved = [], results = [], running = false, stopFlag = false, curCtrl = null;
+    const cfgDef = { order: [], selected: [], envIdx: HttpEngine.envIdx(), iterations: 1, delay: 0, stopOnFail: false, filter: '' };
+    let conf = Object.assign({}, cfgDef, persistGet('runner:cur', {}));
+    const bar = h(`<div class="toolbar">
+      <button class="btn primary" data-ref="run" type="button">▶ 실행</button>
+      <span class="lbl">환경</span><select class="inp sm" data-ref="env"></select>
+      <span class="lbl">반복</span><input class="inp sm" type="number" min="1" max="1000" data-ref="iter" style="width:70px">
+      <span class="lbl">요청 간 지연(ms)</span><input class="inp sm" type="number" min="0" max="60000" data-ref="delay" style="width:84px">
+      <label class="chk"><input type="checkbox" data-ref="stop"> 실패 시 중지</label>
+      <span class="badge" data-ref="mode"></span>
+      <span class="sp"></span>
+      <select class="inp sm" data-ref="confSel" style="max-width:200px"></select><button class="btn sm" data-ref="confSave" type="button">구성 저장</button><button class="btn sm ghost" data-ref="confDel" type="button">삭제</button>
+      <button class="btn sm" data-ref="report" type="button">보고서 ▾</button></div>`);
+    const r = refs(bar);
+    const main = h(`<div style="display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:10px;flex:1;min-height:420px">
+      <div class="card" style="display:flex;flex-direction:column;min-height:0;overflow:hidden"><div class="pane-head"><span class="pane-title">실행할 요청</span><span class="sp"></span><span class="faint" data-ref="selCnt" style="font-size:12px"></span></div>
+        <div class="row" style="padding:6px 8px;border-bottom:1px solid var(--border)"><input class="inp sm" data-ref="filter" placeholder="이름 · 폴더 필터 (예: 회원/)" style="flex:1"><button class="btn xs" data-ref="all" type="button">전체</button><button class="btn xs" data-ref="none" type="button">해제</button><button class="btn xs ghost" data-ref="reload" type="button" title="저장된 요청 다시 읽기">↻</button></div>
+        <div data-ref="list" style="flex:1;overflow:auto"></div></div>
+      <div class="card" style="display:flex;flex-direction:column;min-height:0;overflow:hidden"><div class="row" data-ref="sum" style="padding:8px 10px;border-bottom:1px solid var(--border);min-height:42px"><span class="dim">실행 결과가 여기에 표시됩니다</span></div><div data-ref="res" style="flex:1;overflow:auto"></div></div></div>`);
+    Object.assign(r, refs(main));
+    root.append(bar, main);
+    if (matchMedia && matchMedia('(max-width: 960px)').matches) main.style.gridTemplateColumns = 'minmax(0,1fr)';
+    const save = () => persistSet('runner:cur', conf);
+    function refreshEnv() {
+      const envs = HttpEngine.envs();
+      r.env.innerHTML = '<option value="-1">(환경 없음)</option>' + envs.map((e, i) => `<option value="${i}">${esc(e.name)}</option>`).join('');
+      r.env.value = String(conf.envIdx < envs.length ? conf.envIdx : -1);
+      const c = HttpEngine.cfg();
+      r.mode.textContent = (c.mode === 'proxy' ? '프록시 모드' : '직접 요청') + (c.mock ? ' + MOCK' : ''); r.mode.className = 'badge ' + (c.mock ? 'warn' : c.mode === 'proxy' ? 'info' : '');
+      r.mode.title = 'HTTP API 테스터의 [설정] 탭에서 변경';
+    }
+    function loadSaved() {
+      saved = store.get('http:saved', []);
+      const ids = saved.map(x => x.id);
+      conf.order = conf.order.filter(id => ids.includes(id)).concat(ids.filter(id => !conf.order.includes(id)));
+      conf.selected = conf.selected.filter(id => ids.includes(id));
+      renderList();
+    }
+    function renderList() {
+      r.list.innerHTML = '';
+      const f = r.filter.value.trim().toLowerCase();
+      const items = conf.order.map(id => saved.find(x => x.id === id)).filter(x => x && (!f || x.name.toLowerCase().includes(f) || (x.req.url || '').toLowerCase().includes(f)));
+      if (!saved.length) r.list.innerHTML = '<div class="empty-state">저장된 요청이 없습니다<br><span style="font-size:12px">HTTP API 테스터에서 ★ 저장으로 요청을 저장하세요</span></div>';
+      items.forEach(x => {
+        const tc = (x.req.tests || []).filter(t => t.on !== false).length, ec = (x.req.extract || []).filter(t => t.on !== false).length;
+        const it = h(`<div class="hb-rq" draggable="true"><input type="checkbox"><span class="mth m-${esc(x.req.method)}" style="font:700 11px var(--mono);width:52px">${esc(x.req.method)}</span><span class="nm"></span>${tc ? `<span class="badge" title="테스트">T${tc}</span>` : ''}${ec ? `<span class="badge info" title="변수 추출">↳${ec}</span>` : ''}<button class="btn xs ghost" data-a="up" type="button">▲</button><button class="btn xs ghost" data-a="down" type="button">▼</button></div>`);
+        $('.nm', it).textContent = x.name; $('.nm', it).title = x.req.url;
+        const cb = $('input', it); cb.checked = conf.selected.includes(x.id);
+        on(cb, 'change', () => { conf.selected = cb.checked ? conf.selected.concat(x.id) : conf.selected.filter(i => i !== x.id); save(); updCnt(); });
+        on(it, 'click', e => { const a = e.target.closest('[data-a]'); if (!a) return; const i = conf.order.indexOf(x.id), j = a.dataset.a === 'up' ? i - 1 : i + 1; if (j < 0 || j >= conf.order.length) return; [conf.order[i], conf.order[j]] = [conf.order[j], conf.order[i]]; save(); renderList(); });
+        on(it, 'dragstart', e => { e.dataTransfer.setData('text/x-devhub-run', String(x.id)); it.classList.add('drag'); });
+        on(it, 'dragend', () => it.classList.remove('drag'));
+        on(it, 'dragover', e => { if (Array.from(e.dataTransfer.types).includes('text/x-devhub-run')) { e.preventDefault(); it.classList.add('over'); } });
+        on(it, 'dragleave', () => it.classList.remove('over'));
+        on(it, 'drop', e => { const id = +e.dataTransfer.getData('text/x-devhub-run'); if (!id) return; e.preventDefault(); e.stopPropagation(); it.classList.remove('over'); const from = conf.order.indexOf(id); conf.order.splice(from, 1); conf.order.splice(conf.order.indexOf(x.id), 0, id); save(); renderList(); });
+        r.list.appendChild(it);
+      });
+      updCnt();
+    }
+    function updCnt() { r.selCnt.textContent = `${conf.selected.length} / ${saved.length} 선택`; }
+    on(r.filter, 'input', () => { conf.filter = r.filter.value; save(); renderList(); });
+    on(r.all, 'click', () => { const f = r.filter.value.trim().toLowerCase(); conf.selected = Array.from(new Set(conf.selected.concat(saved.filter(x => !f || x.name.toLowerCase().includes(f) || (x.req.url || '').toLowerCase().includes(f)).map(x => x.id)))); save(); renderList(); });
+    on(r.none, 'click', () => { conf.selected = []; save(); renderList(); });
+    on(r.reload, 'click', () => { loadSaved(); refreshEnv(); toast('저장된 요청을 다시 읽었습니다'); });
+    on(r.env, 'change', () => { conf.envIdx = +r.env.value; save(); });
+    on(r.iter, 'input', () => { conf.iterations = clamp(+r.iter.value || 1, 1, 1000); save(); });
+    on(r.delay, 'input', () => { conf.delay = clamp(+r.delay.value || 0, 0, 60000); save(); });
+    on(r.stop, 'change', () => { conf.stopOnFail = r.stop.checked; save(); });
+    /* ---- 구성 저장 ---- */
+    const confs = () => store.get('runner:configs', []);
+    function fillConf() { r.confSel.innerHTML = '<option value="">저장된 구성…</option>' + confs().map((c, i) => `<option value="${i}">${esc(c.name)}</option>`).join(''); }
+    on(r.confSel, 'change', () => { const c = confs()[+r.confSel.value]; if (!c) return; conf = Object.assign({}, cfgDef, c.conf); save(); applyConf(); loadSaved(); toast(`'${c.name}' 구성을 불러왔습니다`); });
+    on(r.confSave, 'click', () => { const name = prompt('구성 이름', (confs()[+r.confSel.value] || {}).name || '시나리오 1'); if (!name) return; const list = confs().filter(c => c.name !== name); list.unshift({ name, conf: JSON.parse(JSON.stringify(conf)) }); store.set('runner:configs', list); fillConf(); r.confSel.value = '0'; toast('구성을 저장했습니다', 'ok'); });
+    on(r.confDel, 'click', () => { const i = +r.confSel.value; const list = confs(); if (!r.confSel.value || !list[i]) { toast('삭제할 구성을 선택하세요', 'warn'); return; } if (!confirm(`'${list[i].name}' 구성을 삭제할까요?`)) return; list.splice(i, 1); store.set('runner:configs', list); fillConf(); });
+    function applyConf() { r.iter.value = conf.iterations; r.delay.value = conf.delay; r.stop.checked = conf.stopOnFail; r.filter.value = conf.filter || ''; refreshEnv(); }
+    /* ---- 실행 ---- */
+    const sleep = ms => new Promise(res => { const t = setTimeout(res, ms); const iv = setInterval(() => { if (stopFlag) { clearTimeout(t); clearInterval(iv); res(); } }, 50); setTimeout(() => clearInterval(iv), ms + 60); });
+    async function run() {
+      if (running) { stopFlag = true; if (curCtrl) curCtrl.abort(); return; }
+      loadSaved();
+      const list = conf.order.filter(id => conf.selected.includes(id)).map(id => saved.find(x => x.id === id)).filter(Boolean);
+      if (!list.length) { toast('실행할 요청을 선택하세요', 'warn'); return; }
+      running = true; stopFlag = false; results = [];
+      r.run.textContent = '■ 중지'; r.run.classList.remove('primary');
+      const c = HttpEngine.cfg(); const envIdx = conf.envIdx; refreshEnv();
+      r.res.innerHTML = ''; const tbl = h('<table class="tbl"><thead><tr><th>#</th><th>요청</th><th>상태</th><th>시간</th><th>크기</th><th>테스트</th><th>결과</th></tr></thead><tbody></tbody></table>');
+      r.res.appendChild(tbl); const tb = $('tbody', tbl); paintSummary(0);
+      const t0 = performance.now();
+      outer: for (let it = 1; it <= conf.iterations; it++) {
+        for (const item of list) {
+          if (stopFlag) break outer;
+          const rec = { it, name: item.name, method: item.req.method, url: item.req.url };
+          results.push(rec);
+          const tr = h('<tr class="hb-row"><td class="faint"></td><td></td><td></td><td class="mono"></td><td class="mono"></td><td></td><td><span class="dim">실행 중…</span></td></tr>');
+          tr.children[0].textContent = results.length + (conf.iterations > 1 ? ` (${it})` : '');
+          tr.children[1].innerHTML = `<span class="mth m-${esc(item.req.method)}" style="font:700 11px var(--mono)">${esc(item.req.method)}</span> ${esc(item.name)}`;
+          tb.appendChild(tr); tr.scrollIntoView({ block: 'nearest' });
+          try {
+            const rq = await HttpEngine.build(item.req, { vars: HttpEngine.vars(envIdx) });
+            rec.rq = rq; if (rq.unresolved.length) rec.warn = '정의되지 않은 변수: ' + rq.unresolved.map(v => '{{' + v + '}}').join(', ');
+            curCtrl = new AbortController();
+            const resp = await HttpEngine.exec(rq, c, curCtrl);
+            rec.resp = { status: resp.status, statusText: resp.statusText || HTTP_STATUS_TEXT[resp.status] || '', ms: resp.ms != null ? resp.ms : resp.totalMs, size: resp.bytes.length, headers: resp.headers, text: resp.text.slice(0, 200000), via: resp.via, kind: resp.kind };
+            rec.tests = HttpEngine.evalTests(item.req.tests, resp);
+            rec.extracts = HttpEngine.runExtract(item.req.extract, resp, { envIdx });
+            rec.ok = rec.tests.every(x => x.ok) && rec.extracts.every(x => x.ok);
+          } catch (e) {
+            rec.error = e.name === 'AbortError' ? (e.timedOut ? `시간 초과 (${c.timeout}초)` : '중지됨') : e.name === 'TypeError' && c.mode !== 'proxy' ? 'Failed to fetch — CORS 미허용 또는 연결 실패 (CORS 진단 · 프록시 모드 참고)' : e.message;
+            rec.ok = false;
+          } finally { curCtrl = null; }
+          paintRow(tr, rec); paintSummary(performance.now() - t0);
+          if (!rec.ok && conf.stopOnFail) { stopFlag = true; break outer; }
+          if (conf.delay && !stopFlag) await sleep(conf.delay);
+        }
+      }
+      running = false; r.run.textContent = '▶ 실행'; r.run.classList.add('primary');
+      paintSummary(performance.now() - t0, stopFlag ? '중지됨' : '완료');
+    }
+    function paintRow(tr, rec) {
+      const tp = rec.tests || [], pass = tp.filter(x => x.ok).length;
+      tr.children[2].innerHTML = rec.resp ? `<span class="badge ${statusClass(rec.resp.status)}">${rec.resp.status}</span>${rec.resp.via === 'mock' ? ' <span class="badge warn">MOCK</span>' : ''}` : '-';
+      tr.children[3].textContent = rec.resp ? Math.round(rec.resp.ms) + 'ms' : '-';
+      tr.children[4].textContent = rec.resp ? fmtBytes(rec.resp.size) : '-';
+      tr.children[5].innerHTML = tp.length ? `<span class="badge ${pass === tp.length ? 'ok' : 'err'}">${pass}/${tp.length}</span>` : '<span class="faint">-</span>';
+      tr.children[6].innerHTML = rec.error ? `<span class="badge err">오류</span> <span class="t-err" style="font-size:12px">${esc(rec.error)}</span>` : rec.ok ? '<span class="badge ok">성공</span>' : '<span class="badge err">실패</span>';
+      if (rec.warn) tr.children[6].insertAdjacentHTML('beforeend', ` <span class="badge warn" title="${esc(rec.warn)}">⚠ 변수</span>`);
+      on(tr, 'click', () => {
+        const nx = tr.nextElementSibling;
+        if (nx && nx.classList.contains('hb-detail')) { nx.remove(); tr.classList.remove('sel'); return; }
+        tr.classList.add('sel');
+        const d = h('<tr class="hb-detail"><td colspan="7" style="background:var(--bg-sunk)"><div style="display:flex;flex-direction:column;gap:8px;padding:4px"></div></td></tr>');
+        const box = $('div', d);
+        if (rec.rq) {
+          const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto;background:var(--bg-elev)"></pre>');
+          pre.textContent = `${rec.rq.method} ${rec.rq.url}\n` + rec.rq.headers.map(([k, v]) => `${k}: ${SENSITIVE_HDR.test(k) ? v.slice(0, 12) + '…(가림)' : v}`).join('\n') + (rec.rq.bodyText ? '\n\n' + rec.rq.bodyText.slice(0, 4000) : '');
+          box.append(h('<div class="section-title">보낸 요청</div>'), pre);
+        }
+        const rh = httpResultHtml(rec.tests, rec.extracts); if (rh) { const x = h('<div></div>'); x.innerHTML = rh; box.appendChild(x); }
+        if (rec.resp) {
+          let t = rec.resp.text, lang = null;
+          if (/^\s*[{[]/.test(t)) { try { t = JSONX.stringify(JSONX.parse(t.trim()).node, { indent: 2 }); lang = 'json'; } catch (e) { /* 원문 */ } }
+          const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto;background:var(--bg-elev)"></pre>');
+          const shown = t.length > 20000 ? t.slice(0, 20000) + '\n…' : t;
+          if (lang) pre.innerHTML = HL.json(shown); else pre.textContent = shown;
+          const acts = h('<div class="row"></div>'); acts.append(btn('JSON 포매터로', () => sendTo('json-format', 'input', rec.resp.text), 'xs'), btn('HTTP 테스터에서 열기', () => { openTool('http'); toolInst('http')._load(saved.find(x => x.name === rec.name).req); }, 'xs'));
+          box.append(h(`<div class="section-title">응답 본문 (${fmtBytes(rec.resp.size)})</div>`), pre, acts);
+        }
+        tr.after(d);
+      });
+    }
+    function paintSummary(ms, state) {
+      const s = RunnerReport.summary(results);
+      r.sum.innerHTML = `${state ? `<span class="badge ${state === '완료' && !s.fail && !s.err ? 'ok' : state === '완료' ? 'err' : 'warn'}">${state}</span>` : '<span class="badge info">실행 중</span>'}<span>요청 <b>${s.total}</b></span><span class="badge ok">성공 ${s.ok}</span><span class="badge ${s.fail ? 'err' : ''}">실패 ${s.fail}</span><span class="badge ${s.err ? 'err' : ''}">오류 ${s.err}</span><span class="dim">테스트 ${s.tPass}/${s.tPass + s.tFail}</span><span class="dim">경과 ${Math.round(ms)}ms</span>`;
+    }
+    on(r.run, 'click', run);
+    on(r.report, 'click', ev => {
+      if (!results.length) { toast('먼저 실행하세요', 'warn'); return; }
+      const envs = HttpEngine.envs(); const c = HttpEngine.cfg();
+      const meta = { env: (envs[conf.envIdx] || {}).name || '(없음)', mode: (c.mode === 'proxy' ? '프록시' : '직접') + (c.mock ? '+Mock' : ''), iterations: conf.iterations };
+      const d = new Date(), stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+      openMenu(ev.currentTarget, [
+        { label: 'JSON 보고서 저장', onClick: () => download(`runner-report-${stamp}.json`, JSON.stringify(RunnerReport.plain(results, meta), null, 2), 'application/json') },
+        { label: 'HTML 보고서 저장', onClick: () => download(`runner-report-${stamp}.html`, RunnerReport.html(results, meta), 'text/html;charset=utf-8') },
+        { label: 'Markdown 보고서 저장', onClick: () => download(`runner-report-${stamp}.md`, RunnerReport.markdown(results, meta), 'text/markdown;charset=utf-8') },
+        { label: 'Markdown 복사', onClick: () => copyText(RunnerReport.markdown(results, meta)) },
+      ]);
+    });
+    applyConf(); fillConf(); loadSaved();
+    return { run, onShow() { loadSaved(); refreshEnv(); }, _results: () => results };
+  },
+});
+
+/* =====================================================================
+ * HAR 분석기
+ * ===================================================================== */
+const HarAna = (() => {
+  function typeOf(e) {
+    const rt = (e._resourceType || '').toLowerCase(); const mime = ((e.response && e.response.content && e.response.content.mimeType) || '').toLowerCase();
+    if (rt) return { xhr: 'xhr', fetch: 'xhr', document: 'doc', script: 'js', stylesheet: 'css', image: 'img', font: 'font', media: 'media', websocket: 'ws' }[rt] || 'other';
+    if (/json|xml/.test(mime) && !/html/.test(mime)) return 'xhr';
+    if (/html/.test(mime)) return 'doc'; if (/javascript|ecmascript/.test(mime)) return 'js'; if (/css/.test(mime)) return 'css'; if (/^image\//.test(mime)) return 'img'; if (/font|woff/.test(mime)) return 'font';
+    return 'other';
+  }
+  function parse(text) {
+    let j; try { j = JSON.parse(text); } catch (e) { throw new Error('HAR(JSON)를 해석할 수 없습니다: ' + e.message); }
+    const log = j && j.log; if (!log || !Array.isArray(log.entries)) throw new Error('HAR 형식이 아닙니다 (log.entries 없음)');
+    const entries = log.entries.map((e, i) => {
+      const rq = e.request || {}, rs = e.response || {}, ct = rs.content || {};
+      let u; try { u = new URL(rq.url); } catch (x) { u = null; }
+      const start = Date.parse(e.startedDateTime);
+      const transfer = rs._transferSize != null && rs._transferSize >= 0 ? rs._transferSize : rs.bodySize > 0 ? rs.bodySize + Math.max(0, rs.headersSize || 0) : (ct.size || 0);
+      return { i, start, method: rq.method || '', url: rq.url || '', host: u ? u.host : '', path: u ? u.pathname + u.search : rq.url, status: rs.status || 0, statusText: rs.statusText || '', mime: (ct.mimeType || '').split(';')[0], type: typeOf(e), size: transfer, contentSize: ct.size || 0, time: e.time || 0, timings: e.timings || {}, raw: e, error: rs._error || null };
+    });
+    const valid = entries.filter(x => !isNaN(x.start));
+    const min = valid.length ? Math.min(...valid.map(x => x.start)) : 0;
+    const max = valid.length ? Math.max(...valid.map(x => x.start + x.time)) : 0;
+    entries.forEach(x => { x.offset = isNaN(x.start) ? 0 : x.start - min; });
+    return { entries, min, span: Math.max(1, max - min), creator: log.creator ? `${log.creator.name || ''} ${log.creator.version || ''}`.trim() : '', pages: log.pages || [] };
+  }
+  function body(e) {
+    const c = (e.raw.response || {}).content || {};
+    if (c.text == null) return { text: '', note: c.size ? '본문이 HAR에 포함되지 않았습니다 (내보낼 때 "Save all as HAR with content" 사용)' : '' };
+    if (c.encoding === 'base64') { try { const b = b64ToBytes(c.text); return guessKind(c.mimeType || '', b) === 'binary' || /^image\//.test(c.mimeType || '') ? { bytes: b, text: '', note: `바이너리 (${fmtBytes(b.length)})` } : { text: decodeBytes(b).text, note: 'Base64로 저장된 본문을 디코딩했습니다' }; } catch (x) { return { text: c.text, note: 'Base64 디코딩 실패' }; } }
+    return { text: c.text, note: '' };
+  }
+  function toReq(e) {
+    const rq = e.raw.request || {};
+    const headers = (rq.headers || []).filter(x => !/^:/.test(x.name) && !/^(content-length|host|connection|accept-encoding)$/i.test(x.name)).map(x => [x.name, x.value]);
+    const pd = rq.postData; const mime = pd ? (pd.mimeType || '') : '';
+    const bodyType = !pd ? 'none' : /json/.test(mime) ? 'json' : /x-www-form-urlencoded/.test(mime) ? 'form' : /xml/.test(mime) ? 'xml' : 'text';
+    const bodyText = pd ? (pd.text != null ? pd.text : (pd.params || []).map(p => encodeURIComponent(p.name) + '=' + encodeURIComponent(p.value || '')).join('&')) : '';
+    return { method: rq.method || 'GET', url: rq.url, headers, bodyType, bodyText, body: bodyText, form: bodyType === 'form' ? HttpUtil.parseQuery(bodyText) : [], multipart: [] };
+  }
+  function curl(e) { const q = toReq(e); return HttpUtil.toCode('curl', Object.assign({}, q, { bodyType: q.bodyType === 'form' ? 'text' : q.bodyType })); }
+  return { parse, body, toReq, curl, typeOf };
+})();
+DU.HarAna = HarAna;
+const HAR_SAMPLE = (() => {
+  const t0 = Date.parse('2026-10-28T00:15:22.000Z');
+  const mk = (i, method, url, status, mime, ms, offs, extra = {}) => Object.assign({ startedDateTime: new Date(t0 + offs).toISOString(), time: ms, _resourceType: extra.rt || 'fetch',
+    request: { method, url, httpVersion: 'HTTP/1.1', headers: [{ name: 'Accept', value: 'application/json' }, { name: 'Authorization', value: 'Bearer eyJhbGciOiJIUzI1NiJ9.sample.sig' }].concat(extra.reqH || []), queryString: [], cookies: [], headersSize: -1, bodySize: extra.post ? extra.post.text.length : 0, postData: extra.post },
+    response: { status, statusText: HTTP_STATUS_TEXT[status] || '', httpVersion: 'HTTP/1.1', headers: [{ name: 'Content-Type', value: mime }, { name: 'Cache-Control', value: 'no-cache' }], cookies: [], content: Object.assign({ size: (extra.body || '').length, mimeType: mime, text: extra.body }, extra.b64 ? { encoding: 'base64' } : {}), redirectURL: '', headersSize: -1, bodySize: (extra.body || '').length, _transferSize: (extra.body || '').length + 180 },
+    cache: {}, timings: { blocked: 1.2, dns: i ? -1 : 12, connect: i ? -1 : 20, ssl: -1, send: 0.3, wait: ms * 0.8, receive: ms * 0.2 - 1.5 } }, extra.top || {});
+  return JSON.stringify({ log: { version: '1.2', creator: { name: 'WebInspector', version: '537.36' }, pages: [], entries: [
+    mk(0, 'GET', 'http://localhost:8080/app/main.do', 200, 'text/html', 85, 0, { rt: 'document', body: '<!DOCTYPE html><html><body>main</body></html>' }),
+    mk(1, 'POST', 'http://localhost:8080/api/login', 200, 'application/json', 132, 120, { post: { mimeType: 'application/json', text: '{"userId":"admin","password":"****"}' }, body: '{"success":true,"data":{"token":"eyJhbGciOi.payload.sig","name":"홍길동"}}' }),
+    mk(2, 'GET', 'http://localhost:8080/api/users?page=1&size=20', 200, 'application/json', 640, 270, { body: btoa(unescape(encodeURIComponent('{"total":2,"users":[{"id":1,"name":"홍길동"},{"id":2,"name":"김철수"}]}'))), b64: true }),
+    mk(3, 'GET', 'http://localhost:8080/api/orders/42', 404, 'application/json', 45, 300, { body: '{"code":"E404","message":"주문이 없습니다"}' }),
+    mk(4, 'POST', 'http://localhost:8080/api/report', 500, 'application/json', 2310, 340, { post: { mimeType: 'application/x-www-form-urlencoded', text: 'from=2026-10-01&to=2026-10-28' }, body: '{"code":"E500","message":"java.lang.NullPointerException"}' }),
+    mk(5, 'GET', 'http://localhost:8080/static/app.js', 200, 'application/javascript', 30, 100, { rt: 'script', body: 'console.log(1)' }),
+  ] } }, null, 1);
+})();
+
+defineTool({
+  id: 'har', group: 'http', abbr: 'HAR', name: 'HAR 분석기',
+  desc: '개발자 도구에서 저장한 HAR 파일 · 요청 목록 · 워터폴 · 느린/오류 요청 · cURL 변환',
+  keywords: 'har http archive network 개발자도구 네트워크 워터폴 waterfall 느린 요청 분석 timing',
+  inputs: { input: 'HAR(JSON)' }, fill: true,
+  help: `브라우저 개발자 도구(F12) → Network → 목록에서 우클릭 → <b>Save all as HAR with content</b>로 저장한 파일을 열거나 화면에 끌어다 놓으세요.<br>
+    HAR에는 쿠키·토큰이 들어 있으므로 이 도구는 내용을 저장하지 않으며, 상세 보기에서 민감 헤더는 기본으로 가립니다. 공유하기 전에는 <b>민감정보 마스킹</b>을 사용하세요.`,
+  init(root) {
+    root.classList.add('dropzone');
+    let data = null, filtered = [], selIdx = -1, sortKey = 'offset', sortDir = 1;
+    const bar = h(`<div class="toolbar"><button class="btn primary" data-ref="open" type="button">HAR 파일 열기</button><button class="btn sm" data-ref="paste" type="button">붙여넣기…</button>
+      <span class="sep"></span><input class="inp sm" data-ref="q" placeholder="URL 필터" style="width:200px">
+      <select class="inp sm" data-ref="st"><option value="">상태 전체</option><option value="2">2xx</option><option value="3">3xx</option><option value="4">4xx</option><option value="5">5xx</option><option value="0">실패(0)</option><option value="e">오류(4xx·5xx·0)</option></select>
+      <select class="inp sm" data-ref="ty"><option value="">유형 전체</option><option value="xhr">XHR/Fetch</option><option value="doc">문서</option><option value="js">JS</option><option value="css">CSS</option><option value="img">이미지</option><option value="font">폰트</option><option value="other">기타</option></select>
+      <select class="inp sm" data-ref="me"><option value="">메서드 전체</option>${HTTP_METHODS.map(m => `<option>${m}</option>`).join('')}</select>
+      <label class="chk"><input type="checkbox" data-ref="mask" checked> 민감 헤더 가리기</label><span class="sp"></span><button class="btn sm ghost" data-ref="sample" type="button">예제</button></div>`);
+    const r = refs(bar);
+    const sum = h('<div class="stat-row" style="min-height:22px"></div>');
+    const main = h(`<div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:10px;flex:1;min-height:360px">
+      <div class="tbl-wrap" data-ref="tw" style="min-height:0"><div class="empty-state">HAR 파일을 열거나 끌어다 놓으세요</div></div>
+      <div class="card" data-ref="det" style="display:flex;flex-direction:column;min-height:0;overflow:hidden"><div class="empty-state">요청을 선택하면 상세가 표시됩니다</div></div></div>`);
+    Object.assign(r, refs(main));
+    if (matchMedia && matchMedia('(max-width: 960px)').matches) main.style.gridTemplateColumns = 'minmax(0,1fr)';
+    root.append(bar, sum, main);
+    function load(text, name) {
+      try { data = HarAna.parse(text); } catch (e) { toast(e.message, 'err', 4000); return false; }
+      selIdx = -1; apply(); renderDet();
+      toast(`${name ? name + ' · ' : ''}요청 ${data.entries.length}건을 불러왔습니다`, 'ok');
+      return true;
+    }
+    async function loadFile(f) { if (!f) return; if (f.size > 300 * 1048576 && !confirm(`${fmtBytes(f.size)} HAR 파일입니다. 메모리를 많이 사용합니다. 계속할까요?`)) return; load((await readFileText(f)).text, f.name); }
+    on(r.open, 'click', async () => loadFile(await pickFile('.har,.json')));
+    on(r.paste, 'click', () => { const body = h('<textarea class="inp" rows="14" placeholder="HAR JSON 붙여넣기"></textarea>'); const foot = h('<div class="row"></div>'); const m = openModal({ title: 'HAR 붙여넣기', body, foot, wide: true }); body.focus(); foot.append(btn('불러오기', () => { if (load(body.value)) m.close(); }, 'primary')); });
+    on(r.sample, 'click', () => load(HAR_SAMPLE, '예제'));
+    on(root, 'dragover', e => { if (Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault(); });
+    on(root, 'drop', e => { const f = e.dataTransfer.files[0]; if (!f) return; e.preventDefault(); loadFile(f); });
+    [r.q].forEach(x => on(x, 'input', debounce(apply, 200))); [r.st, r.ty, r.me].forEach(x => on(x, 'change', apply)); on(r.mask, 'change', renderDet);
+    function apply() {
+      if (!data) return;
+      const q = r.q.value.trim().toLowerCase(), st = r.st.value, ty = r.ty.value, me = r.me.value;
+      filtered = data.entries.filter(e => (!q || e.url.toLowerCase().includes(q)) && (!ty || e.type === ty) && (!me || e.method === me) &&
+        (!st || (st === 'e' ? (e.status >= 400 || e.status === 0) : st === '0' ? e.status === 0 : String(e.status)[0] === st)));
+      filtered.sort((a, b) => { const x = a[sortKey], y = b[sortKey]; return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * sortDir; });
+      renderSum(); renderTable();
+    }
+    function renderSum() {
+      const es = data.entries; const errs = es.filter(e => e.status >= 400 || e.status === 0);
+      const slow = es.slice().sort((a, b) => b.time - a.time)[0];
+      sum.innerHTML = `<span>요청 <b>${fmtNum(es.length)}</b>${filtered.length !== es.length ? ` (표시 ${fmtNum(filtered.length)})` : ''}</span><span>전송 <b>${fmtBytes(es.reduce((a, e) => a + e.size, 0))}</b></span><span>리소스 <b>${fmtBytes(es.reduce((a, e) => a + e.contentSize, 0))}</b></span><span>전체 구간 <b>${fmtNum(Math.round(data.span))}ms</b></span>${slow ? `<span>가장 느린 요청 <b>${fmtNum(Math.round(slow.time))}ms</b> <span class="faint">${esc(slow.path.slice(0, 50))}</span></span>` : ''}<span class="${errs.length ? 't-err' : ''}">오류 <b>${errs.length}</b></span>${data.creator ? `<span class="faint">${esc(data.creator)}</span>` : ''}`;
+    }
+    function renderTable() {
+      const cols = [['offset', '시작'], ['method', '메서드'], ['path', 'URL'], ['status', '상태'], ['type', '유형'], ['size', '크기'], ['time', '시간'], [null, '워터폴']];
+      const LIM = 1500; const rows = filtered.slice(0, LIM);
+      r.tw.innerHTML = `<table class="tbl hb-har"><thead><tr>${cols.map(([k, l]) => `<th${k ? ` data-k="${k}" style="cursor:pointer"` : ''}>${l}${k === sortKey ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead><tbody>${rows.map(e => `<tr class="hb-row${e.i === selIdx ? ' sel' : ''}" data-i="${e.i}"><td class="mono faint">${Math.round(e.offset)}ms</td><td class="mono"><b class="m-${esc(e.method)}">${esc(e.method)}</b></td><td class="mono u" title="${esc(e.url)}"><span class="faint">${esc(e.host)}</span>${esc(e.path)}</td><td><span class="badge ${statusClass(e.status)}">${e.status || '실패'}</span></td><td class="faint">${esc(e.type)}</td><td class="mono">${fmtBytes(e.size)}</td><td class="mono${e.time > 1000 ? ' t-err' : ''}">${fmtNum(Math.round(e.time))}ms</td><td class="w"><div class="hb-wf"><i class="${e.status >= 400 || !e.status ? 'e' : ''}" style="left:${(e.offset / data.span * 100).toFixed(2)}%;width:${Math.max(0.3, e.time / data.span * 100).toFixed(2)}%"></i></div></td></tr>`).join('')}</tbody></table>${filtered.length > LIM ? `<div class="faint" style="padding:6px">앞 ${LIM}건만 표시 — 필터를 사용하세요</div>` : ''}${!filtered.length ? '<div class="empty-state">일치하는 요청이 없습니다</div>' : ''}`;
+      $$('th[data-k]', r.tw).forEach(th => on(th, 'click', () => { const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; } apply(); }));
+      $$('tr[data-i]', r.tw).forEach(tr => on(tr, 'click', () => { selIdx = +tr.dataset.i; $$('tr.sel', r.tw).forEach(x => x.classList.remove('sel')); tr.classList.add('sel'); renderDet(); }));
+    }
+    let detTab = 'headers';
+    function renderDet() {
+      const e = data && data.entries[selIdx];
+      r.det.innerHTML = '';
+      if (!e) { r.det.appendChild(h('<div class="empty-state">요청을 선택하면 상세가 표시됩니다</div>')); return; }
+      const head = h(`<div class="pane-head" style="flex-wrap:wrap;gap:6px"><span class="badge ${statusClass(e.status)}">${e.status || '실패'} ${esc(e.statusText)}</span><b class="mono m-${esc(e.method)}">${esc(e.method)}</b><span class="mono" style="font-size:12px;word-break:break-all;flex:1;min-width:0"></span></div>`);
+      head.children[2].textContent = e.url;
+      const tabs = Tabs([{ id: 'headers', label: '헤더' }, { id: 'req', label: '쿼리 · 본문' }, { id: 'res', label: '응답' }, { id: 'timing', label: '타이밍' }], id => { detTab = id; paint(); });
+      const body = h('<div style="flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px"></div>');
+      const acts = h('<div class="row" style="padding:6px 8px;border-top:1px solid var(--border)"></div>');
+      const b = HarAna.body(e);
+      acts.append(btn('cURL 복사', () => copyText(HarAna.curl(e)), 'xs'), btn('HTTP 테스터로', () => { const q = HarAna.toReq(e); openTool('http'); toolInst('http')._load({ method: q.method, url: q.url, headers: q.headers.map(([k, v]) => ({ on: true, k, v })), bodyType: q.bodyType, body: q.bodyType === 'json' ? (() => { try { return JSONX.stringify(JSONX.parse(q.bodyText).node, { indent: 2 }); } catch (x) { return q.bodyText; } })() : q.bodyText, form: q.form }); toast('HTTP 테스터로 보냈습니다 (민감 헤더는 저장되지 않음)'); }, 'xs'),
+        btn('응답 → JSON 포매터', () => { if (!b.text) { toast('본문이 없습니다', 'warn'); return; } sendTo('json-format', 'input', b.text); }, 'xs' + (/^\s*[{[]/.test(b.text || '') ? '' : ' hidden')));
+      r.det.append(head, h('<div style="padding:0 8px"></div>'), body, acts);
+      r.det.children[1].appendChild(tabs.el);
+      const mask = (k, v) => (r.mask.checked && SENSITIVE_HDR.test(k) ? String(v).slice(0, 10) + '…(가림)' : v);
+      const tbl = (title, rows) => rows && rows.length ? `<div class="section-title">${title}</div><div class="tbl-wrap"><table class="tbl"><tbody>${rows.map(x => `<tr><td class="mono nowrap"><b>${esc(x.name)}</b></td><td class="mono">${esc(mask(x.name, x.value))}</td></tr>`).join('')}</tbody></table></div>` : '';
+      function paint() {
+        body.innerHTML = '';
+        const rq = e.raw.request || {}, rs = e.raw.response || {};
+        if (detTab === 'headers') { body.innerHTML = tbl('요청 헤더', rq.headers) + tbl('응답 헤더', rs.headers) + tbl('요청 쿠키', rq.cookies) || '<div class="empty-state">헤더 없음</div>'; const hb = btn('응답 헤더 → 헤더 · 캐시 분석', () => sendTo('headers', 'input', `HTTP/1.1 ${e.status} ${e.statusText}\n` + (rs.headers || []).map(x => `${x.name}: ${x.value}`).join('\n')), 'xs'); body.appendChild(hb); }
+        else if (detTab === 'req') {
+          body.innerHTML = tbl('쿼리 파라미터', rq.queryString) || '';
+          const pd = rq.postData;
+          if (pd) { body.insertAdjacentHTML('beforeend', `<div class="section-title">요청 본문 <span class="faint">${esc(pd.mimeType || '')}</span></div>`); const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all"></pre>'); const t = pd.text != null ? pd.text : (pd.params || []).map(p => `${p.name}=${p.value || ''}`).join('\n'); if (/json/.test(pd.mimeType || '')) { try { pre.innerHTML = HL.json(JSONX.stringify(JSONX.parse(t).node, { indent: 2 })); } catch (x) { pre.textContent = t; } } else pre.textContent = t; body.appendChild(pre); }
+          if (!body.children.length) body.innerHTML = '<div class="empty-state">쿼리·본문 없음</div>';
+        } else if (detTab === 'res') {
+          if (b.note) body.appendChild(h(`<div class="note" style="font-size:12px">${esc(b.note)}</div>`));
+          if (b.bytes && /^image\//.test(e.mime)) { const img = h('<img class="img-preview">'); img.src = URL.createObjectURL(new Blob([b.bytes], { type: e.mime })); body.appendChild(img); }
+          else if (b.text) { const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all"></pre>'); let t = b.text.length > 500000 ? b.text.slice(0, 500000) : b.text; if (/^\s*[{[]/.test(t)) { try { pre.innerHTML = HL.json(JSONX.stringify(JSONX.parse(t.trim()).node, { indent: 2 })); } catch (x) { pre.textContent = t; } } else if (/^\s*</.test(t) && t.length < 300000) pre.innerHTML = HL.xml(t); else pre.textContent = t; body.appendChild(pre); }
+          else if (!b.note) body.appendChild(h('<div class="empty-state">본문 없음</div>'));
+        } else {
+          const tm = e.timings; const names = [['blocked', '대기(blocked)'], ['dns', 'DNS 조회'], ['connect', '연결'], ['ssl', 'TLS'], ['send', '요청 전송'], ['wait', '서버 대기(TTFB)'], ['receive', '응답 수신']];
+          const tot = Math.max(1, e.time); const g = h('<div class="hb-tm"></div>');
+          names.forEach(([k, l]) => { const v = tm[k]; if (v == null || v < 0) return; g.append(h(`<span class="dim">${l}</span>`), (() => { const x = document.createElement('i'); x.style.width = Math.max(0.5, v / tot * 100) + '%'; return x; })(), h(`<span class="mono">${v.toFixed(1)}ms</span>`)); });
+          body.append(g, h(`<div class="dim" style="font-size:12px">전체 ${e.time.toFixed(1)}ms · 시작 ${new Date(e.start).toLocaleTimeString('ko-KR')} (+${Math.round(e.offset)}ms)${tm.wait > 1000 ? ' · <b class="t-err">서버 처리 시간(TTFB)이 1초를 넘습니다</b>' : ''}</div>`));
+        }
+      }
+      tabs.set(detTab);
+    }
+    return { run: () => r.open.click(), receive(slot, t) { load(t); }, loadFile };
+  },
+});
+
+/* =====================================================================
+ * WebSocket · SSE 테스터
+ * ===================================================================== */
+const WS_CLOSE = { 1000: '정상 종료', 1001: '상대가 떠남 (페이지 이동·서버 종료)', 1002: '프로토콜 오류', 1003: '지원하지 않는 데이터 형식', 1005: '상태 코드 없음', 1006: '비정상 종료 — 연결 실패·네트워크 끊김·핸드셰이크 거부(Origin 검사, 인증, 잘못된 경로) 등. 브라우저는 상세 원인을 알려주지 않습니다', 1007: '잘못된 데이터 (UTF-8 아님)', 1008: '정책 위반 (인증·권한)', 1009: '메시지가 너무 큼', 1010: '필요한 확장 협상 실패', 1011: '서버 내부 오류', 1012: '서버 재시작', 1013: '잠시 후 다시 시도', 1014: '게이트웨이 오류', 1015: 'TLS 핸드셰이크 실패 (인증서)' };
+function wsCloseText(code) { return WS_CLOSE[code] || (code >= 4000 && code <= 4999 ? '애플리케이션 정의 코드' : code >= 3000 && code <= 3999 ? '라이브러리·프레임워크 정의 코드' : '알 수 없는 코드'); }
+/** text/event-stream 파서 (청크 단위 입력) */
+function SseParser(onEvent) {
+  let buf = '', data = [], ev = '', id = null, retry = null;
+  function line(l) {
+    if (l === '') { if (data.length) onEvent({ event: ev || 'message', data: data.join('\n'), id, retry }); data = []; ev = ''; retry = null; return; }
+    if (l[0] === ':') { onEvent({ comment: l.slice(1).trim() }); return; }
+    const i = l.indexOf(':'); const f = i < 0 ? l : l.slice(0, i); const v = i < 0 ? '' : l.slice(i + 1).replace(/^ /, '');
+    if (f === 'data') data.push(v); else if (f === 'event') ev = v; else if (f === 'id') id = v; else if (f === 'retry') retry = v;
+  }
+  return {
+    push(chunk) {
+      buf += chunk;
+      for (;;) {
+        const m = /\r\n|\n|\r/.exec(buf);
+        if (!m) break;
+        if (m[0] === '\r' && m.index === buf.length - 1) break; // \r\n 이 청크 경계에서 나뉜 경우 대기
+        line(buf.slice(0, m.index)); buf = buf.slice(m.index + m[0].length);
+      }
+    },
+    end() { if (buf) { line(buf); buf = ''; } line(''); },
+  };
+}
+DU.SseParser = SseParser;
+
+defineTool({
+  id: 'ws', group: 'http', abbr: 'WS', name: 'WebSocket · SSE 테스터',
+  desc: 'WebSocket 연결 · 메시지 송수신 로그 · 종료 코드 설명 · Server-Sent Events 스트림 확인',
+  keywords: 'websocket ws wss sse server-sent events eventsource stream 웹소켓 실시간 소켓 푸시 이벤트 스트림',
+  inputs: { url: 'URL' }, fill: true,
+  help: `<b>WebSocket</b> — 브라우저 API 제약으로 <b>사용자 정의 헤더(Authorization 등)를 보낼 수 없습니다</b>. 토큰은 쿼리 파라미터(<code>?token={{token}}</code>)나 서브프로토콜로 전달해야 합니다. 서버가 Origin을 검사하면 file:// 페이지의 <code>Origin: null</code>은 거부될 수 있습니다 (종료 코드 1006).<br>
+    <b>SSE</b> — EventSource 모드는 헤더를 지정할 수 없고 <code>message</code> 외의 이벤트는 이름을 등록해야 받을 수 있습니다. <b>fetch 스트림</b> 모드는 헤더·POST 본문을 지정할 수 있고 모든 이벤트를 받지만 서버의 CORS 허용이 필요합니다.<br>
+    URL에 <code>{{변수}}</code>를 쓰면 HTTP 테스터의 활성 환경변수로 치환됩니다.`,
+  init(root) {
+    const tabs = Tabs([{ id: 'ws', label: 'WebSocket' }, { id: 'sse', label: 'SSE (Server-Sent Events)' }], id => { wsBox.classList.toggle('hidden', id !== 'ws'); sseBox.classList.toggle('hidden', id !== 'sse'); persistSet('ws:tab', id); });
+    /* ---- WebSocket ---- */
+    const wsBox = h(`<div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
+      <div class="http-line"><input class="inp url" data-ref="url" placeholder="ws://localhost:8080/ws/chat?token={{token}}" spellcheck="false"><input class="inp sm mono" data-ref="proto" placeholder="서브프로토콜 (쉼표)" style="width:170px"><button class="btn primary" data-ref="conn" type="button" style="height:34px;min-width:84px">연결</button><span class="badge" data-ref="st">끊김</span></div>
+      <div class="toolbar"><label class="chk"><input type="checkbox" data-ref="auto"> 자동 재연결</label><label class="chk"><input type="checkbox" data-ref="ka"> 유지 메시지</label><input class="inp sm mono" data-ref="kaMsg" style="width:150px" placeholder='{"type":"ping"}'><span class="lbl">간격(초)</span><input class="inp sm" type="number" data-ref="kaSec" min="5" max="3600" style="width:64px"><span class="sp"></span><span class="faint" style="font-size:12px">사용자 정의 헤더는 보낼 수 없습니다 (브라우저 제약)</span></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;flex:1;min-height:300px" data-ref="grid">
+        <div style="display:flex;flex-direction:column;gap:6px;min-height:0"><div data-ref="msgHost" style="flex:1;display:flex;min-height:160px"></div>
+          <div class="row"><button class="btn primary" data-ref="send" type="button">보내기 (Ctrl+Enter)</button><button class="btn sm" data-ref="snip" type="button">스니펫 ▾</button><span class="sp"></span><span class="dim" data-ref="cnt" style="font-size:12px"></span></div></div>
+        <div data-ref="logHost" style="display:flex;min-height:0"></div></div></div>`);
+    const w = refs(wsBox);
+    bindPersist(w.url, 'ws:url'); bindPersist(w.proto, 'ws:proto'); bindPersist(w.auto, 'ws:auto'); bindPersist(w.ka, 'ws:ka'); bindPersist(w.kaMsg, 'ws:kamsg'); bindPersist(w.kaSec, 'ws:kasec');
+    if (!w.kaSec.value) w.kaSec.value = 30;
+    const msg = Pane({ title: '보낼 메시지', persist: 'wsmsg', placeholder: '{"type":"subscribe","channel":"orders"}', actions: ['open', 'wrap', 'clear'] });
+    w.msgHost.appendChild(msg.el); msg.el.style.flex = '1';
+    const wlog = hbLogView(); w.logHost.appendChild(wlog.el);
+    if (matchMedia && matchMedia('(max-width: 960px)').matches) w.grid.style.gridTemplateColumns = 'minmax(0,1fr)';
+    let ws = null, manual = false, retry = 0, reTimer = null, kaTimer = null, nIn = 0, nOut = 0;
+    const setSt = (t, cls) => { w.st.textContent = t; w.st.className = 'badge ' + (cls || ''); };
+    const updCnt = () => { w.cnt.textContent = `보냄 ${nOut} · 받음 ${nIn}`; };
+    function connect() {
+      if (ws && ws.readyState <= 1) { manual = true; ws.close(1000, 'user'); return; }
+      const un = new Set(); const url = HttpUtil.substitute(w.url.value.trim(), HttpEngine.vars(), un);
+      if (!/^wss?:\/\//i.test(url)) { toast('ws:// 또는 wss:// 주소를 입력하세요', 'warn'); return; }
+      if (un.size) wlog.add('sys', `정의되지 않은 변수: ${Array.from(un).map(v => '{{' + v + '}}').join(', ')}`, { err: true });
+      const protos = w.proto.value.split(',').map(s => s.trim()).filter(Boolean);
+      manual = false; clearTimeout(reTimer);
+      try { ws = protos.length ? new WebSocket(url, protos) : new WebSocket(url); } catch (e) { wlog.add('sys', '연결 실패: ' + e.message, { err: true }); return; }
+      ws.binaryType = 'arraybuffer';
+      setSt('연결 중…', 'info'); w.conn.textContent = '끊기'; w.conn.classList.remove('primary');
+      wlog.add('sys', `연결 시도: ${url}${protos.length ? ` (서브프로토콜 ${protos.join(', ')})` : ''}`);
+      const me = ws;
+      ws.onopen = () => { if (me !== ws) return; retry = 0; setSt('연결됨', 'ok'); wlog.add('sys', `연결됨 · 프로토콜 ${ws.protocol || '-'} · 확장 ${ws.extensions || '-'}`); startKa(); };
+      ws.onmessage = e => { nIn++; updCnt(); wlog.add('in', typeof e.data === 'string' ? e.data : new Uint8Array(e.data)); };
+      ws.onerror = () => { wlog.add('sys', '오류 발생 — 브라우저는 상세 원인을 제공하지 않습니다 (이어지는 종료 코드 참고)', { err: true }); };
+      ws.onclose = e => {
+        if (me !== ws) return;
+        stopKa(); setSt(`끊김 (${e.code})`, e.code === 1000 ? '' : 'err'); w.conn.textContent = '연결'; w.conn.classList.add('primary');
+        wlog.add('sys', `연결 종료 · 코드 ${e.code} — ${wsCloseText(e.code)}${e.reason ? ` · 사유: ${e.reason}` : ''}${e.wasClean ? '' : ' · 비정상 종료'}`, { err: e.code !== 1000 && e.code !== 1005 });
+        if (!manual && w.auto.checked) { const d = Math.min(30000, 1000 * Math.pow(2, retry++)); wlog.add('sys', `${(d / 1000).toFixed(0)}초 후 재연결합니다`); reTimer = setTimeout(connect, d); }
+      };
+    }
+    function startKa() { stopKa(); if (!w.ka.checked) return; const sec = clamp(+w.kaSec.value || 30, 5, 3600); kaTimer = setInterval(() => { if (ws && ws.readyState === 1 && w.kaMsg.value) { ws.send(w.kaMsg.value); nOut++; updCnt(); wlog.add('out', w.kaMsg.value, { ev: '유지' }); } }, sec * 1000); }
+    function stopKa() { clearInterval(kaTimer); kaTimer = null; }
+    on(w.ka, 'change', () => { if (ws && ws.readyState === 1) startKa(); });
+    function send() {
+      if (!ws || ws.readyState !== 1) { toast('먼저 연결하세요', 'warn'); return; }
+      const t = msg.get(); if (!t) return;
+      if (/^\s*[{[]/.test(t)) { try { JSONX.parse(t); } catch (e) { if (!confirm(`JSON 형식 오류: ${e.message}\n그대로 보낼까요?`)) return; } }
+      const sent = HttpUtil.substitute(t, HttpEngine.vars(), null);
+      ws.send(sent); nOut++; updCnt(); wlog.add('out', sent);
+    }
+    on(w.conn, 'click', connect); on(w.send, 'click', send);
+    on(msg.ta, 'keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopPropagation(); send(); } });
+    on(w.snip, 'click', ev => {
+      const list = store.get('ws:snippets', []);
+      openMenu(ev.currentTarget, list.map((s, i) => ({ label: '삽입: ' + s.name, onClick: () => msg.set(s.text) })).concat(list.length ? [{ sep: true }] : [],
+        [{ label: '현재 메시지를 스니펫으로 저장', onClick: () => { const name = prompt('스니펫 이름', preview(msg.get())); if (!name) return; list.unshift({ name, text: msg.get() }); store.set('ws:snippets', list.slice(0, 50)); toast('저장했습니다', 'ok'); } }],
+        list.length ? [{ label: '스니펫 모두 삭제', onClick: () => { if (confirm('스니펫을 모두 삭제할까요?')) store.set('ws:snippets', []); } }] : []));
+    });
+    const preview = s => (s || '').replace(/\s+/g, ' ').slice(0, 30);
+    /* ---- SSE ---- */
+    const sseBox = h(`<div class="hidden" style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
+      <div class="toolbar"><select class="inp sm" data-ref="mode"><option value="es">EventSource</option><option value="fetch">fetch 스트림 (헤더·POST 가능)</option></select><select class="inp sm" data-ref="method"><option>GET</option><option>POST</option></select><label class="chk" data-ref="credL"><input type="checkbox" data-ref="cred"> withCredentials (쿠키 포함)</label></div>
+      <div class="http-line"><input class="inp url" data-ref="url" placeholder="http://localhost:8080/api/events?topic=orders" spellcheck="false"><button class="btn primary" data-ref="conn" type="button" style="height:34px;min-width:84px">연결</button><span class="badge" data-ref="st">끊김</span></div>
+      <div class="grid2" data-ref="opts"><label class="field" data-ref="evL"><span>추가로 받을 이벤트 이름 (쉼표, EventSource 전용)</span><input class="inp sm mono" data-ref="events" placeholder="order-created, heartbeat"></label>
+        <label class="field" data-ref="hdL"><span>요청 헤더 (한 줄에 "이름: 값", fetch 전용)</span><textarea class="inp" rows="2" data-ref="headers" placeholder="Authorization: Bearer {{token}}"></textarea></label>
+        <label class="field" data-ref="bdL"><span>POST 본문 (fetch 전용)</span><textarea class="inp" rows="2" data-ref="body"></textarea></label></div>
+      <div data-ref="logHost" style="display:flex;flex:1;min-height:260px"></div></div>`);
+    const se = refs(sseBox);
+    ['url', 'events', 'headers', 'body', 'mode', 'method', 'cred'].forEach(k => bindPersist(se[k], 'sse:' + k));
+    const slog = hbLogView(); se.logHost.appendChild(slog.el);
+    let es = null, sCtrl = null;
+    function sseUi() { const f = se.mode.value === 'fetch'; se.method.classList.toggle('hidden', !f); se.credL.classList.toggle('hidden', f); se.evL.classList.toggle('hidden', f); se.hdL.classList.toggle('hidden', !f); se.bdL.classList.toggle('hidden', !f || se.method.value !== 'POST'); }
+    on(se.mode, 'change', sseUi); on(se.method, 'change', sseUi); sseUi();
+    const sSt = (t, cls) => { se.st.textContent = t; se.st.className = 'badge ' + (cls || ''); };
+    function sseStop(note) { if (es) { es.close(); es = null; } if (sCtrl) { sCtrl.abort(); sCtrl = null; } sSt('끊김'); se.conn.textContent = '연결'; se.conn.classList.add('primary'); if (note) slog.add('sys', note); }
+    async function sseConnect() {
+      if (es || sCtrl) { sseStop('연결을 끊었습니다'); return; }
+      const vars = HttpEngine.vars(); const un = new Set();
+      let url = HttpUtil.substitute(se.url.value.trim(), vars, un);
+      if (!url) { toast('URL을 입력하세요', 'warn'); return; }
+      if (!/^[a-z]+:\/\//i.test(url)) url = 'http://' + url;
+      if (un.size) slog.add('sys', `정의되지 않은 변수: ${Array.from(un).map(v => '{{' + v + '}}').join(', ')}`, { err: true });
+      se.conn.textContent = '끊기'; se.conn.classList.remove('primary'); sSt('연결 중…', 'info');
+      if (se.mode.value === 'es') {
+        try { es = new EventSource(url, { withCredentials: se.cred.checked }); } catch (e) { slog.add('sys', '연결 실패: ' + e.message, { err: true }); sseStop(); return; }
+        slog.add('sys', `EventSource 연결: ${url}`);
+        es.onopen = () => sSt('연결됨', 'ok');
+        es.onmessage = e => slog.add('in', e.data, { ev: 'message', id: e.lastEventId });
+        se.events.value.split(',').map(s => s.trim()).filter(Boolean).forEach(n => es.addEventListener(n, e => slog.add('in', e.data, { ev: n, id: e.lastEventId })));
+        es.onerror = () => { if (!es) return; if (es.readyState === 2) { slog.add('sys', '연결 실패 — CORS 미허용, 잘못된 Content-Type(text/event-stream 아님), 서버 오류일 수 있습니다', { err: true }); sseStop(); } else { sSt('재연결 중…', 'warn'); slog.add('sys', '연결이 끊겨 브라우저가 자동 재연결합니다', { err: true }); } };
+        return;
+      }
+      sCtrl = new AbortController(); const ctrl = sCtrl;
+      const headers = new Headers({ Accept: 'text/event-stream' });
+      HttpEngine.parseHeaderLines(HttpUtil.substitute(se.headers.value, vars, null)).forEach(([k, v]) => { try { headers.set(k, v); } catch (e) { slog.add('sys', `헤더 ${k} 설정 불가`, { err: true }); } });
+      slog.add('sys', `fetch 스트림 연결: ${se.method.value} ${url}`);
+      try {
+        const res = await fetch(url, { method: se.method.value, headers, body: se.method.value === 'POST' ? HttpUtil.substitute(se.body.value, vars, null) : undefined, signal: ctrl.signal, cache: 'no-store' });
+        const ct = res.headers.get('content-type') || '';
+        slog.add('sys', `응답 ${res.status} ${res.statusText} · ${ct || 'Content-Type 없음'}`, { err: !res.ok });
+        if (!/event-stream/.test(ct)) slog.add('sys', 'Content-Type이 text/event-stream이 아닙니다 — 서버 설정을 확인하세요', { err: true });
+        if (!res.body) throw new Error('스트림을 읽을 수 없습니다');
+        sSt('연결됨', 'ok');
+        const parser = SseParser(ev => { if (ev.comment !== undefined) slog.add('sys', `: ${ev.comment}`); else slog.add('in', ev.data, { ev: ev.event, id: ev.id }); });
+        const reader = res.body.getReader(); const dec = new TextDecoder();
+        for (;;) { const { done, value } = await reader.read(); if (done) break; parser.push(dec.decode(value, { stream: true })); }
+        parser.end(); if (sCtrl === ctrl) sseStop('서버가 스트림을 종료했습니다');
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        slog.add('sys', e.name === 'TypeError' ? 'Failed to fetch — CORS 미허용 또는 연결 실패 (CORS 진단 도구 참고)' : e.message, { err: true });
+        if (sCtrl === ctrl) sseStop();
+      }
+    }
+    on(se.conn, 'click', sseConnect);
+    root.append(tabs.el, wsBox, sseBox);
+    tabs.set(persistGet('ws:tab', 'ws'));
+    return {
+      run: () => (tabs.cur === 'sse' ? sseConnect() : connect()),
+      receive(slot, t) { const u = t.trim(); const el = /^wss?:/i.test(u) ? w.url : se.url; tabs.set(el === w.url ? 'ws' : 'sse'); el.value = u; el.dispatchEvent(new Event('input')); },
+      onClose() { manual = true; if (ws) ws.close(1000); stopKa(); clearTimeout(reTimer); sseStop(); },
+      _wsLog: () => wlog.items(), _sseLog: () => slog.items(),
+    };
+  },
+});
+
+/* =====================================================================
+ * CORS 진단
+ * ===================================================================== */
+const CorsDiag = (() => {
+  const SAFE_METHODS = ['GET', 'HEAD', 'POST'];
+  const SAFE_CT = ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain'];
+  const SAFE_RES = ['cache-control', 'content-language', 'content-length', 'content-type', 'expires', 'last-modified', 'pragma'];
+  const BROWSER_SET = /^(accept-charset|accept-encoding|access-control-request-headers|access-control-request-method|connection|content-length|cookie|cookie2|date|dnt|expect|host|keep-alive|origin|referer|te|trailer|transfer-encoding|upgrade|via|user-agent)$|^(proxy-|sec-)/i;
+  function isPrivateHost(host) { return /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0|\[::1\]|\[f[cd]|169\.254\.)/i.test(host) || /\.(local|internal|intranet|corp|lan)$/i.test(host); }
+  function parseHeaders(t) {
+    const lines = String(t || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    let status = null; const hs = [];
+    lines.forEach((l, i) => { const m = /^HTTP\/[\d.]+\s+(\d{3})/.exec(l); if (i === 0 && m) { status = +m[1]; return; } const k = l.indexOf(':'); if (k > 0) hs.push([l.slice(0, k).trim(), l.slice(k + 1).trim()]); else if (/^\d{3}$/.test(l)) status = +l; });
+    return { status, hs, given: lines.length > 0 };
+  }
+  const hv = (hs, n) => { const x = hs.filter(([k]) => k.toLowerCase() === n); return x.length ? x.map(y => y[1]).join(', ') : null; };
+  const list = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
+  /** 콘솔 오류 메시지 해석 */
+  function parseError(text) {
+    const t = String(text || '');
+    const out = { url: null, origin: null, kinds: [] };
+    let m = /Access to (?:fetch|XMLHttpRequest|resource|script|font)(?: at)? '([^']+)'(?: \([^)]*\))? from origin '([^']*)'/i.exec(t);
+    if (m) { out.url = m[1]; out.origin = m[2]; }
+    m = /(?:remote resource at|요청한 리소스) (\S+?)\.? \(Reason/i.exec(t); if (m && !out.url) out.url = m[1];
+    const K = [
+      [/No 'Access-Control-Allow-Origin' header|CORS header .?Access-Control-Allow-Origin.? missing/i, 'acao-missing'],
+      [/does not have HTTP ok status|CORS preflight response did not succeed|preflight.*(?:403|401|404|405)/i, 'preflight-status'],
+      [/must not be the wildcard '\*' when the request's credentials mode is 'include'|Credential is not supported if the CORS header .?Access-Control-Allow-Origin.? is .?\*/i, 'wildcard-credentials'],
+      [/Request header field (\S+) is not allowed by Access-Control-Allow-Headers|missing token .?([\w-]+).? in CORS header .?Access-Control-Allow-Headers/i, 'header-not-allowed'],
+      [/Method (\S+) is not allowed by Access-Control-Allow-Methods|Did not find method in CORS header/i, 'method-not-allowed'],
+      [/Access-Control-Allow-Credentials.*(?:which must be 'true'|expected .?true)/i, 'credentials-missing'],
+      [/that is not equal to the supplied origin|does not match/i, 'origin-mismatch'],
+      [/contains multiple values/i, 'multiple-origins'],
+      [/Redirect is not allowed for a preflight request/i, 'preflight-redirect'],
+      [/private network|address space|Private-Network/i, 'pna'],
+      [/CORS request did not succeed|net::ERR_/i, 'network'],
+    ];
+    K.forEach(([re, k]) => { const mm = re.exec(t); if (mm) out.kinds.push({ k, arg: mm[1] || mm[2] || null }); });
+    return out;
+  }
+  const KIND_DOC = {
+    'acao-missing': ['서버 응답에 Access-Control-Allow-Origin 헤더가 없습니다', 'CORS 설정이 안 되어 있거나, 오류 응답(401/403/500)·Spring Security 필터처럼 CORS 처리 전에 응답이 끝나는 경로입니다.'],
+    'preflight-status': ['사전 요청(OPTIONS)이 2xx로 응답하지 않았습니다', 'Spring Security · 인증 필터가 OPTIONS를 막거나(401/403), OPTIONS 매핑이 없어 404/405가 납니다. OPTIONS는 인증 없이 통과시켜야 합니다.'],
+    'wildcard-credentials': ['쿠키·인증 포함 요청에는 Allow-Origin: * 를 쓸 수 없습니다', '정확한 Origin을 돌려주고 Access-Control-Allow-Credentials: true를 함께 보내야 합니다.'],
+    'header-not-allowed': ['요청 헤더가 Access-Control-Allow-Headers에 없습니다', 'Authorization, Content-Type(application/json), 사용자 정의 X- 헤더를 허용 목록에 추가하세요. * 는 Authorization을 포함하지 않습니다.'],
+    'method-not-allowed': ['메서드가 Access-Control-Allow-Methods에 없습니다', 'PUT/PATCH/DELETE 등을 허용 목록에 추가하세요. 메서드 이름은 대소문자를 구분합니다 (patch ≠ PATCH).'],
+    'credentials-missing': ['Access-Control-Allow-Credentials: true 가 없습니다', 'credentials: include(쿠키 포함) 요청이면 서버가 이 헤더를 보내야 응답을 읽을 수 있습니다.'],
+    'origin-mismatch': ['Allow-Origin 값이 요청 Origin과 다릅니다', '서버가 고정된 다른 Origin을 돌려줍니다. 요청 Origin을 허용 목록에 넣으세요 (file://은 "null").'],
+    'multiple-origins': ['Allow-Origin에 값이 여러 개입니다', '헤더는 하나의 Origin만 가질 수 있습니다. 필터·프록시(nginx)와 애플리케이션이 중복으로 추가하지 않는지 확인하세요.'],
+    'preflight-redirect': ['사전 요청이 리다이렉트되었습니다', 'http→https, 슬래시 추가, 로그인 페이지 리다이렉트 등을 OPTIONS에서 하지 않도록 하세요. 최종 URL로 직접 요청하세요.'],
+    'pna': ['사설망 접근(Private Network Access) 차단', '공개 웹 페이지에서 사설 IP/localhost로 요청하면 Chrome이 Access-Control-Allow-Private-Network: true 를 요구합니다.'],
+    'network': ['네트워크 수준 실패', '서버 미실행, 포트·방화벽, 인증서 오류일 수 있습니다. CORS 이전 단계의 문제입니다.'],
+  };
+  function evaluate(o) {
+    const steps = []; const add = (lv, msg, detail) => steps.push({ lv, msg, detail });
+    const origin = (o.origin || 'null').trim() || 'null';
+    let target; try { target = new URL(o.url); } catch (e) { return { error: 'URL 형식이 올바르지 않습니다' }; }
+    const method = (o.method || 'GET').toUpperCase();
+    const cred = o.credentials || 'omit';
+    const reqH = (o.headers || []).map(x => (Array.isArray(x) ? x : [x, ''])).filter(([k]) => k && k.trim()).map(([k, v]) => [k.trim(), String(v || '').trim()]);
+    if (o.contentType && !reqH.some(([k]) => k.toLowerCase() === 'content-type')) reqH.push(['Content-Type', o.contentType]);
+    const same = origin !== 'null' && origin.replace(/\/$/, '') === target.origin;
+    const res = { origin, target: target.origin, method, cred, same, steps, preflight: { needed: false, reasons: [] }, pna: false, required: { preflight: [], actual: [] }, verdict: null, ignored: [], nonSafe: [] };
+    if (same) { add('ok', `같은 출처(${origin})의 요청이라 CORS가 적용되지 않습니다.`); res.verdict = { ok: true, msg: 'CORS 문제가 아닙니다 (같은 출처)' }; return res; }
+    add('info', `교차 출처 요청: 페이지 ${origin === 'null' ? 'null (file:// 로 연 HTML, sandbox iframe 등)' : origin} → 서버 ${target.origin}`);
+    // 단순 요청 판정
+    reqH.forEach(([k, v]) => {
+      const lk = k.toLowerCase();
+      if (BROWSER_SET.test(lk)) { res.ignored.push(k); return; }
+      if (lk === 'accept' || lk === 'accept-language' || lk === 'content-language') return;
+      if (lk === 'content-type') { const mt = v.split(';')[0].trim().toLowerCase(); if (SAFE_CT.includes(mt)) return; res.nonSafe.push(k); res.preflight.reasons.push(`Content-Type: ${mt || '(빈 값)'} 은 단순 요청 형식이 아닙니다 (form/multipart/text/plain만 단순)`); return; }
+      if (lk === 'range' && /^bytes=\d+-\d*$/.test(v)) return;
+      res.nonSafe.push(k); res.preflight.reasons.push(`사용자 정의/비표준 헤더 ${k}`);
+    });
+    if (!SAFE_METHODS.includes(method)) res.preflight.reasons.unshift(`메서드 ${method}는 단순 메서드(GET/HEAD/POST)가 아닙니다`);
+    res.preflight.needed = res.preflight.reasons.length > 0;
+    if (res.ignored.length) add('warn', `브라우저가 직접 설정하는 헤더는 무시됩니다: ${res.ignored.join(', ')} (필요하면 로컬 프록시 사용)`);
+    if (res.preflight.needed) add('info', `사전 요청(OPTIONS preflight)이 먼저 전송됩니다 — 이유: ${res.preflight.reasons.join(' · ')}`);
+    else add('ok', '단순 요청(simple request)입니다 — 사전 요청 없이 바로 전송됩니다.');
+    // 사설망 접근
+    const originHost = origin === 'null' ? null : (() => { try { return new URL(origin).hostname; } catch (e) { return null; } })();
+    if (isPrivateHost(target.hostname) && originHost && !isPrivateHost(originHost)) {
+      res.pna = true; add('warn', `공개 출처에서 사설망(${target.hostname})으로 요청 — Chrome의 Private Network Access 규칙에 따라 사전 요청에 Access-Control-Allow-Private-Network: true 가 필요합니다${/^http:/.test(origin) ? ' (HTTP 페이지에서는 차단될 수 있음)' : ''}.`);
+    }
+    if (cred === 'include') add('info', '쿠키·인증 포함(credentials: include) 요청 — Allow-Origin에 * 를 쓸 수 없고 Allow-Credentials: true 가 필요합니다. 쿠키는 SameSite=None; Secure 여야 다른 사이트로 전송됩니다.');
+    // 필요한 헤더
+    const acao = cred === 'include' || origin === 'null' ? origin : `${origin} 또는 *`;
+    if (res.preflight.needed) {
+      res.required.preflight.push(['(상태 코드)', '200 또는 204 — 인증 없이 응답']);
+      res.required.preflight.push(['Access-Control-Allow-Origin', acao]);
+      if (cred === 'include') res.required.preflight.push(['Access-Control-Allow-Credentials', 'true']);
+      if (!SAFE_METHODS.includes(method)) res.required.preflight.push(['Access-Control-Allow-Methods', method]);
+      if (res.nonSafe.length) res.required.preflight.push(['Access-Control-Allow-Headers', res.nonSafe.join(', ')]);
+      res.required.preflight.push(['Access-Control-Max-Age', '600 (선택 — 사전 요청 캐시)']);
+      if (res.pna) res.required.preflight.push(['Access-Control-Allow-Private-Network', 'true']);
+    }
+    res.required.actual.push(['Access-Control-Allow-Origin', acao]);
+    if (cred === 'include') res.required.actual.push(['Access-Control-Allow-Credentials', 'true']);
+    res.required.actual.push(['Access-Control-Expose-Headers', '스크립트에서 읽을 응답 헤더 (선택)']);
+    res.required.actual.push(['Vary', 'Origin (Origin별로 값을 돌려줄 때)']);
+    // 응답 검사
+    let fail = false;
+    const checkAcao = (hs, where) => {
+      const v = hv(hs, 'access-control-allow-origin');
+      if (v == null) { fail = true; add('err', `${where}: Access-Control-Allow-Origin 헤더가 없습니다 → 브라우저가 응답을 차단합니다`); return; }
+      if (v.includes(',')) { fail = true; add('err', `${where}: Access-Control-Allow-Origin에 값이 여러 개입니다 (${v}) — 하나만 허용됩니다`); return; }
+      if (v === '*') { if (cred === 'include') { fail = true; add('err', `${where}: credentials: include 요청에 Allow-Origin: * 는 허용되지 않습니다 → 정확한 Origin(${origin})을 돌려주세요`); } else add('ok', `${where}: Allow-Origin: * — 허용`); }
+      else if (v !== origin) { fail = true; add('err', `${where}: Allow-Origin(${v})이 요청 Origin(${origin})과 다릅니다`); }
+      else { add('ok', `${where}: Allow-Origin이 요청 Origin과 일치합니다`); if (origin === 'null') add('warn', `${where}: Allow-Origin: null 허용은 다른 사이트의 sandbox iframe도 null Origin을 쓰므로 운영 환경에서는 위험합니다`); }
+      if (cred === 'include') { const c = hv(hs, 'access-control-allow-credentials'); if (c !== 'true') { fail = true; add('err', `${where}: Access-Control-Allow-Credentials: true 가 없습니다 (현재: ${c == null ? '없음' : c})`); } else add('ok', `${where}: Allow-Credentials: true`); }
+    };
+    const pf = parseHeaders(o.preflight), ac = parseHeaders(o.actual);
+    if (res.preflight.needed && pf.given) {
+      if (pf.status != null) { if (pf.status >= 200 && pf.status < 300) add('ok', `사전 요청 상태 ${pf.status} — 정상`); else { fail = true; add('err', `사전 요청 상태 ${pf.status} — 2xx가 아니면 실패합니다 (${pf.status === 401 || pf.status === 403 ? '인증 필터가 OPTIONS를 막고 있음' : pf.status === 404 || pf.status === 405 ? 'OPTIONS 처리 경로 없음' : pf.status >= 300 && pf.status < 400 ? '사전 요청 리다이렉트 불가' : '서버 오류'})`); } }
+      checkAcao(pf.hs, '사전 요청');
+      if (!SAFE_METHODS.includes(method)) {
+        const am = hv(pf.hs, 'access-control-allow-methods'); const ms = list(am);
+        if (am == null) { fail = true; add('err', `사전 요청: Access-Control-Allow-Methods가 없어 ${method}가 거부됩니다`); }
+        else if (ms.includes(method) || (ms.includes('*') && cred !== 'include')) add('ok', `사전 요청: 메서드 ${method} 허용`);
+        else { fail = true; add('err', `사전 요청: 메서드 ${method}가 허용 목록(${am})에 없습니다${ms.some(x => x.toUpperCase() === method) ? ' — 대소문자가 다릅니다 (메서드는 대소문자 구분)' : ''}${ms.includes('*') ? ' — credentials 요청에서 * 는 와일드카드로 동작하지 않습니다' : ''}`); }
+      }
+      if (res.nonSafe.length) {
+        const ah = hv(pf.hs, 'access-control-allow-headers'); const ls = list(ah).map(x => x.toLowerCase());
+        res.nonSafe.forEach(k => {
+          const lk = k.toLowerCase();
+          if (ls.includes(lk)) add('ok', `사전 요청: 헤더 ${k} 허용`);
+          else if (ls.includes('*') && cred !== 'include' && lk !== 'authorization') add('ok', `사전 요청: 헤더 ${k} 허용 (*)`);
+          else if (ls.includes('*') && cred !== 'include') add('warn', '사전 요청: Allow-Headers: * 는 표준(Fetch)상 Authorization을 포함하지 않습니다 — Firefox·Safari는 차단하고 Chrome·Edge는 현재 허용합니다. Authorization을 목록에 명시하세요.');
+          else { fail = true; add('err', `사전 요청: 헤더 ${k}가 Access-Control-Allow-Headers(${ah == null ? '없음' : ah})에 없습니다${ls.includes('*') ? ' — credentials 요청에서 * 는 와일드카드가 아닙니다' : ''}`); }
+        });
+      }
+      const ma = hv(pf.hs, 'access-control-max-age'); add('info', ma ? `사전 요청 결과를 ${ma}초 캐시합니다 (Chrome 최대 7200초)` : 'Access-Control-Max-Age가 없어 매 요청마다 사전 요청이 갈 수 있습니다 (기본 5초)');
+      if (res.pna) { const p = hv(pf.hs, 'access-control-allow-private-network'); if (p === 'true') add('ok', '사전 요청: Allow-Private-Network: true'); else { fail = true; add('err', '사전 요청: Access-Control-Allow-Private-Network: true 가 없습니다'); } }
+    } else if (res.preflight.needed) add('info', '사전 요청 응답 헤더를 붙여넣으면 서버 설정을 자동 검사합니다 (개발자 도구 Network에서 OPTIONS 요청 → Response Headers).');
+    if (ac.given) {
+      if (ac.status != null) add('info', `실제 응답 상태 ${ac.status}${ac.status >= 400 ? ' — 오류 응답에도 CORS 헤더가 있어야 브라우저가 내용을 보여줍니다' : ''}`);
+      checkAcao(ac.hs, '실제 응답');
+      const ex = hv(ac.hs, 'access-control-expose-headers'); const exL = list(ex).map(x => x.toLowerCase());
+      const readable = ac.hs.map(([k]) => k.toLowerCase()).filter((k, i, a) => a.indexOf(k) === i).filter(k => SAFE_RES.includes(k) || exL.includes(k) || (exL.includes('*') && cred !== 'include'));
+      const hidden = ac.hs.map(([k]) => k.toLowerCase()).filter((k, i, a) => a.indexOf(k) === i && !readable.includes(k) && !/^access-control-|^set-cookie/.test(k));
+      add('info', `스크립트에서 읽을 수 있는 응답 헤더: ${readable.join(', ') || '(기본 헤더만)'}${hidden.length ? ` · 숨겨짐: ${hidden.join(', ')} (Access-Control-Expose-Headers에 추가)` : ''}`);
+      const acaoV = hv(ac.hs, 'access-control-allow-origin');
+      if (acaoV && acaoV !== '*' && !/origin/i.test(hv(ac.hs, 'vary') || '')) add('warn', '특정 Origin을 돌려주는데 Vary: Origin 이 없습니다 — 프록시·브라우저 캐시가 다른 Origin에 잘못된 값을 줄 수 있습니다');
+    } else add('info', '실제 응답 헤더를 붙여넣으면 Allow-Origin·노출 헤더도 검사합니다.');
+    // 콘솔 오류
+    if (o.error) {
+      const pe = parseError(o.error);
+      pe.kinds.forEach(({ k, arg }) => { const d = KIND_DOC[k]; if (d) add('err', `콘솔 오류: ${d[0]}${arg ? ` (${arg})` : ''}`, d[1]); });
+      if (!pe.kinds.length) add('info', '콘솔 메시지에서 알려진 CORS 오류 유형을 찾지 못했습니다.');
+      if (/preflight/i.test(o.error) && !res.preflight.needed) add('info', '콘솔 메시지상 사전 요청(preflight)이 있었습니다 — 실제로 보낸 헤더(Authorization, Content-Type: application/json 등)와 메서드를 입력하면 필요한 서버 설정을 정확히 계산합니다.');
+      if (pe.kinds.length) fail = true;
+    }
+    const checked = (res.preflight.needed && pf.given) || ac.given || o.error;
+    res.verdict = !checked ? { ok: null, msg: '요청 조건 분석 완료 — 서버 응답 헤더나 콘솔 오류를 붙여넣으면 통과 여부를 판정합니다' } : fail ? { ok: false, msg: '브라우저가 이 요청(또는 응답 읽기)을 차단합니다' } : { ok: true, msg: '붙여넣은 헤더 기준으로 CORS 검사를 통과합니다' };
+    return res;
+  }
+  function fixes(o, res) {
+    const origin = res.origin, ms = Array.from(new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].concat(res.method))), hs = Array.from(new Set(['Content-Type', 'Authorization'].concat(res.nonSafe)));
+    const cred = res.cred === 'include';
+    const oJava = origin === 'null' ? (cred ? '"null"' : '"*"') : `"${origin}"`;
+    const q = a => a.map(x => `"${x}"`).join(', ');
+    return [
+      ['spring', 'Spring MVC', `@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns(${oJava})${origin === 'null' ? '   // file:// 페이지 (개발용)' : ''}
+                .allowedMethods(${q(ms)})
+                .allowedHeaders(${q(hs)})
+                .exposedHeaders("Content-Disposition")
+                .allowCredentials(${cred})
+                .maxAge(600);
+    }
+}`],
+      ['security', 'Spring Security', `@Bean
+SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.cors(Customizer.withDefaults())   // ← 없으면 OPTIONS가 401/403
+        .authorizeHttpRequests(a -> a
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .anyRequest().authenticated());
+    return http.build();
+}
+
+@Bean
+CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration c = new CorsConfiguration();
+    c.setAllowedOriginPatterns(List.of(${oJava}));
+    c.setAllowedMethods(List.of(${q(ms)}));
+    c.setAllowedHeaders(List.of(${q(hs)}));
+    c.setAllowCredentials(${cred});
+    c.setMaxAge(600L);
+    UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
+    s.registerCorsConfiguration("/**", c);
+    return s;
+}`],
+      ['filter', 'Servlet Filter (JEUS · Tomcat 공통)', `// Spring이 없는 JEUS/Tomcat 웹 애플리케이션 (javax.servlet → Jakarta EE 9+는 jakarta.servlet)
+@WebFilter("/*")
+public class CorsFilter implements Filter {
+    private static final Set<String> ALLOWED = Set.of(${origin === 'null' ? '"null"' : `"${origin}"`});
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest rq = (HttpServletRequest) req;
+        HttpServletResponse rs = (HttpServletResponse) res;
+        String origin = rq.getHeader("Origin");
+        if (origin != null && ALLOWED.contains(origin)) {
+            rs.setHeader("Access-Control-Allow-Origin", origin);
+            rs.setHeader("Vary", "Origin");${cred ? '\n            rs.setHeader("Access-Control-Allow-Credentials", "true");' : ''}
+            rs.setHeader("Access-Control-Allow-Methods", "${ms.join(', ')}");
+            rs.setHeader("Access-Control-Allow-Headers", "${hs.join(', ')}");
+            rs.setHeader("Access-Control-Max-Age", "600");
+        }
+        if ("OPTIONS".equalsIgnoreCase(rq.getMethod())) { rs.setStatus(204); return; }  // 인증 필터보다 먼저
+        chain.doFilter(req, res);
+    }
+}`],
+      ['tomcat', 'Tomcat CorsFilter (web.xml)', `<filter>
+  <filter-name>CorsFilter</filter-name>
+  <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+  <init-param><param-name>cors.allowed.origins</param-name><param-value>${origin === 'null' ? '*' : origin}</param-value></init-param>
+  <init-param><param-name>cors.allowed.methods</param-name><param-value>${ms.join(',')}</param-value></init-param>
+  <init-param><param-name>cors.allowed.headers</param-name><param-value>${hs.concat(['Accept', 'Origin', 'X-Requested-With']).join(',')}</param-value></init-param>
+  <init-param><param-name>cors.support.credentials</param-name><param-value>${cred && origin !== 'null'}</param-value></init-param>
+  <init-param><param-name>cors.preflight.maxage</param-name><param-value>600</param-value></init-param>
+</filter>
+<filter-mapping><filter-name>CorsFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
+` + '<!' + '-- 인증 필터보다 앞에 선언하세요. JEUS는 이 클래스가 없으므로 Servlet Filter 예제를 사용하세요. --' + '>'],
+      ['nginx', 'nginx', `location /api/ {
+    if ($request_method = OPTIONS) {
+        add_header Access-Control-Allow-Origin "${origin === 'null' ? '*' : origin}" always;${cred ? '\n        add_header Access-Control-Allow-Credentials "true" always;' : ''}
+        add_header Access-Control-Allow-Methods "${ms.join(', ')}" always;
+        add_header Access-Control-Allow-Headers "${hs.join(', ')}" always;
+        add_header Access-Control-Max-Age 600 always;
+        return 204;
+    }
+    add_header Access-Control-Allow-Origin "${origin === 'null' ? '*' : origin}" always;   # always: 오류 응답에도${cred ? '\n    add_header Access-Control-Allow-Credentials "true" always;' : ''}
+    add_header Vary Origin always;
+    proxy_pass http://backend;
+    # 백엔드도 CORS 헤더를 넣으면 값이 중복됩니다 — 한 곳에서만 처리
+}`],
+      ['apache', 'Apache httpd', `Header always set Access-Control-Allow-Origin "${origin === 'null' ? '*' : origin}"${cred ? '\nHeader always set Access-Control-Allow-Credentials "true"' : ''}
+Header always set Access-Control-Allow-Methods "${ms.join(', ')}"
+Header always set Access-Control-Allow-Headers "${hs.join(', ')}"
+Header always set Vary "Origin"
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=204,L]`],
+    ];
+  }
+  return { evaluate, parseError, parseHeaders, fixes, isPrivateHost, KIND_DOC };
+})();
+DU.CorsDiag = CorsDiag;
+
+defineTool({
+  id: 'cors', group: 'http', abbr: 'CORS', name: 'CORS 진단',
+  desc: '사전 요청 필요 여부 · 서버 응답 헤더 검사 · 콘솔 오류 해석 · Spring/Tomcat/nginx 설정 예제',
+  keywords: 'cors 진단 preflight options access-control-allow-origin credentials 차단 blocked by cors policy 교차 출처 spring security corsfilter',
+  inputs: { input: '콘솔 오류', request: '요청 정보' },
+  help: `브라우저 콘솔의 <code>…has been blocked by CORS policy…</code> 메시지를 붙여넣으면 원인과 해결 방법을 알려줍니다.<br>
+    정확히 판정하려면 개발자 도구 Network 탭에서 <b>OPTIONS(사전 요청)</b>와 실제 요청의 <b>Response Headers</b>를 복사해 붙여넣으세요.<br>
+    로컬 HTML(file://)의 Origin은 <code>null</code>입니다. 서버 설정을 바꿀 수 없다면 HTTP 테스터의 <b>로컬 프록시 모드</b>를 사용하세요.`,
+  init(root) {
+    const form = h(`<div class="card card-pad" style="display:flex;flex-direction:column;gap:8px">
+      <div class="grid2"><label class="field"><span>페이지 Origin (요청을 보내는 쪽)</span><div class="row"><input class="inp mono" data-ref="origin" style="flex:1"><button class="btn xs" data-o="null" type="button">file:// (null)</button><button class="btn xs" data-o="http://localhost:3000" type="button">localhost:3000</button></div></label>
+        <label class="field"><span>요청 URL (서버)</span><input class="inp mono" data-ref="url" placeholder="http://192.168.0.100:8080/api/test"></label></div>
+      <div class="row"><span class="lbl">메서드</span><select class="inp sm" data-ref="method">${HTTP_METHODS.map(m => `<option>${m}</option>`).join('')}</select>
+        <span class="lbl">Content-Type</span><select class="inp sm" data-ref="ct"><option value="">(없음)</option><option>application/json</option><option>application/x-www-form-urlencoded</option><option>multipart/form-data</option><option>text/plain</option><option>application/xml</option></select>
+        <span class="lbl">credentials</span><select class="inp sm" data-ref="cred"><option value="omit">omit (쿠키 없음)</option><option value="same-origin">same-origin</option><option value="include">include (쿠키·인증 포함)</option></select></div>
+      <label class="field"><span>요청 헤더 (한 줄에 "이름: 값" 또는 이름만)</span><textarea class="inp" rows="2" data-ref="headers" placeholder="Authorization: Bearer …\nX-Request-Id"></textarea></label>
+      <div class="grid3"><label class="field"><span>사전 요청(OPTIONS) 응답 헤더 (선택)</span><textarea class="inp" rows="5" data-ref="pf" placeholder="HTTP/1.1 204\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: GET, POST"></textarea></label>
+        <label class="field"><span>실제 응답 헤더 (선택)</span><textarea class="inp" rows="5" data-ref="ac" placeholder="HTTP/1.1 200\nAccess-Control-Allow-Origin: *"></textarea></label>
+        <label class="field"><span>브라우저 콘솔 오류 메시지 (선택)</span><textarea class="inp" rows="5" data-ref="err" placeholder="Access to fetch at '…' from origin 'null' has been blocked by CORS policy: …"></textarea></label></div>
+      <div class="row"><button class="btn primary" data-ref="go" type="button">진단</button><span class="sp"></span><button class="btn sm ghost" data-ref="ex1" type="button">예제: 헤더 누락</button><button class="btn sm ghost" data-ref="ex2" type="button">예제: 콘솔 오류</button><button class="btn sm ghost" data-ref="clr" type="button">비우기</button></div></div>`);
+    const f = refs(form);
+    ['origin', 'url', 'method', 'ct', 'cred', 'headers', 'pf', 'ac', 'err'].forEach(k => bindPersist(f[k], 'cors:' + k));
+    if (!f.origin.value) f.origin.value = location.protocol === 'file:' ? 'null' : location.origin;
+    $$('[data-o]', form).forEach(b => on(b, 'click', () => { f.origin.value = b.dataset.o; f.origin.dispatchEvent(new Event('input')); run(); }));
+    const res = h('<div style="display:flex;flex-direction:column;gap:10px"></div>');
+    root.append(form, res);
+    function headersList() { return f.headers.value.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : [l, '']; }); }
+    function prefillFromError() {
+      const pe = CorsDiag.parseError(f.err.value);
+      if (pe.url && !f.url.value) f.url.value = pe.url;
+      if (pe.origin != null && pe.origin !== '') f.origin.value = pe.origin;
+      pe.kinds.forEach(({ k, arg }) => { if (k === 'header-not-allowed' && arg && !new RegExp('^' + arg + '\\b', 'im').test(f.headers.value)) f.headers.value = (f.headers.value ? f.headers.value + '\n' : '') + arg; if (k === 'method-not-allowed' && arg) f.method.value = arg.toUpperCase(); if (k === 'wildcard-credentials' || k === 'credentials-missing') f.cred.value = 'include'; });
+    }
+    const FIELDS = ['origin', 'url', 'method', 'ct', 'cred', 'headers', 'pf', 'ac', 'err'];
+    function run() {
+      res.innerHTML = '';
+      if (f.err.value.trim()) prefillFromError();
+      FIELDS.forEach(k => f[k].dispatchEvent(new Event('input')));
+      if (!f.url.value.trim()) { res.appendChild(h('<div class="empty-state">요청 URL을 입력하거나 콘솔 오류 메시지를 붙여넣으세요</div>')); return; }
+      const o = { origin: f.origin.value, url: f.url.value.trim(), method: f.method.value, contentType: f.ct.value, credentials: f.cred.value, headers: headersList(), preflight: f.pf.value, actual: f.ac.value, error: f.err.value };
+      const r = CorsDiag.evaluate(o);
+      if (r.error) { res.appendChild(h(`<div class="note err">${esc(r.error)}</div>`)); return; }
+      const v = r.verdict;
+      res.appendChild(h(`<div class="note ${v.ok === true ? 'ok' : v.ok === false ? 'err' : ''}"><b>${v.ok === true ? '✓ ' : v.ok === false ? '✕ ' : ''}${esc(v.msg)}</b> <span class="dim">· ${r.preflight.needed ? '사전 요청 필요' : '단순 요청'}${r.pna ? ' · 사설망 접근' : ''}</span></div>`));
+      const icon = { err: '✕', warn: '⚠', info: 'ℹ', ok: '✓' };
+      const box = h('<div class="card"><div class="pane-head"><span class="pane-title">단계별 검사</span></div></div>');
+      r.steps.forEach(s => { const d = h(`<div class="hb-step"><span class="badge ${s.lv}">${icon[s.lv]}</span><div style="flex:1"><div data-m></div>${s.detail ? '<div class="dim" data-d style="font-size:12px"></div>' : ''}</div></div>`); $('[data-m]', d).textContent = s.msg; if (s.detail) $('[data-d]', d).textContent = s.detail; box.appendChild(d); });
+      res.appendChild(box);
+      const req = h('<div class="grid2"></div>');
+      const reqTbl = (title, rows) => `<div class="card"><div class="pane-head"><span class="pane-title">${title}</span></div><table class="tbl"><tbody>${rows.map(([k, val]) => `<tr><td class="mono nowrap"><b>${esc(k)}</b></td><td class="mono">${esc(val)}</td></tr>`).join('')}</tbody></table></div>`;
+      req.innerHTML = (r.required.preflight.length ? reqTbl('서버가 보내야 할 헤더 — 사전 요청(OPTIONS)', r.required.preflight) : '<div class="card card-pad dim">사전 요청 없음</div>') + reqTbl('서버가 보내야 할 헤더 — 실제 응답', r.required.actual);
+      res.appendChild(req);
+      const fx = CorsDiag.fixes(o, r);
+      const fb = h('<div class="card" style="overflow:hidden"><div style="padding:0 8px" data-t></div><pre class="code" style="padding:10px;white-space:pre-wrap;word-break:break-all;margin:0"></pre><div class="row" style="padding:6px 8px;border-top:1px solid var(--border)"><span class="dim" style="font-size:12px">개발 환경 기준 예제입니다. 운영에서는 허용 Origin을 명시하세요. 서버를 바꿀 수 없으면 HTTP 테스터의 <b>로컬 프록시 모드</b>를 쓰세요.</span><span class="sp"></span></div></div>');
+      const pre = $('pre', fb); let curCode = '';
+      const tb = Tabs(fx.map(([id, l]) => ({ id, label: l })), id => { curCode = fx.find(x => x[0] === id)[2]; pre.textContent = curCode; persistSet('cors:fix', id); });
+      $('[data-t]', fb).appendChild(tb.el); fb.lastChild.appendChild(copyBtn(() => curCode, '복사'));
+      res.appendChild(fb); tb.set(fx.some(x => x[0] === persistGet('cors:fix', 'spring')) ? persistGet('cors:fix', 'spring') : 'spring');
+    }
+    on(f.go, 'click', run);
+    on(f.ex1, 'click', () => { f.origin.value = 'null'; f.url.value = 'http://192.168.0.100:8080/api/orders/42'; f.method.value = 'PUT'; f.ct.value = 'application/json'; f.cred.value = 'omit'; f.headers.value = 'Authorization: Bearer {{token}}'; f.pf.value = 'HTTP/1.1 200\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: GET, POST\nAccess-Control-Allow-Headers: *'; f.ac.value = ''; f.err.value = ''; run(); });
+    on(f.ex2, 'click', () => { f.origin.value = 'null'; f.url.value = ''; f.pf.value = ''; f.ac.value = ''; f.headers.value = ''; f.err.value = "Access to fetch at 'http://localhost:8080/api/users' from origin 'null' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'."; run(); });
+    on(f.clr, 'click', () => { ['url', 'headers', 'pf', 'ac', 'err'].forEach(k => { f[k].value = ''; f[k].dispatchEvent(new Event('input')); }); res.innerHTML = ''; });
+    if (f.url.value || f.err.value) run();
+    return {
+      run,
+      receive(slot, t) {
+        if (slot === 'request') { try { const j = JSON.parse(t); f.url.value = j.url || ''; f.method.value = j.method || 'GET'; f.headers.value = (j.headers || []).filter(k => !/^content-type$/i.test(k)).join('\n'); const ctH = (j.headers || []).find(k => /^content-type$/i.test(k)); f.cred.value = j.credentials || 'omit'; f.origin.value = location.protocol === 'file:' ? 'null' : location.origin; f.pf.value = ''; f.ac.value = ''; f.err.value = ''; if (!ctH) f.ct.value = ''; } catch (e) { /* 무시 */ } }
+        else { f.err.value = t; f.url.value = ''; f.pf.value = ''; f.ac.value = ''; }
+        run();
+      },
+    };
+  },
+});
+
+/* ---------- Smart Paste 감지기 · 레시피 연산 ---------- */
+defineDetector({ id: 'har', test(text, c) {
+  if (!/"log"\s*:/.test(c.t.slice(0, 2000)) || !/"entries"\s*:/.test(c.t)) return null;
+  let n = 0; try { const j = JSON.parse(c.t); if (!j.log || !Array.isArray(j.log.entries)) return null; n = j.log.entries.length; } catch (e) { return null; }
+  return { key: 'har', score: 99, label: `HAR 네트워크 기록 (요청 ${n}건)`, actions: [{ label: 'HAR 분석기', tool: 'har' }] };
+} });
+defineFileDetector({ id: 'har', test(file, head, ext) {
+  const s = new TextDecoder().decode(head.subarray(0, 4096));
+  if (ext !== 'har' && !(/"log"\s*:/.test(s) && /"(entries|creator)"\s*:/.test(s))) return null;
+  return { key: 'har', score: 99, label: 'HAR 네트워크 기록 파일', actions: [{ label: 'HAR 분석기로 열기', run: f => { openTool('har'); toolInst('har').loadFile(f); } }] };
+} });
+defineDetector({ id: 'cors-error', test(text, c) {
+  if (!/blocked by CORS policy|Cross-Origin Request Blocked|CORS header|CORS preflight|Access-Control-Allow-Origin/i.test(c.t) || c.t.length > 20000) return null;
+  const pe = CorsDiag.parseError(c.t);
+  const d = pe.kinds.map(k => (CorsDiag.KIND_DOC[k.k] || [k.k])[0]).join(' · ');
+  return { key: 'cors', score: /blocked by CORS policy|Cross-Origin Request Blocked/i.test(c.t) ? 98 : 70, label: 'CORS 오류 메시지', detail: [pe.url && `대상 ${pe.url}`, pe.origin != null && `Origin ${pe.origin}`, d].filter(Boolean).join(' · '), actions: [{ label: 'CORS 진단', tool: 'cors', slot: 'input' }] };
+} });
+defineDetector({ id: 'ws-url', test(text, c) {
+  if (!c.oneLine || !/^wss?:\/\/\S+$/i.test(c.t)) return null;
+  return { key: 'ws-url', score: 92, label: 'WebSocket 주소', actions: [{ label: 'WebSocket 테스터', tool: 'ws', slot: 'url' }] };
+} });
+defineDetector({ id: 'sse-stream', test(text, c) {
+  const n = (c.text.match(/^data:/gm) || []).length;
+  if (n < 2 || !/^(event|data|id|retry):/m.test(c.t)) return null;
+  return { key: 'sse', score: 80, label: `SSE 이벤트 스트림 원문 (data ${n}줄)`, actions: [{ label: 'SSE → JSON 이벤트 목록', recipe: [{ op: 'sse-parse' }] }] };
+} });
+defineOp({ id: 'har-urls', name: 'HAR → 요청 목록 (메서드 URL 상태 시간)', group: 'HTTP', run: v => HarAna.parse(v).entries.map(e => `${e.method} ${e.url} ${e.status} ${Math.round(e.time)}ms`).join('\n') });
+defineOp({ id: 'sse-parse', name: 'SSE 원문 → 이벤트 JSON', group: 'HTTP', run: v => { const out = []; const p = SseParser(ev => { if (ev.comment === undefined) { let d = ev.data; try { d = JSON.parse(d); } catch (e) { /* 텍스트 */ } out.push({ event: ev.event, id: ev.id, data: d }); } }); p.push(v); p.end(); return JSON.stringify(out, null, 2); } });
+
+/* =====================================================================
  * 인증서 뷰어 — ASN.1 DER 파서 · X.509 · CSR(PKCS#10) · PKCS#7 · JKS 키스토어 (외부 라이브러리 없음)
  * ===================================================================== */
 const Asn1E = (() => {
@@ -10810,6 +12315,137 @@ defineDetector({ id: 'markdown', test(text, c) {
   if (s < 2) return null;
   return { key: 'markdown', score: 45, label: 'Markdown 문서', actions: [spAct('Markdown 미리보기', 'markdown')] };
 } });
+
+/* =====================================================================
+   v3 운영 사전 공통 — 명령어 · 옵션 · 경로 · 장애 레지스트리 + 한글 작업 검색
+   - 데이터 파일(89v3~89v6)은 아래 define* 함수로 등록만 하고, 검색은 opsSearch 하나로 한다.
+   - verified: 'run' = 이 문서의 검증 환경에서 실제 실행해 확인
+               'man' = man 페이지/--help로 확인 (부작용 때문에 실행하지 않음)
+               'doc' = 제품 공식 문서 기준 (현장 버전에 따라 다를 수 있음)
+   - 예시 출력(out)은 항상 "예시"로 표시한다. 실제 결과는 사용자가 넣은 파일을 분석하는 도구만 보여준다.
+   ===================================================================== */
+const OPS_ENV = 'Ubuntu 24.04 · GNU coreutils 9.4 · grep 3.11 · tar 1.35 · rsync 3.2.7';
+const KB = { cmds: [], paths: [], errors: [], opts: {}, syn: [], synMap: null, cats: {} };
+const OPS_VERIFIED = { run: ['실행 확인', 'ok'], man: ['매뉴얼 확인', 'info'], doc: ['문서 기준', 'warn'] };
+const OPS_DANGER = [null, ['주의', 'warn'], ['위험', 'err'], ['매우 위험', 'err']];
+
+/** 분류 이름 등록: defineOpsCats({ 'linux-file': '파일 · 경로', ... }) */
+function defineOpsCats(map) { Object.assign(KB.cats, map); }
+/**
+ * 명령어 예제 등록. 항목 형식:
+ * { id?, title: '한글 작업 이름', cmd: '실제 명령', desc?, kw?: '검색어 공백 구분', env?, verified?: 'run'|'man'|'doc',
+ *   src?: '근거 문서', danger?: 0~3, warn?: '경고 문구', out?: '예시 출력', note?, related?: [id], win?: 'Windows 대응 명령', pair?: '헷갈리는 짝 id' }
+ */
+function defineCmds(cat, list) {
+  list.forEach(c => { const e = Object.assign({ cat, verified: 'run', danger: 0 }, c); e.id = e.id || cat + ':' + KB.cmds.length; KB.cmds.push(e); });
+}
+/** 경로 등록: { path, title, desc?, kw?, env?, verified?, src?, note?, cmds?: ['관련 명령'] } */
+function definePaths(cat, list) {
+  list.forEach(p => { const e = Object.assign({ cat, verified: 'doc' }, p); e.id = e.id || cat + ':' + KB.paths.length; KB.paths.push(e); });
+}
+/** 장애/오류 등록: { id, title, cat, match?: [정규식 문자열], symptom?, causes?: [], checks?: [{ cmd, desc }], fixes?: [], kw?, tools?: [도구 id], verified? } */
+function defineErrors(list) { list.forEach(e => KB.errors.push(Object.assign({ verified: 'doc' }, e))); }
+/** 프로그램 옵션 사전 (명령어 설명기 · 옵션 비교기용): { summary, env?, verified?, opts: [{ f: '-x', l: '--extract', arg?, d, danger? }], subs?: { 하위명령: { summary, opts } }, bundle?: true(-xzvf 묶음 허용) } */
+function defineOpts(prog, spec) { KB.opts[prog] = Object.assign(KB.opts[prog] || {}, spec); }
+/** 동의어 묶음: defineSynonyms([['압축 해제', '압축풀기', '풀기', 'extract', 'unzip'], ...]) */
+function defineSynonyms(groups) { groups.forEach(g => KB.syn.push(g)); KB.synMap = null; }
+
+/* ---------- 한글 검색 유틸 ---------- */
+const OPS_CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const OPS_JUNG = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+const OPS_JONG = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+/** 한글 음절을 자모로 분해 ('압축' → 'ㅇㅏㅂㅊㅜㄱ'), 그 외 문자는 그대로 */
+function opsJamo(s) {
+  let r = '';
+  for (const ch of s) {
+    const c = ch.charCodeAt(0) - 0xAC00;
+    if (c >= 0 && c < 11172) r += OPS_CHO[(c / 588) | 0] + OPS_JUNG[((c % 588) / 28) | 0] + OPS_JONG[c % 28];
+    else r += ch;
+  }
+  return r;
+}
+/** 초성만 ('압축 풀기' → 'ㅇㅊ ㅍㄱ') */
+function opsChosung(s) { let r = ''; for (const ch of s) { const c = ch.charCodeAt(0) - 0xAC00; r += c >= 0 && c < 11172 ? OPS_CHO[(c / 588) | 0] : ch; } return r; }
+function opsNorm(s) { return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+/** 편집 거리 (상한 max를 넘으면 max+1) */
+function opsDist(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]; let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < best) best = cur[j];
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function opsSynMap() {
+  if (KB.synMap) return KB.synMap;
+  const m = new Map();
+  KB.syn.forEach(g => { const ns = g.map(x => opsNorm(x).replace(/ /g, '')); ns.forEach(k => { const set = m.get(k) || new Set(); ns.forEach(x => set.add(x)); m.set(k, set); }); });
+  return (KB.synMap = m);
+}
+/** 검색어 토큰 하나가 대상 문자열(공백 제거·소문자)과 맞는 정도: 0 = 불일치 */
+function opsTokScore(tok, hay, hayJamo, hayCho, words) {
+  if (!tok) return 1;
+  if (hay.includes(tok)) return 10;
+  const syn = opsSynMap().get(tok);
+  if (syn) for (const s of syn) if (s !== tok && hay.includes(s)) return 8;
+  if (/^[ㄱ-ㅎ]+$/.test(tok) && tok.length >= 2 && hayCho.includes(tok)) return 6;
+  // 오타 허용: 자모 단위로 단어와 비교
+  const tj = opsJamo(tok);
+  if (tj.length >= 4) {
+    const max = tj.length >= 9 ? 2 : 1;
+    for (const w of words) {
+      const wj = opsJamo(w);
+      if (opsDist(tj, wj, max) <= max) return 4;
+      if (wj.length > tj.length && opsDist(tj, wj.slice(0, tj.length), max) <= max) return 3;
+    }
+  }
+  return 0;
+}
+/**
+ * 한글 작업 검색. list 항목에서 fields(가중치 포함)를 모아 검색어 토큰이 모두 맞는 항목만 점수순 반환.
+ * opsSearch(KB.cmds, '로그 실시간 보기', { title: 3, kw: 2, cmd: 2, desc: 1 })
+ */
+function opsSearch(list, q, fields, limit) {
+  fields = fields || { title: 3, kw: 2, cmd: 2, desc: 1 };
+  const nq = opsNorm(q); if (!nq) return list.slice(0, limit || list.length).map(item => ({ item, score: 0 }));
+  const toks = nq.split(' ').filter(Boolean);
+  const out = [];
+  for (const item of list) {
+    if (!item._idx) {
+      item._idx = Object.keys(fields).map(f => {
+        const raw = opsNorm(Array.isArray(item[f]) ? item[f].join(' ') : item[f]);
+        const hay = raw.replace(/ /g, '');
+        return { f, w: fields[f], hay, cho: opsChosung(hay), words: raw.split(/[\s,·/()]+/).filter(x => x.length > 1) };
+      });
+    }
+    let total = 0, ok = true;
+    for (const t of toks) {
+      let best = 0;
+      for (const ix of item._idx) { const s = opsTokScore(t, ix.hay, null, ix.cho, ix.words); if (s) best = Math.max(best, s * ix.w); }
+      if (!best) { ok = false; break; }
+      total += best;
+    }
+    if (!ok) continue;
+    const t0 = item._idx[0];
+    if (t0 && t0.hay.startsWith(nq.replace(/ /g, ''))) total += 15;
+    out.push({ item, score: total });
+  }
+  out.sort((a, b) => b.score - a.score);
+  return limit ? out.slice(0, limit) : out;
+}
+/** 검증 · 위험 배지 HTML */
+function opsBadges(e) {
+  const v = OPS_VERIFIED[e.verified] || OPS_VERIFIED.doc, d = OPS_DANGER[e.danger || 0];
+  const tip = e.verified === 'run' ? '검증 환경: ' + (e.env || OPS_ENV) : e.verified === 'man' ? 'man/--help 기준 · ' + (e.env || OPS_ENV) : '근거: ' + (e.src || '제품 공식 문서') + ' — 현장 버전에 따라 다를 수 있음';
+  return `<span class="badge ${v[1]}" title="${esc(tip)}">${v[0]}</span>${d ? ` <span class="badge ${d[1]}">${d[0]}</span>` : ''}`;
+}
+DU.KB = KB; DU.opsSearch = opsSearch; DU.opsJamo = opsJamo;
 
 /* =====================================================================
  * 부팅
