@@ -522,6 +522,103 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 [data-design="mono"] .gcard h3 { color: var(--text); font-size: 11.5px; letter-spacing: .14em; font-weight: 800; }
 [data-design="mono"] .gtool { border-radius: 0; }
 
+/* ---------- G. 모노 컬러 (기본: 모노 + 분류별 색 구분) ---------- */
+:root[data-design="monocolor"] {
+  --bg: #ffffff; --bg-elev: #ffffff; --bg-sunk: #f5f5f5; --bg-hover: #eeeeee;
+  --border: #e4e4e4; --border-strong: #0a0a0a;
+  --text: #0a0a0a; --text-dim: #525252; --text-faint: #a3a3a3;
+  --accent: #1d4bff; --accent-hover: #0d39e6; --accent-weak: #e9eeff; --accent-text: #ffffff;
+  --ok: #00875a; --ok-weak: #e3f5ee; --warn: #c2410c; --warn-weak: #fdeee6; --err: #e5172f; --err-weak: #fde7ea; --info: #1d4bff; --info-weak: #e9eeff;
+  --info-line: #c2cfff; --warn-line: #f6c6ab; --err-line: #f6b3bc; --ok-line: #a9dcc6;
+  --syn-key: #0a0a0a; --syn-str: #1d4bff; --syn-num: #00875a; --syn-bool: #7c3aed; --syn-null: #a3a3a3; --syn-punct: #a3a3a3; --syn-kw: #1d4bff; --syn-tag: #0a0a0a; --syn-attr: #525252; --syn-fn: #7c3aed;
+  --mark: #dbe3ff; --mark2: #ececec; --mark-cur: #b3c4ff; --sel: rgba(29, 75, 255, .18); --focus: rgba(29, 75, 255, .45);
+  --side-bg: #0a0a0a; --side-text: #f5f5f5; --side-dim: #8a8a8a; --side-hover: #1d1d1d; --side-line: #222222;
+  --radius: 0px; --shadow: 0 0 0 1px #0a0a0a, 10px 10px 0 rgba(0, 0, 0, .08);
+}
+:root[data-design="monocolor"][data-theme="dark"] {
+  --bg: #000000; --bg-elev: #0a0a0a; --bg-sunk: #111111; --bg-hover: #1a1a1a;
+  --border: #262626; --border-strong: #fafafa;
+  --text: #fafafa; --text-dim: #a3a3a3; --text-faint: #5c5c5c;
+  --accent: #5b82ff; --accent-hover: #7a99ff; --accent-weak: #101a3d; --accent-text: #ffffff;
+  --ok: #3ddc97; --ok-weak: #0b2a1f; --warn: #fb923c; --warn-weak: #2e1a0c; --err: #ff5c6c; --err-weak: #34121a; --info: #5b82ff; --info-weak: #101a3d;
+  --info-line: #20316b; --warn-line: #5a3115; --err-line: #66222e; --ok-line: #175a3f;
+  --syn-key: #fafafa; --syn-str: #7a99ff; --syn-num: #3ddc97; --syn-bool: #c4a3ff; --syn-null: #5c5c5c; --syn-punct: #737373; --syn-kw: #7a99ff; --syn-tag: #fafafa; --syn-attr: #a3a3a3; --syn-fn: #c4a3ff;
+  --mark: #1f2d63; --mark2: #262626; --mark-cur: #2f46a8; --sel: rgba(91, 130, 255, .3); --focus: rgba(91, 130, 255, .6);
+  --side-bg: #000000; --side-line: #262626;
+}
+[data-design="monocolor"] #sidebar { background: var(--side-bg); border-right: 1px solid var(--side-line); color: var(--side-text); }
+[data-design="monocolor"] .brand-name { color: var(--side-text); font-weight: 800; letter-spacing: -.02em; }
+[data-design="monocolor"] .brand-sub { color: var(--side-dim); }
+[data-design="monocolor"] .brand-logo { background: #fff; color: #000; border-radius: 0; }
+[data-design="monocolor"] .search-btn { background: #141414; border: 1px solid #2a2a2a; color: #9a9a9a; border-radius: 0; }
+[data-design="monocolor"] .smart-btn { color: #fff; }
+[data-design="monocolor"] #sidebar kbd { background: #1d1d1d; border-color: #3a3a3a; color: #bdbdbd; }
+[data-design="monocolor"] .nav-group-title { color: var(--side-dim); letter-spacing: .14em; font-size: 10.5px; }
+[data-design="monocolor"] .nav-item { color: var(--side-text); border-radius: 0; }
+[data-design="monocolor"] .nav-item:hover { background: var(--side-hover); }
+[data-design="monocolor"] .nav-item.on { background: #ffffff; color: #000000; }
+[data-design="monocolor"] .abbr { background: transparent; border-color: #3a3a3a; color: #bdbdbd; border-radius: 0; }
+[data-design="monocolor"] .nav-item.on .abbr { background: #000; color: #fff; border-color: #000; }
+[data-design="monocolor"] .side-foot { border-top-color: var(--side-line); }
+[data-design="monocolor"] .side-foot .btn.ghost { color: #a3a3a3; }
+[data-design="monocolor"] .side-foot .btn.ghost:hover { background: var(--side-hover); color: #fff; }
+[data-design="monocolor"] #topbar { min-height: 66px; }
+[data-design="monocolor"] #toolTitle { font-size: 24px; font-weight: 900; letter-spacing: -.04em; }
+[data-design="monocolor"] #tabbar { background: var(--bg); }
+[data-design="monocolor"] .wtab { border-radius: 0; }
+[data-design="monocolor"] .wtab.on { background: transparent; border-color: transparent; box-shadow: inset 0 -3px 0 var(--text); }
+[data-design="monocolor"] .wtab .abbr, [data-design="monocolor"] .gtool .abbr, [data-design="monocolor"] .menu .abbr, [data-design="monocolor"] .palette .abbr { border-color: var(--border); color: var(--text-dim); }
+[data-design="monocolor"] .btn { border-radius: 0; font-weight: 600; }
+[data-design="monocolor"] .btn.primary { background: var(--text); border-color: var(--text); color: var(--bg); }
+[data-design="monocolor"] .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+[data-design="monocolor"] .inp, [data-design="monocolor"] .seg, [data-design="monocolor"] .chip { border-radius: 0; }
+[data-design="monocolor"] .seg button.on { background: var(--text); color: var(--bg); }
+[data-design="monocolor"] .pane, [data-design="monocolor"] .card, [data-design="monocolor"] .tbl-wrap, [data-design="monocolor"] .kvlist, [data-design="monocolor"] .modal, [data-design="monocolor"] .menu, [data-design="monocolor"] .sp-item, [data-design="monocolor"] .rc-step, [data-design="monocolor"] .op, [data-design="monocolor"] .rc-ops, [data-design="monocolor"] .note { border-radius: 0; }
+[data-design="monocolor"] .pane-head { background: var(--bg-elev); }
+[data-design="monocolor"] .pane-title { font-weight: 800; letter-spacing: .01em; }
+[data-design="monocolor"] .gutter, [data-design="monocolor"] .pane-foot { background: var(--bg-elev); }
+[data-design="monocolor"] .badge { border-radius: 0; }
+[data-design="monocolor"] .tab.on { color: var(--text); border-bottom: 2px solid var(--text); }
+[data-design="monocolor"] .sp-item.top { border-color: var(--text); box-shadow: 4px 4px 0 var(--accent); }
+[data-design="monocolor"] .hero h1 { font-size: 52px; font-weight: 900; letter-spacing: -.05em; line-height: 1; }
+[data-design="monocolor"] .hero p { font-size: 14px; }
+[data-design="monocolor"] .gcard { border: 0; border-top: 2px solid var(--text); border-radius: 0; padding: 12px 0 4px; background: transparent; }
+[data-design="monocolor"] .gcard h3 { color: var(--text); font-size: 11.5px; letter-spacing: .14em; font-weight: 800; }
+[data-design="monocolor"] .gtool { border-radius: 0; }
+
+
+[data-design="monocolor"] [data-group="auto"] { --g: #7c3aed; --gl: #a78bfa; } [data-design="monocolor"] [data-group="json"] { --g: #4f46e5; --gl: #818cf8; }
+[data-design="monocolor"] [data-group="data"] { --g: #0d9488; --gl: #2dd4bf; } [data-design="monocolor"] [data-group="http"] { --g: #2563eb; --gl: #60a5fa; }
+[data-design="monocolor"] [data-group="encode"] { --g: #059669; --gl: #34d399; } [data-design="monocolor"] [data-group="file"] { --g: #0891b2; --gl: #22d3ee; }
+[data-design="monocolor"] [data-group="format"] { --g: #0369a1; --gl: #38bdf8; } [data-design="monocolor"] [data-group="text"] { --g: #db2777; --gl: #f472b6; }
+[data-design="monocolor"] [data-group="java"] { --g: #dc2626; --gl: #f87171; } [data-design="monocolor"] [data-group="time"] { --g: #9333ea; --gl: #c084fc; }
+[data-design="monocolor"] [data-group="misc"] { --g: #475569; --gl: #94a3b8; }
+[data-design="monocolor"] [data-group] { --gt: #ffffff; }
+[data-design="monocolor"][data-theme="dark"] [data-group] { --g: var(--gl); --gt: #0a0a0a; }
+/* 사이드바: 분류 색 사각형 + 색 글자 아이콘 */
+[data-design="monocolor"] .nav-group-title::before { content: ''; display: inline-block; width: 7px; height: 7px; background: var(--gl); margin-right: 8px; vertical-align: 1px; }
+[data-design="monocolor"] .nav-item .abbr { border-color: transparent; color: var(--gl); background: rgba(255, 255, 255, .06); }
+[data-design="monocolor"] .nav-item.on { background: #ffffff; color: #000000; box-shadow: inset 4px 0 0 var(--g); }
+[data-design="monocolor"][data-theme="dark"] .nav-item.on { box-shadow: inset 4px 0 0 var(--gl); }
+[data-design="monocolor"] .nav-item.on .abbr { background: var(--g); border-color: var(--g); color: var(--gt); }
+[data-design="monocolor"][data-theme="dark"] .nav-item.on .abbr { background: #000; border-color: #000; color: var(--gl); }
+/* 상단 제목 옆 색 블록, 작업 탭 */
+[data-design="monocolor"] #topbar[data-group] #toolTitle::before { content: ''; display: inline-block; width: 13px; height: 13px; background: var(--g); margin-right: 10px; vertical-align: 1px; }
+[data-design="monocolor"] .wtab .abbr { background: transparent; border-color: var(--g); color: var(--g); }
+[data-design="monocolor"] .wtab.on { box-shadow: inset 0 -3px 0 var(--g); }
+[data-design="monocolor"] .wtab.on .abbr { background: var(--g); color: var(--gt); }
+/* 도구 안: 분류색이 강조색 */
+[data-design="monocolor"] .tool[data-group] { --accent: var(--g); --accent-hover: var(--g); --accent-text: var(--gt); }
+[data-design="monocolor"] .tool[data-group] .btn.primary:hover { background: var(--g); border-color: var(--g); color: var(--gt); }
+[data-design="monocolor"] .tool[data-group] .tab.on { border-bottom-color: var(--g); }
+[data-design="monocolor"] .tool[data-group] .seg button.on { background: var(--text); color: var(--bg); }
+/* 홈 */
+[data-design="monocolor"] .gcard[data-group] { border-top: 3px solid var(--g); }
+[data-design="monocolor"] .gcard[data-group] h3 { color: var(--g); }
+[data-design="monocolor"] .gtool .abbr { border-color: var(--g); color: var(--g); background: transparent; }
+[data-design="monocolor"] .gtool:hover .abbr { background: var(--g); color: var(--gt); }
+[data-design="monocolor"] .sp-item.top { border-color: var(--text); box-shadow: inset 4px 0 0 var(--accent); }
+
 /* ---------- F. 오로라 (분류별 색 · 그라데이션) ---------- */
 :root[data-design="aurora"] {
   --bg: #f5f6fe; --bg-elev: #ffffff; --bg-sunk: #f0f2fc; --bg-hover: #eaedfb;
@@ -726,9 +823,11 @@ const store = {
   clear(prefix = '') { this.keys().filter(k => k.startsWith(prefix)).forEach(k => this.del(k)); },
   size() { let n = 0; try { this.keys().forEach(k => { n += (localStorage.getItem(this.pfx + k) || '').length * 2; }); } catch (e) { /* ignore */ } return n; },
 };
-const settings = Object.assign({ theme: 'auto', design: 'default', autosave: true, indent: '2' }, store.get('settings', {}));
-const DESIGNS = [['default', '기본', '깔끔한 기본 스타일'], ['midnight', '미드나잇', '네이비 · 보라→청록 그라데이션 · 은은한 빛'], ['mono', '모노', '흑백 + 블루 포인트 · 검정 사이드바 · 굵은 타이포'], ['aurora', '오로라', '분류별 색상 · 라벤더 · 그라데이션 버튼']];
-if (!DESIGNS.some(d => d[0] === settings.design)) settings.design = 'default';
+const settings = Object.assign({ theme: 'auto', design: 'monocolor', autosave: true, indent: '2' }, store.get('settings', {}));
+const DESIGNS = [['monocolor', '모노 컬러', '흑백 바탕 + 기능 분류별 색 구분 (기본)'], ['mono', '모노', '흑백 + 블루 포인트 하나'], ['aurora', '오로라', '라벤더 · 분류별 색상 · 그라데이션 버튼'], ['midnight', '미드나잇', '네이비 · 보라→청록 그라데이션'], ['default', '클래식', '처음 버전의 디자인']];
+// 디자인 기본값 변경(v2) 이전에 저장된 설정은 새 기본 디자인으로
+if (settings.designV !== 2) { settings.design = 'monocolor'; settings.designV = 2; }
+if (!DESIGNS.some(d => d[0] === settings.design)) settings.design = 'monocolor';
 function saveSettings() { store.set('settings', settings); }
 const MAX_PERSIST = 300 * 1024;
 /** 작업 탭(같은 도구의 2번째 이후 인스턴스) 초기화 중이면 저장 키에 '#n'을 붙임 */
@@ -1230,7 +1329,7 @@ let OPEN_TABS = (store.get('tabs', []) || []).filter(x => x && TOOL_MAP && typeo
 function saveTabs() { store.set('tabs', OPEN_TABS); }
 function createInst(t, n) {
   t.insts = t.insts || [];
-  const root = h(`<div class="tool" data-tool="${t.id}" data-inst="${n}"></div>`);
+  const root = h(`<div class="tool" data-tool="${t.id}" data-inst="${n}" data-group="${t.group}"></div>`);
   if (t.fill) root.classList.add('fill');
   $('#view').appendChild(root);
   const rec = { n, root, inst: {}, keys: [] };
