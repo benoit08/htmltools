@@ -4,60 +4,47 @@
 `dev-utility-hub.html` 파일 하나를 복사해 브라우저로 열면 바로 동작합니다. 외부 CDN, 웹폰트, 원격 요청이 없고, 입력한 데이터는 브라우저 안에서만 처리됩니다.
 
 - 실행: `dev-utility-hub.html`을 Chrome / Edge / Whale(최근 버전)로 열기 (Internet Explorer는 지원하지 않음)
-- 단축키: <kbd>Ctrl</kbd>+<kbd>K</kbd> 기능 검색 · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 현재 도구 실행
-- 파일 열기: 각 입력 패널에 파일을 끌어다 놓으면 열립니다 (UTF-8 / EUC-KR(CP949) 자동 감지)
+- 단축키: <kbd>Ctrl</kbd>+<kbd>K</kbd> 기능 검색 · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 현재 도구 실행 · 아무 데서나 <kbd>Ctrl</kbd>+<kbd>V</kbd> → Smart Paste
+- 파일 열기: 입력 패널이나 화면 어디에든 파일을 끌어다 놓으면 알맞은 도구가 열립니다 (UTF-8 / EUC-KR(CP949) 자동 감지)
 
-## 도구 목록 (27종)
+## 공통 기능
 
-| 분류 | 도구 | 주요 기능 |
-| --- | --- | --- |
-| JSON | JSON 포매터 | 정렬 · 압축 · 검증(줄/열 위치와 한국어 원인) · 트리 뷰(경로 복사, 검색) · 이중/삼중 이스케이프 자동 해제 · 중첩 JSON 펼치기 · 관대한 파싱으로 복구 · **2^53을 넘는 Long ID와 키 순서 보존** |
-| | JSON 이스케이프 | 문자열 ↔ JSON 문자열 리터럴 · 1단계 / 완전 해제 |
-| | JSON 비교 | 키 순서·공백 무시 구조 비교 · 배열 매칭 키(id) · 무시할 키(timestamp 등) · 정규화 텍스트 비교 |
-| | JSONPath 검색 | `$..id`, `[?(@.age > 20 && @.active)]`, 정규식 `=~`, `.length` |
-| | 컬렉션 도구 | 배열 필드 추출 · 정렬 · 중복 제거 · 그룹화 · 개수 · 필터 · 통계 · 평탄화 |
-| HTTP · API | HTTP API 테스터 | GET/POST/PUT/PATCH/DELETE · Params/Headers/Body(JSON, form, multipart, 파일)/Auth · 환경변수 `{{baseUrl}}` · cURL 가져오기(bash/cmd) · 코드 생성(cURL, fetch, Java HttpClient, RestTemplate) · 히스토리 · 저장된 요청 · 응답 비교 · EUC-KR 응답 디코딩 · 로컬 프록시 모드 |
-| | HTTP 헤더 · 쿠키 분석 | 헤더 설명 · 보안 헤더 점검(HSTS, CSP, X-Frame-Options, CORS) · Set-Cookie 속성/만료 · Basic 인증 해독 |
-| | OpenAPI 뷰어 | Swagger 2 / OpenAPI 3 (JSON·YAML) · 파라미터 · 예제 본문 생성 · HTTP 테스터로 보내기 |
-| 인코딩 · 보안 | Base64 | UTF-8 / EUC-KR · URL-safe · 파일 ↔ Base64 · 이미지 미리보기 |
-| | URL 인코딩 · 쿼리 편집 | encodeURIComponent / encodeURI / Java URLEncoder · **EUC-KR 퍼센트 인코딩** · URL 분석 · 쿼리 파라미터 표 편집 |
-| | JWT 디코더 | Header/Payload 해독 · 만료 확인 · HS/RS/ES/PS 서명 검증 · HS 토큰 생성 |
-| | 유니코드 · 문자셋 | `\uXXXX` ↔ 한글 · HTML 엔티티 · UTF-8/EUC-KR 바이트 · **깨진 한글 복구** · 문자별 코드 표 · 바이트 수 |
-| | 해시 · HMAC · 체크섬 | MD5 · SHA-1 · SHA-256/384/512 · HMAC · CRC32 · 파일 체크섬 비교 (WebCrypto 없이도 동작) |
-| | UUID · 랜덤 문자열 | UUID v4/v7 대량 생성 · UUID 분석 · 안전한 랜덤 문자열 |
-| 포매터 | XML 포매터 | 정렬 · 압축 · 검증 · XPath · XML ↔ JSON (MyBatis 매퍼, SOAP) |
-| | HTML 포매터 · 엔티티 | 정렬 · 압축 · 엔티티 인코딩/디코딩 · 태그 제거 |
-| | SQL 포매터 | SELECT/JOIN/WHERE/서브쿼리/CASE 정렬 · 키워드 대소문자 · 쉼표 앞 배치 · 압축 · `#{}` `${}` `?` 지원 |
-| 텍스트 | 텍스트 · 파일 비교 | 줄 단위 + 문자 단위 강조 · 나란히/통합 보기 · 공백/대소문자 무시 · 동일 구간 접기 |
-| | 정규식 테스터 | 실시간 매칭 · 그룹/이름 그룹 · 치환 · Java 문자열 변환 · 2초 시간 제한(무한 백트래킹 방지) |
-| | 문자열 도구 | 공백·중복·정렬 · camelCase ↔ SNAKE_CASE · SQL IN 절 · 추출(이메일, IP 등) · UTF-8/EUC-KR 바이트 수 |
-| | CSV · JSON · 표 변환 | CSV/TSV(엑셀 붙여넣기) ↔ JSON · Markdown 표 · SQL INSERT · Excel용 BOM 저장 |
-| Java · 서버 | SQL 바인드 치환 | MyBatis `Preparing/Parameters`, Hibernate `binding parameter` 로그 → 값이 들어간 디버깅용 SQL |
-| | 스택 트레이스 분석 | `Caused by` 체인 · 근본 원인 · 앱 코드 프레임 강조 · 프레임워크 프레임 접기 · ORA 오류 등 원인 힌트 |
-| | Java 로그 분석기 | Logback/Log4j · JEUS · Tomcat 로그 · 레벨별 필터 · 스택 묶기 · 동일 예외 집계 · 시간/텍스트 필터 |
-| | Properties · YAML · JSON | application.properties ↔ application.yml ↔ JSON · native2ascii · `---` 프로파일 문서 |
-| 시간 · 스케줄 | 날짜 · 타임스탬프 변환 | Unix 초/밀리초 ↔ ISO 8601 · KST/UTC · yyyyMMddHHmmss · Java 패턴 포맷 · 날짜 계산 |
-| | Cron 표현식 | Linux · Spring `@Scheduled` · Quartz · 다음 실행 시각 · 한국어 설명 |
+| 기능 | 설명 |
+| --- | --- |
+| **Smart Paste** | 무엇이든 붙여넣거나 파일을 놓으면 형식을 감지해 도구와 변환을 추천합니다 (이스케이프된 JSON, JWT, cURL, 스택 트레이스, 스레드 덤프, 인증서, HAR, CORS 오류 메시지, 16진수, 색상 등) |
+| **레시피 파이프라인** | Base64 디코드 → gzip 해제 → JSON 정렬처럼 변환을 이어 붙여 한 번에 실행하고 레시피로 저장 |
+| **여러 탭** | 같은 도구를 여러 개 열어 비교 (주소 `#/도구/번호`로 바로 열기) |
+| **입력 기록 · 스냅샷** | 입력 패널의 **기록 ▾**에서 이전 입력으로 되돌리기 |
+| **보내기 ▾** | 결과를 다른 도구로 바로 넘기기 (HTTP 응답 → JSON 포매터, 로그 예외 → 스택 분석 등) |
+| **대용량 모드** | 큰 JSON은 Web Worker로 처리, 큰 로그·GC 로그·Hex 파일은 나눠 읽기 (수십~수백 MB, Hex 뷰어는 GB 단위) |
+| **디자인** | 사이드바의 **◐ 테마**로 라이트/다크, **▦ 디자인**으로 스킨 선택. 기본 스킨 '미드나잇 오로라'는 기능 분류마다 사무실 프로그램 색(데이터 Excel 초록, HTTP Outlook 파랑, 텍스트 Word 파랑 …)을 씁니다 |
 
-### 도구 간 연계
+## 도구 목록 (66종)
 
-결과 패널의 **보내기 ▾** 버튼으로 다른 도구에 바로 넘길 수 있습니다. 예를 들어
-
-- HTTP 테스터 응답 → **JSON 포매터로** → 트리에서 값 경로 복사
-- HTTP 테스터 **이전 응답과 비교** → JSON 비교 (직전 응답 vs 현재 응답)
-- 로그 분석기의 예외 → **스택 분석기로** → 근본 원인 확인
-- OpenAPI 뷰어 → **HTTP 테스터로** (메서드, URL, 예제 본문 자동 채움)
+| 분류 | 도구 |
+| --- | --- |
+| 자동화 | 레시피 파이프라인 |
+| JSON | JSON 포매터(2^53 넘는 Long ID·키 순서 보존, 한국어 오류 위치, 관대한 파싱 복구) · JSON 이스케이프 · JSON 비교 · JSONPath 검색 · 컬렉션 도구 · JSON Schema 검증 · JSON Schema 생성 · JSON → Java DTO(class/Lombok/record, TS, Kotlin) · JSON Flatten · JSON Patch(RFC 6902/7396) · NDJSON · JSON Lines |
+| 데이터 · 문서 | CSV · JSON · 표 변환 · JSON Mock 생성 · 데이터 표 뷰어(10만 행 정렬·필터) · 테스트 데이터 빌더 · Markdown 미리보기 |
+| HTTP · API | HTTP API 테스터(환경변수, cURL 가져오기, 응답 검증 Tests, 값 추출 체이닝, Mock 모드, 코드 생성 11종, 로컬 프록시) · HTTP 헤더 · 쿠키 · 캐시 분석 · OpenAPI 뷰어 · 컬렉션 러너 · HAR 분석기 · WebSocket · SSE 테스터 · CORS 진단 |
+| 인코딩 · 보안 | Base64 · URL 인코딩 · 쿼리 편집 · JWT 디코더 · 유니코드 · 문자셋(깨진 한글 복구) · 해시 · HMAC · 체크섬 · UUID · 랜덤 문자열 · 바이트 길이 계산 · 인증서 뷰어(PEM/DER/P7B/CSR/JKS) · OAuth PKCE 생성기 · 민감정보 마스킹 |
+| 파일 · 바이너리 | Hex 뷰어 · 파일 형식 판별 · 파일 인코딩 검사 · 변환 · 파일 비교 · 체크섬 검증 · 이미지 메타데이터(EXIF·GPS 보기/제거) · GZIP · 압축 도구 |
+| 포매터 | XML 포매터(XPath, XML ↔ JSON) · HTML 포매터 · 엔티티 · SQL 포매터 |
+| 텍스트 | 텍스트 · 파일 비교 · 정규식 테스터 · 문자열 도구 · 줄바꿈 · 공백 정리(CRLF 셸 스크립트 감지) · 유니코드 정규화 · 숨은 문자 |
+| Java · 서버 | SQL 바인드 치환(MyBatis/Hibernate 로그) · 스택 트레이스 분석 · Java 로그 분석기(Logback/Log4j/JEUS/Tomcat, 큰 파일 스트리밍) · Properties · YAML · JSON · JDBC URL 빌더 · 파서(11종 DB) · JNDI 설정 점검 · 스레드 덤프 분석 · GC 로그 분석 · 실행 계획 분석(Oracle/Tibero/PostgreSQL/MySQL) · 플레이스홀더 해석 · WAR · JAR 탐색기(중복·충돌 라이브러리) · 클래스 버전 확인 · web.xml 분석 |
+| 시간 · 스케줄 | 날짜 · 타임스탬프 변환 · Cron 표현식(Linux/Spring/Quartz) |
+| 기타 유틸 | 진법 변환 · 비트 · IP · CIDR 계산기(IPv4/IPv6) · 색상 변환 · 대비 검사 |
 
 ## 저장 데이터와 보안
 
 - 입력 내용은 새로고침해도 복원되도록 이 PC 브라우저의 localStorage에만 저장됩니다. **설정(⚙)**에서 끄거나 지울 수 있습니다.
-- **JWT 토큰, HTTP 인증 값, HTTP 응답 본문은 저장하지 않습니다.** Authorization·Cookie·토큰류 헤더도 히스토리에 남기지 않습니다(값이 `Bearer {{token}}`처럼 환경변수 참조뿐이면 유지).
-- 토큰은 HTTP 테스터의 **환경변수**(`{{token}}`)로 관리하는 것을 권장합니다.
+- **JWT 토큰, HTTP 인증 값, HTTP 응답 본문, 인증서·키스토어 비밀번호, JDBC 비밀번호, 민감정보 마스킹 원본, PKCE verifier는 저장하지 않습니다.** Authorization·Cookie·토큰류 헤더도 히스토리에 남기지 않습니다(값이 `Bearer {{token}}`처럼 환경변수 참조뿐이면 유지).
+- HTTP 테스터에서 추출한 값 중 token처럼 민감해 보이는 이름은 기본으로 메모리에만 보관합니다.
 - 설정 · 환경변수 · 저장된 요청은 설정 화면에서 JSON 파일로 내보내고 다른 PC에서 가져올 수 있습니다.
 
 ## HTTP 테스터와 CORS
 
-HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요청합니다. 서버가 CORS를 허용하지 않으면 응답을 읽을 수 없고, `Cookie`·`Host` 같은 헤더는 브라우저가 무시합니다. 방법은 두 가지입니다.
+HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요청합니다. 서버가 CORS를 허용하지 않으면 응답을 읽을 수 없고, `Cookie`·`Host` 같은 헤더는 브라우저가 무시합니다. 원인은 **CORS 진단** 도구로 확인할 수 있고, 방법은 두 가지입니다.
 
 1. **개발 서버에서 CORS 허용** (Spring 예)
    ```java
@@ -72,6 +59,7 @@ HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요
    실행하면 콘솔에 토큰이 출력됩니다. HTML → HTTP API 테스터 → **설정** 탭에서 **로컬 프록시 경유**를 선택하고 주소와 토큰을 입력하세요. CORS·금지 헤더 제한이 없어지고 `Set-Cookie`를 포함한 모든 응답 헤더를 볼 수 있습니다.
    - 기본적으로 `127.0.0.1`에만 바인딩하고, `file://`·localhost 페이지에서 온 요청과 올바른 토큰만 허용합니다. 운영 서버에서 실행하지 마세요.
    - 콘솔 한글이 깨지면 `chcp 65001` 후 실행하거나 `java -Dstdout.encoding=UTF-8 DevHubProxy.java`로 실행하세요.
+   - WebSocket · SSE 테스터는 프록시를 거치지 않고 직접 연결합니다.
 
 ## 단일 HTML로 할 수 없는 것
 
@@ -79,6 +67,8 @@ HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요
 | --- | --- |
 | DB 직접 접속 | 브라우저는 JDBC/TCP 소켓을 열 수 없음 — 별도 서버 필요 |
 | Ping / TCP 포트 확인 | OS 네트워크 기능 필요 |
+| 운영 서버 SSL 인증서 직접 가져오기 | 브라우저가 인증서 체인을 노출하지 않음 — `openssl s_client` 결과나 인증서 파일을 붙여넣어 분석 |
+| Mock 서버 | 페이지는 포트를 열 수 없음 — HTTP 테스터의 Mock 모드는 브라우저 안에서만 응답을 흉내냄 |
 | 임의 파일 시스템 접근 | 사용자가 선택하거나 끌어다 놓은 파일만 읽을 수 있음 |
 | CORS 미허용 서버 직접 호출 | 브라우저 정책 — 위의 로컬 프록시 사용 |
 
@@ -90,8 +80,8 @@ HTML을 로컬 파일(`file://`)로 열면 브라우저는 `Origin: null`로 요
 ## 구성
 
 ```
-dev-utility-hub.html     단일 실행 파일 (HTML + CSS + JavaScript, 약 430KB)
+dev-utility-hub.html     단일 실행 파일 (HTML + CSS + JavaScript, 약 1.3MB)
 proxy/DevHubProxy.java   선택: HTTP 테스터용 로컬 프록시 (JDK 11+)
 ```
 
-`dev-utility-hub.html`이 유일한 소스입니다. 기능 추가는 파일 안의 `defineTool({...})` 블록을 참고하세요. 각 도구는 `id`, `group`, `name`, `init(root)`를 가지며, `inputs`를 정의하면 다른 도구의 **보내기** 메뉴에 나타납니다.
+`dev-utility-hub.html`이 유일한 실행 파일입니다. 각 도구는 `defineTool({ id, group, name, init(root) })` 블록으로 정의되며, `inputs`를 정의하면 다른 도구의 **보내기** 메뉴에, `defineDetector`로 Smart Paste에, `defineOp`로 레시피 파이프라인에 나타납니다.
