@@ -399,6 +399,194 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
   .grid2 { grid-template-columns: minmax(0, 1fr); }
 }
 @media print { #sidebar, #topbar { display: none; } #app { display: block; } }
+/* =====================================================================
+   디자인 스킨 (설정 → 디자인). html[data-design] 으로 전환, 라이트/다크 모두 지원
+   ===================================================================== */
+
+/* ---------- A. 콘솔 (터미널 · IDE) ---------- */
+:root[data-design="console"] {
+  --bg: #f2eee3; --bg-elev: #faf7ee; --bg-sunk: #e9e4d6; --bg-hover: #e2dbc8;
+  --border: #d3cbb6; --border-strong: #b3a98f;
+  --text: #1b1914; --text-dim: #5a5446; --text-faint: #8b8371;
+  --accent: #b4530b; --accent-hover: #96450a; --accent-weak: #f1dfc7; --accent-text: #fffaf0;
+  --ok: #2d7a33; --ok-weak: #dcefd9; --warn: #9d5a00; --warn-weak: #f6e6c4; --err: #b02a20; --err-weak: #f6dcd8; --info: #2f5f8a; --info-weak: #dde8f1;
+  --info-line: #b9cde0; --warn-line: #e4c88f; --err-line: #e7b3ad; --ok-line: #b2d6b0;
+  --syn-key: #8a4b08; --syn-str: #3d7a2a; --syn-num: #a33d6b; --syn-bool: #2f5f8a; --syn-null: #8b8371; --syn-punct: #6f6858; --syn-kw: #7a3fa0; --syn-tag: #a33a20; --syn-attr: #8a4b08; --syn-fn: #2f5f8a;
+  --mark: #f6d58a; --mark2: #d8e4c4; --sel: rgba(180, 83, 11, .22); --focus: rgba(180, 83, 11, .45);
+  --font: "D2Coding", "D2 Coding", Consolas, "Cascadia Mono", "JetBrains Mono", Menlo, "Malgun Gothic", monospace;
+  --radius: 2px; --shadow: 0 0 0 1px var(--border-strong), 0 10px 30px rgba(0, 0, 0, .14);
+}
+:root[data-design="console"][data-theme="dark"] {
+  --bg: #11110e; --bg-elev: #181814; --bg-sunk: #0c0c0a; --bg-hover: #23221c;
+  --border: #2b2923; --border-strong: #47433a;
+  --text: #ebe4d0; --text-dim: #a9a18b; --text-faint: #6e695a;
+  --accent: #f2a541; --accent-hover: #ffb75a; --accent-weak: #33270f; --accent-text: #15120b;
+  --ok: #8fd694; --ok-weak: #172818; --warn: #f2c14e; --warn-weak: #30280f; --err: #ff7b6b; --err-weak: #351a16; --info: #79b8e8; --info-weak: #15232f;
+  --info-line: #27445d; --warn-line: #5a4716; --err-line: #66302a; --ok-line: #2b4f2e;
+  --syn-key: #f2a541; --syn-str: #a5d6a7; --syn-num: #f48fb1; --syn-bool: #79b8e8; --syn-null: #6e695a; --syn-punct: #8d8674; --syn-kw: #c792ea; --syn-tag: #ff8a65; --syn-attr: #f2a541; --syn-fn: #79b8e8;
+  --mark: #5b4613; --mark2: #2a3a1f; --sel: rgba(242, 165, 65, .28); --focus: rgba(242, 165, 65, .55);
+}
+[data-design="console"] body { font-size: 12.5px; }
+[data-design="console"] #sidebar { background: var(--bg-sunk); }
+[data-design="console"] .brand-logo { background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; }
+[data-design="console"] .brand-name::after { content: ' ▌'; color: var(--accent); animation: dcBlink 1.1s steps(1) infinite; }
+@keyframes dcBlink { 50% { opacity: 0; } }
+[data-design="console"] .search-btn { border-radius: 2px; background: var(--bg); }
+[data-design="console"] .nav-group-title { text-transform: none; letter-spacing: 0; color: var(--text-faint); }
+[data-design="console"] .nav-group-title::before { content: '// '; color: var(--accent); }
+[data-design="console"] .nav-item { border-radius: 0; border-left: 2px solid transparent; padding-left: 6px; }
+[data-design="console"] .nav-item.on { background: var(--bg-hover); color: var(--text); border-left-color: var(--accent); font-weight: 700; }
+[data-design="console"] .nav-item.on::after { content: '◂'; margin-left: auto; color: var(--accent); }
+[data-design="console"] .abbr { border-radius: 1px; background: transparent; }
+[data-design="console"] .nav-item.on .abbr { background: transparent; color: var(--accent); border-color: var(--accent); }
+[data-design="console"] #topbar { background: var(--bg); }
+[data-design="console"] #toolTitle { font-size: 15px; }
+[data-design="console"] #toolTitle::before { content: '❯ '; color: var(--accent); }
+[data-design="console"] #tabbar { background: var(--bg-sunk); }
+[data-design="console"] .wtab { border-radius: 0; }
+[data-design="console"] .wtab.on { border-top: 2px solid var(--accent); background: var(--bg); }
+[data-design="console"] .btn, [data-design="console"] .inp, [data-design="console"] .seg, [data-design="console"] .chip { border-radius: 2px; }
+[data-design="console"] .btn.primary::before { content: '▶'; font-size: 8px; margin-right: 2px; }
+[data-design="console"] .pane, [data-design="console"] .card, [data-design="console"] .gcard, [data-design="console"] .tbl-wrap, [data-design="console"] .kvlist, [data-design="console"] .modal, [data-design="console"] .menu, [data-design="console"] .note, [data-design="console"] .sp-item, [data-design="console"] .rc-step, [data-design="console"] .op { border-radius: 2px; }
+[data-design="console"] .pane-title::before { content: '■ '; color: var(--accent); font-size: 8px; vertical-align: 1px; }
+[data-design="console"] .badge { border-radius: 2px; }
+[data-design="console"] .hero h1::after { content: '_'; color: var(--accent); animation: dcBlink 1.1s steps(1) infinite; }
+[data-design="console"] .gcard h3::before { content: '$ ls '; color: var(--accent); font-weight: 400; }
+[data-design="console"] .tab.on { color: var(--text); border-bottom-color: var(--accent); }
+
+/* ---------- B. 네오 브루탈 ---------- */
+:root[data-design="brutal"] {
+  --bg: #fff5dc; --bg-elev: #ffffff; --bg-sunk: #ffedbd; --bg-hover: #ffe08a;
+  --border: #111111; --border-strong: #111111;
+  --text: #111111; --text-dim: #383838; --text-faint: #6a6a6a;
+  --accent: #2b4eff; --accent-hover: #1a3be6; --accent-weak: #dfe4ff; --accent-text: #ffffff;
+  --ok: #08803c; --ok-weak: #b6f0cd; --warn: #8f5300; --warn-weak: #ffe08a; --err: #cf2219; --err-weak: #ffc8c2; --info: #2b4eff; --info-weak: #dfe4ff;
+  --info-line: #111; --warn-line: #111; --err-line: #111; --ok-line: #111;
+  --mark: #ffd23f; --mark2: #b9f0e0;
+  --hard: #111111; --pop: #ffd23f; --pop2: #ff8fab; --pop3: #7ee0c3; --pop4: #a5b4ff;
+  --font: "Pretendard", "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", -apple-system, "Segoe UI", sans-serif;
+  --radius: 10px; --shadow: 6px 6px 0 var(--hard);
+}
+:root[data-design="brutal"][data-theme="dark"] {
+  --bg: #16151b; --bg-elev: #211f29; --bg-sunk: #1b1a21; --bg-hover: #2d2a38;
+  --border: #f3ecd8; --border-strong: #f3ecd8;
+  --text: #f7f1df; --text-dim: #d3cbb5; --text-faint: #9c947e;
+  --accent: #8ea0ff; --accent-hover: #a7b5ff; --accent-weak: #2a3060; --accent-text: #0e0e14;
+  --ok: #5fe39a; --ok-weak: #163a27; --warn: #ffd23f; --warn-weak: #3a3010; --err: #ff7f75; --err-weak: #42191a; --info: #8ea0ff; --info-weak: #262c56;
+  --info-line: #f3ecd8; --warn-line: #f3ecd8; --err-line: #f3ecd8; --ok-line: #f3ecd8;
+  --mark: #6b5a12; --mark2: #1f4a40; --hard: #5b6cff;
+}
+[data-design="brutal"] #sidebar { border-right: 2px solid var(--border); background: var(--bg); }
+[data-design="brutal"] .brand-logo { background: var(--pop2); color: #111; border: 2px solid var(--border); box-shadow: 3px 3px 0 var(--hard); border-radius: 10px; }
+[data-design="brutal"] .brand-name { font-weight: 900; font-size: 15px; }
+[data-design="brutal"] .search-btn { border: 2px solid var(--border); border-radius: 10px; background: var(--bg-elev); color: var(--text-dim); box-shadow: 3px 3px 0 var(--hard); }
+[data-design="brutal"] .smart-btn { background: var(--pop3); color: #111; }
+[data-design="brutal"] .nav-group-title { color: var(--text); font-weight: 900; letter-spacing: .04em; }
+[data-design="brutal"] .nav-item { border: 2px solid transparent; border-radius: 8px; font-weight: 600; }
+[data-design="brutal"] .nav-item:hover { background: var(--bg-sunk); }
+[data-design="brutal"] .nav-item.on { background: var(--pop); color: #111; border-color: var(--border); box-shadow: 3px 3px 0 var(--hard); }
+[data-design="brutal"] .abbr { border: 1.5px solid var(--border); background: var(--bg-elev); color: var(--text); border-radius: 5px; }
+[data-design="brutal"] .nav-item.on .abbr { background: #111; color: var(--pop); border-color: #111; }
+[data-design="brutal"] .side-foot, [data-design="brutal"] #topbar, [data-design="brutal"] #tabbar { border-color: var(--border); border-width: 2px; }
+[data-design="brutal"] #topbar { background: var(--bg); }
+[data-design="brutal"] #toolTitle { font-weight: 900; font-size: 20px; background: linear-gradient(transparent 58%, var(--pop) 58%); padding: 0 3px; }
+[data-design="brutal"][data-theme="dark"] #toolTitle { color: #111; background: var(--pop); border-radius: 4px; }
+[data-design="brutal"] #tabbar { background: var(--bg-sunk); }
+[data-design="brutal"] .wtab { border-radius: 8px 8px 0 0; font-weight: 600; }
+[data-design="brutal"] .wtab.on { border: 2px solid var(--border); border-bottom: 0; background: var(--bg-elev); }
+[data-design="brutal"] .btn { border: 2px solid var(--border); border-radius: 8px; box-shadow: 2px 2px 0 var(--hard); font-weight: 700; }
+[data-design="brutal"] .btn:active { transform: translate(2px, 2px); box-shadow: none; }
+[data-design="brutal"] .btn.primary { background: var(--pop); color: #111; border-color: var(--border); }
+[data-design="brutal"] .btn.primary:hover { background: #ffc800; }
+[data-design="brutal"] .btn.ghost, [data-design="brutal"] .pane-acts .btn { box-shadow: none; border-color: transparent; font-weight: 600; }
+[data-design="brutal"] .inp, [data-design="brutal"] select.inp, [data-design="brutal"] .seg { border: 2px solid var(--border); border-radius: 8px; }
+[data-design="brutal"] .seg button { border-right: 2px solid var(--border); font-weight: 600; }
+[data-design="brutal"] .seg button.on { background: var(--pop); color: #111; }
+[data-design="brutal"] .pane, [data-design="brutal"] .card, [data-design="brutal"] .gcard, [data-design="brutal"] .tbl-wrap, [data-design="brutal"] .kvlist, [data-design="brutal"] .sp-item, [data-design="brutal"] .rc-step, [data-design="brutal"] .op, [data-design="brutal"] .rc-ops { border: 2px solid var(--border); border-radius: 12px; box-shadow: 4px 4px 0 var(--hard); }
+[data-design="brutal"] .modal, [data-design="brutal"] .menu { border: 2px solid var(--border); box-shadow: 6px 6px 0 var(--hard); }
+[data-design="brutal"] .pane-head { border-bottom: 2px solid var(--border); background: var(--pop4); color: #111; }
+[data-design="brutal"] .split > .pane:nth-child(2) .pane-head { background: var(--pop3); }
+[data-design="brutal"] .pane-head .btn.ghost { color: #111; }
+[data-design="brutal"] .pane-foot { border-top: 2px solid var(--border); }
+[data-design="brutal"] .gutter { border-right: 2px solid var(--border); }
+[data-design="brutal"] .badge { border: 1.5px solid var(--border); font-weight: 800; }
+[data-design="brutal"] .chip { border: 2px solid var(--border); }
+[data-design="brutal"] .note { border: 2px solid var(--border); border-radius: 10px; }
+[data-design="brutal"] .tab.on { color: var(--text); border-bottom: 3px solid var(--border); font-weight: 800; }
+[data-design="brutal"] .tbl th { background: var(--pop); color: #111; border-bottom: 2px solid var(--border); }
+[data-design="brutal"] .hero h1 { font-size: 36px; font-weight: 900; letter-spacing: -.02em; }
+[data-design="brutal"] .hero h1 span, [data-design="brutal"] .hero h1 { text-decoration: underline; text-decoration-color: var(--pop2); text-decoration-thickness: 6px; text-underline-offset: 4px; }
+[data-design="brutal"] .gcard h3 { color: var(--text); font-weight: 900; font-size: 15px; }
+[data-design="brutal"] .home-grid .gcard:nth-child(4n+1) h3 .badge { background: var(--pop); }
+[data-design="brutal"] .home-grid .gcard:nth-child(4n+2) h3 .badge { background: var(--pop2); }
+[data-design="brutal"] .home-grid .gcard:nth-child(4n+3) h3 .badge { background: var(--pop3); }
+[data-design="brutal"] .home-grid .gcard:nth-child(4n) h3 .badge { background: var(--pop4); }
+[data-design="brutal"] .home-grid .gcard h3 .badge { color: #111; }
+[data-design="brutal"] .gtool:hover { background: var(--bg-sunk); }
+
+/* ---------- C. 페이퍼 (에디토리얼) ---------- */
+:root[data-design="paper"] {
+  --bg: #f3eee3; --bg-elev: #fbf8f1; --bg-sunk: #ece5d6; --bg-hover: #e6dcc8;
+  --border: #d8cdb7; --border-strong: #a99c82;
+  --text: #1c1712; --text-dim: #5f5444; --text-faint: #958971;
+  --accent: #c63d23; --accent-hover: #a8301b; --accent-weak: #f5ddd3; --accent-text: #fffaf3;
+  --ok: #2f6b3a; --ok-weak: #dde9d8; --warn: #96600c; --warn-weak: #f3e5c5; --err: #b3261e; --err-weak: #f4d9d4; --info: #34557a; --info-weak: #dde5ee;
+  --info-line: #bccadb; --warn-line: #e0c98f; --err-line: #e2b1a9; --ok-line: #b6cfb0;
+  --syn-key: #7a2e1a; --syn-str: #3e6b2f; --syn-num: #a0531b; --syn-bool: #34557a; --syn-null: #958971; --syn-punct: #6f6555; --syn-kw: #34557a; --syn-tag: #a33421; --syn-attr: #7a2e1a; --syn-fn: #7b5a14;
+  --mark: #f2d48a; --mark2: #d9e3c8; --sel: rgba(198, 61, 35, .18); --focus: rgba(198, 61, 35, .4);
+  --serif: "Noto Serif KR", "Nanum Myeongjo", "나눔명조", "Batang", "바탕", "AppleMyungjo", "Times New Roman", serif;
+  --radius: 0px; --shadow: 0 1px 0 var(--border-strong), 0 18px 40px rgba(60, 40, 10, .14);
+}
+:root[data-design="paper"][data-theme="dark"] {
+  --bg: #1a1713; --bg-elev: #211d18; --bg-sunk: #151310; --bg-hover: #2c2720;
+  --border: #3a332a; --border-strong: #5e5444;
+  --text: #efe6d3; --text-dim: #b9ad97; --text-faint: #7e7462;
+  --accent: #ff7a59; --accent-hover: #ff9478; --accent-weak: #3d2018; --accent-text: #1a1713;
+  --ok: #9ccc8a; --ok-weak: #1d2a19; --warn: #e8bd63; --warn-weak: #33280f; --err: #ff8a7a; --err-weak: #3b1b17; --info: #9db8d9; --info-weak: #1c2633;
+  --info-line: #31445d; --warn-line: #5c4818; --err-line: #66302a; --ok-line: #2f4a28;
+  --syn-key: #ffb08f; --syn-str: #b6d69a; --syn-num: #e8bd63; --syn-bool: #9db8d9; --syn-null: #7e7462; --syn-punct: #9b907c; --syn-kw: #9db8d9; --syn-tag: #ff8a7a; --syn-attr: #ffb08f; --syn-fn: #e8bd63;
+  --mark: #5c4a14; --mark2: #2a3a22; --sel: rgba(255, 122, 89, .25); --focus: rgba(255, 122, 89, .5);
+}
+[data-design="paper"] #sidebar { background: var(--bg-sunk); border-right: 1px solid var(--border-strong); }
+[data-design="paper"] .brand-logo { border-radius: 50%; background: var(--text); color: var(--bg); font-family: var(--serif); }
+[data-design="paper"] .brand-name { font-family: var(--serif); font-size: 15px; letter-spacing: -.01em; }
+[data-design="paper"] .search-btn { border-radius: 999px; background: var(--bg-elev); }
+[data-design="paper"] .nav-group-title { font-family: var(--serif); font-size: 12.5px; font-weight: 700; color: var(--text); text-transform: none; letter-spacing: 0; border-bottom: 1px solid var(--border-strong); margin: 0 6px 4px; padding: 6px 2px 4px; }
+[data-design="paper"] .nav-item { border-radius: 0; }
+[data-design="paper"] .nav-item.on { background: transparent; color: var(--accent); font-weight: 700; box-shadow: inset 3px 0 0 var(--accent); }
+[data-design="paper"] .abbr { border-radius: 999px; background: transparent; }
+[data-design="paper"] .nav-item.on .abbr { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+[data-design="paper"] #topbar { background: var(--bg); border-bottom: 3px double var(--border-strong); min-height: 64px; }
+[data-design="paper"] #toolTitle { font-family: var(--serif); font-size: 23px; font-weight: 700; letter-spacing: -.02em; }
+[data-design="paper"] #toolDesc { font-family: var(--serif); font-style: normal; color: var(--text-faint); }
+[data-design="paper"] #tabbar { background: var(--bg-sunk); }
+[data-design="paper"] .wtab { border-radius: 0; }
+[data-design="paper"] .wtab.on { border-top: 2px solid var(--accent); background: var(--bg); }
+[data-design="paper"] .btn { border-radius: 999px; }
+[data-design="paper"] .btn.primary { background: var(--text); border-color: var(--text); color: var(--bg); }
+[data-design="paper"] .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+[data-design="paper"] .inp, [data-design="paper"] select.inp { border-radius: 0; border-width: 0 0 1px; background: transparent; }
+[data-design="paper"] textarea.inp { border-width: 1px; }
+[data-design="paper"] .seg { border-radius: 999px; }
+[data-design="paper"] .pane, [data-design="paper"] .card, [data-design="paper"] .tbl-wrap, [data-design="paper"] .kvlist, [data-design="paper"] .sp-item, [data-design="paper"] .rc-step, [data-design="paper"] .op, [data-design="paper"] .rc-ops { border-radius: 0; border-color: var(--border-strong); }
+[data-design="paper"] .pane-head { background: transparent; border-bottom: 1px solid var(--text); }
+[data-design="paper"] .pane-title { font-family: var(--serif); font-size: 13.5px; }
+[data-design="paper"] .pane-foot { background: transparent; }
+[data-design="paper"] .gutter { background: transparent; }
+[data-design="paper"] .badge { border-radius: 999px; }
+[data-design="paper"] .note { border-radius: 0; border-width: 0 0 0 3px; }
+[data-design="paper"] .tab { font-family: var(--serif); }
+[data-design="paper"] .tab.on { color: var(--text); border-bottom-color: var(--accent); }
+[data-design="paper"] .tbl th { background: transparent; border-bottom: 1px solid var(--text); font-family: var(--serif); }
+[data-design="paper"] .section-title, [data-design="paper"] .modal-head h2, [data-design="paper"] .card h3 { font-family: var(--serif); }
+[data-design="paper"] .modal { border-radius: 0; }
+[data-design="paper"] .hero { border-bottom: 1px solid var(--text); padding-bottom: 16px; }
+[data-design="paper"] .hero h1 { font-family: var(--serif); font-size: 44px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+[data-design="paper"] .hero p { font-family: var(--serif); font-size: 15px; }
+[data-design="paper"] .gcard { background: transparent; border: 0; border-top: 2px solid var(--text); border-radius: 0; padding: 10px 2px 4px; }
+[data-design="paper"] .gcard h3 { font-family: var(--serif); font-size: 19px; color: var(--text); font-weight: 700; }
+[data-design="paper"] .gtool b { font-family: var(--serif); font-size: 14px; }
+[data-design="paper"] .gtool { border-radius: 0; border-bottom: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -413,6 +601,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
     <nav id="nav"></nav>
     <div class="side-foot">
       <button class="btn sm ghost" id="themeBtn" type="button" title="테마 전환">◐ 테마</button>
+      <button class="btn sm ghost" id="designBtn" type="button" title="디자인 스킨 바꾸기">▦ 디자인</button>
       <span class="sp"></span>
       <button class="btn sm ghost" id="settingsBtn" type="button" title="설정">⚙ 설정</button>
     </div>
@@ -544,7 +733,8 @@ const store = {
   clear(prefix = '') { this.keys().filter(k => k.startsWith(prefix)).forEach(k => this.del(k)); },
   size() { let n = 0; try { this.keys().forEach(k => { n += (localStorage.getItem(this.pfx + k) || '').length * 2; }); } catch (e) { /* ignore */ } return n; },
 };
-const settings = Object.assign({ theme: 'auto', autosave: true, indent: '2' }, store.get('settings', {}));
+const settings = Object.assign({ theme: 'auto', design: 'default', autosave: true, indent: '2' }, store.get('settings', {}));
+const DESIGNS = [['default', '기본', '깔끔한 기본 스타일'], ['console', '콘솔', '터미널 · IDE 감성, 고정폭 글꼴, 앰버 포인트'], ['brutal', '네오 브루탈', '굵은 테두리 · 오프셋 그림자 · 원색 블록'], ['paper', '페이퍼', '종이색 · 명조 제목 · 먹색과 주홍 포인트']];
 function saveSettings() { store.set('settings', settings); }
 const MAX_PERSIST = 300 * 1024;
 /** 작업 탭(같은 도구의 2번째 이후 인스턴스) 초기화 중이면 저장 키에 '#n'을 붙임 */
@@ -1191,6 +1381,7 @@ function openPalette() {
     { id: '@home', name: '홈', abbr: '⌂', desc: '대시보드로 이동', run: () => { location.hash = ''; showHome(); } },
     { id: '@theme', name: '테마 전환 (라이트/다크)', abbr: '◐', desc: '화면 테마 변경', run: cycleTheme },
     { id: '@settings', name: '설정', abbr: '⚙', desc: '자동 저장 · 저장 데이터 삭제 · 내보내기/가져오기', run: openSettings },
+    ...DESIGNS.map(([id, n, d]) => ({ id: '@design-' + id, name: `디자인: ${n}`, abbr: '▦', desc: d, kw: 'design theme skin 디자인 스킨 ' + id, run: () => setDesign(id) })),
     { id: '@smart', name: 'Smart Paste (입력 자동 감지)', abbr: '⚡', desc: '붙여넣은 내용을 분석해 알맞은 도구 추천', kw: 'smart paste auto detect 자동 감지 붙여넣기', run: () => SmartPaste.open('') },
   ];
   const all = TOOLS.map(t => ({ id: t.id, name: t.name, abbr: t.abbr, desc: t.desc, group: (GROUPS.find(g => g.id === t.group) || {}).name, kw: t.keywords, run: () => { location.hash = '#/' + t.id; } })).concat(extra);
@@ -1224,8 +1415,12 @@ function openPalette() {
 function applyTheme() {
   const dark = settings.theme === 'dark' || (settings.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  if (settings.design && settings.design !== 'default') document.documentElement.dataset.design = settings.design; else delete document.documentElement.dataset.design;
   $('#themeBtn').textContent = settings.theme === 'auto' ? '◐ 자동' : dark ? '☾ 다크' : '☀ 라이트';
 }
+function setDesign(d) { settings.design = d; saveSettings(); applyTheme(); toast('디자인: ' + (DESIGNS.find(x => x[0] === d) || [, d])[1]); }
+function designMenu(anchor) { openMenu(anchor, [{ header: '디자인 스킨' }].concat(DESIGNS.map(([id, name, desc]) => ({ label: `${settings.design === id ? '✓ ' : '　'}${name} — ${desc}`, onClick: () => setDesign(id) })))); }
+DU.setDesign = setDesign;
 function cycleTheme() {
   settings.theme = { auto: 'light', light: 'dark', dark: 'auto' }[settings.theme] || 'auto';
   saveSettings(); applyTheme();
@@ -1235,7 +1430,8 @@ function openSettings() {
   const body = h(`<div style="display:flex;flex-direction:column;gap:12px">
     <label class="chk"><input type="checkbox" data-ref="auto"> 입력 내용 자동 저장 (새로고침해도 복원)</label>
     <div class="note">자동 저장은 이 PC 브라우저의 localStorage에만 저장됩니다. <b>JWT 토큰, HTTP 인증 정보, HTTP 응답 본문은 자동 저장하지 않습니다.</b> 공용 PC라면 자동 저장을 끄세요.</div>
-    <div class="row"><span class="dim">테마</span><select class="inp" data-ref="theme"><option value="auto">시스템 설정 따름</option><option value="light">라이트</option><option value="dark">다크</option></select></div>
+    <div class="row"><span class="dim">테마</span><select class="inp" data-ref="theme"><option value="auto">시스템 설정 따름</option><option value="light">라이트</option><option value="dark">다크</option></select>
+      <span class="dim" style="margin-left:12px">디자인</span><select class="inp" data-ref="design">${DESIGNS.map(([id, n, d]) => `<option value="${id}">${n} — ${d}</option>`).join('')}</select></div>
     <div class="row"><span class="dim">저장된 데이터: <b data-ref="size"></b></span><span class="sp"></span>
       <button class="btn sm" data-ref="clrIn" type="button">입력 내용만 삭제</button>
       <button class="btn sm danger" data-ref="clrAll" type="button">모든 저장 데이터 삭제</button></div>
@@ -1245,7 +1441,8 @@ function openSettings() {
       <div class="faint" style="font-size:12px">브라우저 저장소는 지워질 수 있으니 중요한 환경변수·요청 컬렉션·레시피는 파일로 백업하세요. 다른 PC로 옮길 때도 사용합니다.</div></div>
     <div class="faint" style="font-size:12px">Dev Utility Hub v${VERSION} · 외부 라이브러리 / CDN / 웹폰트를 사용하지 않는 단일 HTML 파일입니다.</div></div>`);
   const r = refs(body);
-  r.auto.checked = settings.autosave; r.theme.value = settings.theme;
+  r.auto.checked = settings.autosave; r.theme.value = settings.theme; r.design.value = settings.design || 'default';
+  on(r.design, 'change', () => setDesign(r.design.value));
   const upd = () => { r.size.textContent = fmtBytes(store.size()); };
   upd();
   on(r.auto, 'change', () => { settings.autosave = r.auto.checked; saveSettings(); if (!settings.autosave) store.clear('in:'); upd(); });
@@ -7251,6 +7448,7 @@ function boot() {
     SmartPaste.openFile(f);
   });
   on($('#themeBtn'), 'click', cycleTheme);
+  on($('#designBtn'), 'click', e => designMenu(e.currentTarget));
   on($('#settingsBtn'), 'click', openSettings);
   on($('[data-home]'), 'click', () => { location.hash = ''; showHome(); });
   on($('#menuBtn'), 'click', () => document.body.classList.toggle('nav-open'));
