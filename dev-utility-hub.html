@@ -9282,6 +9282,1536 @@ defineDetector({ id: 'data-adv', test(text, c) {
 } });
 
 /* =====================================================================
+ * 인증서 뷰어 — ASN.1 DER 파서 · X.509 · CSR(PKCS#10) · PKCS#7 · JKS 키스토어 (외부 라이브러리 없음)
+ * ===================================================================== */
+const Asn1E = (() => {
+  const UNIV = { 1: 'BOOLEAN', 2: 'INTEGER', 3: 'BIT STRING', 4: 'OCTET STRING', 5: 'NULL', 6: 'OBJECT IDENTIFIER', 10: 'ENUMERATED', 12: 'UTF8String', 16: 'SEQUENCE', 17: 'SET', 18: 'NumericString', 19: 'PrintableString', 20: 'T61String', 22: 'IA5String', 23: 'UTCTime', 24: 'GeneralizedTime', 26: 'VisibleString', 28: 'UniversalString', 30: 'BMPString' };
+  function decode(b, start = 0, end = b.length, depth = 0) {
+    if (depth > 64) throw new Error('ASN.1 중첩이 너무 깊습니다');
+    let p = start;
+    if (p >= end) throw new Error(`ASN.1 데이터가 끝났습니다 (오프셋 ${start})`);
+    const t = b[p++]; const cls = t >> 6, cons = (t & 0x20) !== 0; let num = t & 0x1f;
+    if (num === 0x1f) { num = 0; let x; do { if (p >= end) throw new Error('ASN.1 태그 오류'); x = b[p++]; num = num * 128 + (x & 0x7f); } while (x & 0x80); }
+    if (p >= end) throw new Error(`ASN.1 길이 필드가 없습니다 (오프셋 ${start})`);
+    let len = b[p++], indef = false;
+    if (len === 0x80) indef = true;
+    else if (len & 0x80) { const n = len & 0x7f; if (n > 6 || p + n > end) throw new Error(`ASN.1 길이 필드 오류 (오프셋 ${start})`); len = 0; for (let i = 0; i < n; i++) len = len * 256 + b[p++]; }
+    const node = { off: start, hl: p - start, cls, cons, num, tag: t, indef };
+    if (indef) {
+      if (!cons) throw new Error('원시 형식에 부정 길이가 쓰였습니다');
+      node.children = []; let q = p;
+      while (!(b[q] === 0 && b[q + 1] === 0)) { if (q >= end) throw new Error('부정 길이 종료 표시(00 00)가 없습니다'); const c = decode(b, q, end, depth + 1); node.children.push(c); q = c.end; }
+      node.len = q - p; node.content = b.subarray(p, q); node.end = q + 2;
+    } else {
+      node.len = len; node.end = p + len;
+      if (node.end > end) throw new Error(`ASN.1 길이(${len})가 데이터 범위를 넘습니다 (오프셋 ${start})`);
+      node.content = b.subarray(p, node.end);
+      if (cons) { node.children = []; let q = p; while (q < node.end) { const c = decode(b, q, node.end, depth + 1); node.children.push(c); q = c.end; } }
+    }
+    node.raw = b.subarray(start, node.end);
+    return node;
+  }
+  /** 전체가 하나의 DER 값인지 확인 후 해석 */
+  function parseAll(b) { const n = decode(b, 0, b.length); return n; }
+  function tryEncap(content) { if (!content || content.length < 2) return null; try { const n = decode(content, 0, content.length); return n.end === content.length && (n.cons || [2, 5, 6].includes(n.num)) ? n : null; } catch (e) { return null; } }
+  function tagName(n) { return n.cls === 0 ? (UNIV[n.num] || `UNIVERSAL ${n.num}`) : n.cls === 2 ? `[${n.num}]` : n.cls === 1 ? `[APPLICATION ${n.num}]` : `[PRIVATE ${n.num}]`; }
+  function oid(n) {
+    const c = n.content || n; const out = []; let v = 0n;
+    for (let i = 0; i < c.length; i++) {
+      v = v * 128n + BigInt(c[i] & 0x7f);
+      if (!(c[i] & 0x80)) { if (!out.length) { const f = v < 80n ? v / 40n : 2n; out.push(f, v - f * 40n); } else out.push(v); v = 0n; }
+    }
+    return out.join('.');
+  }
+  const latin1 = c => { let s = ''; for (let i = 0; i < c.length; i++) s += String.fromCharCode(c[i]); return s; };
+  function str(n) {
+    const c = n.content;
+    switch (n.num) {
+      case 12: return decodeUtf8(c);
+      case 30: { let s = ''; for (let i = 0; i + 1 < c.length; i += 2) s += String.fromCharCode((c[i] << 8) | c[i + 1]); return s; }
+      case 28: { let s = ''; for (let i = 0; i + 3 < c.length; i += 4) s += String.fromCodePoint(((c[i] << 24) | (c[i + 1] << 16) | (c[i + 2] << 8) | c[i + 3]) >>> 0); return s; }
+      case 20: try { return new TextDecoder('utf-8', { fatal: true }).decode(c); } catch (e) { return latin1(c); }
+      default: return latin1(c);
+    }
+  }
+  function time(n) {
+    const s = latin1(n.content); let m, y, mo, d, hh, mi, ss, ms = 0, tz;
+    if (n.num === 23) { m = /^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?(Z|[+-]\d{4})$/.exec(s); if (!m) return null; y = +m[1] < 50 ? 2000 + +m[1] : 1900 + +m[1]; [mo, d, hh, mi, ss, tz] = [m[2], m[3], m[4], m[5], m[6] || '0', m[7]]; }
+    else { m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})?(\d{2})?(?:[.,](\d+))?(Z|[+-]\d{4})?$/.exec(s); if (!m) return null; y = +m[1]; [mo, d, hh, mi, ss] = [m[2], m[3], m[4], m[5] || '0', m[6] || '0']; if (m[7]) ms = Math.round(+('0.' + m[7]) * 1000); tz = m[8] || 'Z'; }
+    let t = Date.UTC(y, +mo - 1, +d, +hh, +mi, +ss, ms);
+    if (tz && tz !== 'Z') t -= (tz[0] === '-' ? -1 : 1) * (+tz.slice(1, 3) * 60 + +tz.slice(3)) * 60000;
+    return t;
+  }
+  function intHex(n) { let c = n.content; let i = 0; while (i < c.length - 1 && c[i] === 0) i++; return bytesToHex(c.subarray(i)); }
+  function intBig(n) { const c = n.content; if (!c.length) return 0n; let v = 0n; for (const x of c) v = v * 256n + BigInt(x); if (c[0] & 0x80) v -= 1n << BigInt(c.length * 8); return v; }
+  function bitLen(c) { let i = 0; while (i < c.length && c[i] === 0) i++; if (i >= c.length) return 0; let b = c[i], n = 0; while (b) { n++; b >>= 1; } return (c.length - i - 1) * 8 + n; }
+  return { decode, parseAll, tryEncap, tagName, oid, str, time, intHex, intBig, bitLen, latin1, UNIV };
+})();
+DU.Asn1E = Asn1E;
+
+const X509E = (() => {
+  const A = Asn1E;
+  const OID = {
+    '1.2.840.113549.1.1.1': 'RSA', '1.2.840.113549.1.1.2': 'md2WithRSAEncryption', '1.2.840.113549.1.1.4': 'md5WithRSAEncryption', '1.2.840.113549.1.1.5': 'sha1WithRSAEncryption',
+    '1.2.840.113549.1.1.10': 'RSASSA-PSS', '1.2.840.113549.1.1.11': 'sha256WithRSAEncryption', '1.2.840.113549.1.1.12': 'sha384WithRSAEncryption', '1.2.840.113549.1.1.13': 'sha512WithRSAEncryption', '1.2.840.113549.1.1.14': 'sha224WithRSAEncryption',
+    '1.2.840.10045.2.1': 'EC', '1.2.840.10045.4.1': 'ecdsa-with-SHA1', '1.2.840.10045.4.3.1': 'ecdsa-with-SHA224', '1.2.840.10045.4.3.2': 'ecdsa-with-SHA256', '1.2.840.10045.4.3.3': 'ecdsa-with-SHA384', '1.2.840.10045.4.3.4': 'ecdsa-with-SHA512',
+    '1.3.101.110': 'X25519', '1.3.101.111': 'X448', '1.3.101.112': 'Ed25519', '1.3.101.113': 'Ed448',
+    '1.2.840.10040.4.1': 'DSA', '1.2.840.10040.4.3': 'dsa-with-SHA1', '2.16.840.1.101.3.4.3.2': 'dsa-with-SHA256', '1.2.156.10197.1.501': 'SM2-with-SM3',
+    '1.2.840.10045.3.1.7': 'P-256 (prime256v1)', '1.3.132.0.34': 'P-384 (secp384r1)', '1.3.132.0.35': 'P-521 (secp521r1)', '1.3.132.0.10': 'secp256k1', '1.2.840.10045.3.1.1': 'P-192', '1.3.132.0.33': 'P-224',
+    '1.3.36.3.3.2.8.1.1.7': 'brainpoolP256r1', '1.3.36.3.3.2.8.1.1.11': 'brainpoolP384r1', '1.3.36.3.3.2.8.1.1.13': 'brainpoolP512r1',
+    '2.5.4.3': 'CN', '2.5.4.6': 'C', '2.5.4.7': 'L', '2.5.4.8': 'ST', '2.5.4.10': 'O', '2.5.4.11': 'OU', '2.5.4.5': 'serialNumber', '2.5.4.4': 'SN', '2.5.4.42': 'GN', '2.5.4.12': 'title', '2.5.4.9': 'street',
+    '2.5.4.17': 'postalCode', '2.5.4.46': 'dnQualifier', '2.5.4.65': 'pseudonym', '2.5.4.97': 'organizationIdentifier', '2.5.4.15': 'businessCategory', '2.5.4.43': 'initials', '2.5.4.44': 'generationQualifier',
+    '1.2.840.113549.1.9.1': 'emailAddress', '0.9.2342.19200300.100.1.25': 'DC', '0.9.2342.19200300.100.1.1': 'UID', '1.3.6.1.4.1.311.60.2.1.3': 'jurisdictionC', '1.3.6.1.4.1.311.60.2.1.2': 'jurisdictionST', '1.3.6.1.4.1.311.60.2.1.1': 'jurisdictionL',
+    '2.5.29.14': '주체 키 식별자 (SKI)', '2.5.29.15': '키 용도 (Key Usage)', '2.5.29.16': '개인키 사용 기간', '2.5.29.17': '주체 대체 이름 (SAN)', '2.5.29.18': '발급자 대체 이름', '2.5.29.19': '기본 제약 (Basic Constraints)',
+    '2.5.29.30': '이름 제약 (Name Constraints)', '2.5.29.31': 'CRL 배포 지점', '2.5.29.32': '인증서 정책', '2.5.29.33': '정책 매핑', '2.5.29.35': '발급자 키 식별자 (AKI)', '2.5.29.36': '정책 제약', '2.5.29.37': '확장 키 용도 (EKU)',
+    '2.5.29.46': '최신 CRL', '2.5.29.54': 'anyPolicy 금지', '1.3.6.1.5.5.7.1.1': '기관 정보 접근 (AIA)', '1.3.6.1.5.5.7.1.11': '주체 정보 접근 (SIA)', '1.3.6.1.5.5.7.1.24': 'TLS 기능 (OCSP Must-Staple)',
+    '1.3.6.1.4.1.11129.2.4.2': '인증서 투명성 SCT 목록', '1.3.6.1.4.1.11129.2.4.3': 'CT 사전 인증서 표시(poison)', '2.16.840.1.113730.1.1': 'Netscape 인증서 유형', '2.16.840.1.113730.1.13': 'Netscape 주석',
+    '1.3.6.1.4.1.311.21.7': 'MS 인증서 템플릿', '1.3.6.1.4.1.311.21.10': 'MS 응용 프로그램 정책', '1.3.6.1.4.1.311.20.2': 'MS 인증서 템플릿 이름', '1.3.6.1.4.1.311.21.1': 'MS CA 버전',
+    '1.3.6.1.5.5.7.3.1': 'TLS 웹 서버 인증 (serverAuth)', '1.3.6.1.5.5.7.3.2': 'TLS 웹 클라이언트 인증 (clientAuth)', '1.3.6.1.5.5.7.3.3': '코드 서명 (codeSigning)', '1.3.6.1.5.5.7.3.4': '이메일 보호 (emailProtection)',
+    '1.3.6.1.5.5.7.3.8': '타임스탬프 (timeStamping)', '1.3.6.1.5.5.7.3.9': 'OCSP 서명 (OCSPSigning)', '2.5.29.37.0': '모든 용도 (anyExtendedKeyUsage)', '1.3.6.1.4.1.311.20.2.2': '스마트카드 로그온', '1.3.6.1.4.1.311.10.3.3': 'MS SGC', '2.16.840.1.113730.4.1': 'Netscape SGC',
+    '1.3.6.1.5.5.7.48.1': 'OCSP', '1.3.6.1.5.5.7.48.2': 'CA 발급자 (caIssuers)', '1.3.6.1.5.5.7.48.3': '타임스탬프', '1.3.6.1.5.5.7.48.5': 'CA 저장소',
+    '2.23.140.1.2.1': 'CA/B 도메인 검증 (DV)', '2.23.140.1.2.2': 'CA/B 조직 검증 (OV)', '2.23.140.1.2.3': 'CA/B 개인 검증 (IV)', '2.23.140.1.1': 'CA/B 확장 검증 (EV)', '2.5.29.32.0': '모든 정책 (anyPolicy)',
+    '1.3.6.1.5.5.7.2.1': 'CPS URI', '1.3.6.1.5.5.7.2.2': '사용자 고지', '1.3.6.1.4.1.311.17.2': 'MS 로컬 머신 키셋',
+    '1.2.840.113549.1.7.1': 'data', '1.2.840.113549.1.7.2': 'signedData', '1.2.840.113549.1.9.14': 'extensionRequest', '1.2.840.113549.1.9.7': 'challengePassword', '1.2.840.113549.1.9.2': 'unstructuredName',
+    '1.3.14.3.2.26': 'SHA-1', '2.16.840.1.101.3.4.2.1': 'SHA-256', '2.16.840.1.101.3.4.2.2': 'SHA-384', '2.16.840.1.101.3.4.2.3': 'SHA-512', '1.2.840.113549.1.1.8': 'MGF1',
+    '1.3.6.1.4.1.42.2.17.1.1': 'Sun JKS 키 보호', '1.2.840.113549.1.12.1.3': 'PBE-SHA1-3DES', '1.2.840.113549.1.5.13': 'PBES2',
+  };
+  const oname = o => OID[o] || (o.startsWith('1.2.410.200004') ? `한국 공동(공인)인증 체계 OID ${o}` : o.startsWith('1.2.410.') ? `한국 기관 OID ${o}` : o);
+  const KU = ['digitalSignature (전자서명)', 'nonRepudiation (부인방지)', 'keyEncipherment (키 암호화)', 'dataEncipherment (데이터 암호화)', 'keyAgreement (키 합의)', 'keyCertSign (인증서 서명)', 'cRLSign (CRL 서명)', 'encipherOnly', 'decipherOnly'];
+  const CURVE_BITS = { '1.2.840.10045.3.1.7': 256, '1.3.132.0.34': 384, '1.3.132.0.35': 521, '1.3.132.0.10': 256, '1.2.840.10045.3.1.1': 192, '1.3.132.0.33': 224, '1.3.36.3.3.2.8.1.1.7': 256, '1.3.36.3.3.2.8.1.1.11': 384, '1.3.36.3.3.2.8.1.1.13': 512 };
+  const kids = n => n.children || [];
+  const isCtx = (n, k) => n && n.cls === 2 && n.num === k;
+  function parseName(n) {
+    const rdns = kids(n).map(set => kids(set).map(atv => { const o = A.oid(atv.children[0]); const v = atv.children[1]; return { oid: o, short: OID[o] && !/\s/.test(OID[o]) ? OID[o] : o, value: v.cls === 0 && [12, 19, 20, 22, 26, 28, 30, 18].includes(v.num) ? A.str(v) : bytesToHex(v.content) }; }));
+    return { rdns, der: n.raw, hex: bytesToHex(n.raw) };
+  }
+  const rfcEsc = s => s.replace(/([,+"\\<>;])/g, '\\$1').replace(/^([ #])/, '\\$1').replace(/ $/, '\\ ');
+  function dnRfc(name) { return name.rdns.slice().reverse().map(r => r.map(a => `${a.short}=${rfcEsc(a.value)}`).join('+')).join(','); }
+  function dnOpenssl(name) { return name.rdns.map(r => r.map(a => `${a.short} = ${a.value}`).join(' + ')).join(', '); }
+  function dnGet(name, short) { for (const r of name.rdns) for (const a of r) if (a.short === short) return a.value; return ''; }
+  function algId(n) { const o = A.oid(n.children[0]); return { oid: o, name: oname(o), params: n.children[1] || null }; }
+  function ipStr(b) {
+    if (b.length === 4) return Array.from(b).join('.');
+    if (b.length === 16) { const g = []; for (let i = 0; i < 16; i += 2) g.push(((b[i] << 8) | b[i + 1]).toString(16)); return compressV6(g); }
+    if (b.length === 8 || b.length === 32) { const h = b.length / 2; return `${ipStr(b.subarray(0, h))}/${ipStr(b.subarray(h))}`; }
+    return bytesToHex(b);
+  }
+  function compressV6(g) {
+    let best = -1, bl = 0; for (let i = 0; i < 8;) { if (g[i] === '0') { let j = i; while (j < 8 && g[j] === '0') j++; if (j - i > bl && j - i > 1) { best = i; bl = j - i; } i = j; } else i++; }
+    if (best < 0) return g.join(':');
+    return (g.slice(0, best).join(':') + '::' + g.slice(best + bl).join(':'));
+  }
+  function genName(n) {
+    switch (n.num) {
+      case 0: { const o = A.oid(n.children[0]); let v = ''; try { const inner = n.children[1].children[0]; v = inner.cls === 0 && [12, 19, 22, 30].includes(inner.num) ? A.str(inner) : bytesToHex(inner.content); } catch (e) { v = '?'; } return { type: 'otherName', label: `기타(${o === '1.3.6.1.4.1.311.20.2.3' ? 'UPN' : o})`, value: v }; }
+      case 1: return { type: 'email', label: '이메일', value: A.latin1(n.content) };
+      case 2: return { type: 'dns', label: 'DNS', value: A.latin1(n.content) };
+      case 4: return { type: 'dir', label: '디렉터리 이름', value: dnRfc(parseName(n.children[0])) };
+      case 6: return { type: 'uri', label: 'URI', value: A.latin1(n.content) };
+      case 7: return { type: 'ip', label: 'IP', value: ipStr(n.content) };
+      case 8: return { type: 'rid', label: '등록 ID', value: A.oid(n) };
+      default: return { type: 'other', label: `[${n.num}]`, value: bytesToHex(n.content) };
+    }
+  }
+  const genNames = n => kids(n).map(genName);
+  function bits(bs) { const c = bs.content; const out = []; for (let i = 0; i < (c.length - 1) * 8 - c[0]; i++) if ((c[1 + (i >> 3)] >> (7 - (i & 7))) & 1) out.push(i); return out; }
+  function parseExt(o, v) {
+    const n = A.decode(v, 0, v.length);
+    switch (o) {
+      case '2.5.29.17': case '2.5.29.18': { const g = genNames(n); return { list: g, text: g.map(x => `${x.label}: ${x.value}`).join(', ') }; }
+      case '2.5.29.15': { const b = bits(n); return { list: b.map(i => KU[i] || `bit ${i}`), text: b.map(i => (KU[i] || `bit${i}`).split(' ')[0]).join(', ') }; }
+      case '2.5.29.37': { const l = kids(n).map(x => A.oid(x)); return { oids: l, list: l.map(oname), text: l.map(oname).join(', ') }; }
+      case '2.5.29.19': { let ca = false, pl = null; kids(n).forEach(x => { if (x.num === 1) ca = x.content[0] !== 0; if (x.num === 2) pl = Number(A.intBig(x)); }); return { ca, pathLen: pl, text: `CA: ${ca ? '예' : '아니오'}${pl != null ? `, 경로 길이 제한: ${pl}` : ''}` }; }
+      case '2.5.29.14': return { hex: bytesToHex(n.content), text: colonHex(n.content) };
+      case '2.5.29.35': { const r = {}; kids(n).forEach(x => { if (x.num === 0) r.keyId = bytesToHex(x.content); if (x.num === 1) r.issuer = genNames(x).map(g => g.value).join(', '); if (x.num === 2) r.serial = bytesToHex(x.content); }); return Object.assign(r, { text: [r.keyId && `키 ID: ${colonHex(hexToBytes(r.keyId))}`, r.issuer && `발급자: ${r.issuer}`, r.serial && `일련번호: ${r.serial}`].filter(Boolean).join(' · ') }); }
+      case '2.5.29.31': case '2.5.29.46': {
+        const urls = []; kids(n).forEach(dp => kids(dp).forEach(x => { if (x.num === 0) kids(x).forEach(fn => { if (fn.num === 0) genNames(fn).forEach(g => urls.push(g.value)); }); }));
+        return { list: urls, text: urls.join(', ') || '(이름 없음)' };
+      }
+      case '1.3.6.1.5.5.7.1.1': case '1.3.6.1.5.5.7.1.11': { const l = kids(n).map(ad => ({ method: oname(A.oid(ad.children[0])), loc: genName(ad.children[1]).value })); return { list: l.map(x => `${x.method}: ${x.loc}`), text: l.map(x => `${x.method} - ${x.loc}`).join(', ') }; }
+      case '2.5.29.32': {
+        const l = kids(n).map(pi => { const o = A.oid(pi.children[0]); const q = []; if (pi.children[1]) kids(pi.children[1]).forEach(qi => { const qo = A.oid(qi.children[0]); const qv = qi.children[1]; if (qo === '1.3.6.1.5.5.7.2.1' && qv) q.push('CPS: ' + A.str(qv)); else if (qv) q.push(oname(qo)); }); return { oid: o, name: oname(o), q }; });
+        return { oids: l.map(x => x.oid), list: l.map(x => `${x.oid === x.name ? x.oid : `${x.name} (${x.oid})`}${x.q.length ? ' — ' + x.q.join(', ') : ''}`), text: l.map(x => x.oid).join(', ') };
+      }
+      case '1.3.6.1.4.1.11129.2.4.2': return { text: `SCT 데이터 ${n.content.length}바이트` };
+      case '2.16.840.1.113730.1.13': return { text: A.str(n) };
+      default: return { text: bytesToHex(v.length > 64 ? v.subarray(0, 64) : v) + (v.length > 64 ? '…' : '') };
+    }
+  }
+  const colonHex = b => bytesToHex(b, ':').toUpperCase();
+  function spkiInfo(n) {
+    const alg = algId(n.children[0]); const bs = n.children[1]; const key = bs.content.subarray(1);
+    const info = { alg: alg.oid, algName: alg.name, raw: n.raw };
+    try {
+      if (alg.oid === '1.2.840.113549.1.1.1' || alg.oid === '1.2.840.113549.1.1.10') { const k = A.decode(key, 0, key.length); info.bits = A.bitLen(k.children[0].content); info.exponent = Number(A.intBig(k.children[1])); info.modulus = A.intHex(k.children[0]); info.text = `RSA ${info.bits}비트 (공개 지수 ${info.exponent})`; }
+      else if (alg.oid === '1.2.840.10045.2.1') { const c = alg.params && alg.params.num === 6 ? A.oid(alg.params) : ''; info.curve = oname(c); info.bits = CURVE_BITS[c] || null; info.text = `EC ${info.curve}${info.bits ? ` (${info.bits}비트)` : ''}`; }
+      else if (['1.3.101.112', '1.3.101.113', '1.3.101.110', '1.3.101.111'].includes(alg.oid)) { info.bits = { '1.3.101.112': 256, '1.3.101.113': 456, '1.3.101.110': 253, '1.3.101.111': 448 }[alg.oid]; info.text = `${alg.name} (${info.bits}비트)`; }
+      else if (alg.oid === '1.2.840.10040.4.1') { const p = alg.params; info.bits = p ? A.bitLen(p.children[0].content) : null; info.text = `DSA ${info.bits || ''}비트`; }
+      else info.text = alg.name;
+    } catch (e) { info.text = alg.name; }
+    return info;
+  }
+  function fp(der) { return { sha1: colonHex(Hash.digest('sha1', der)), sha256: colonHex(Hash.digest('sha256', der)) }; }
+  function parseCert(der) {
+    const root = A.decode(der, 0, der.length);
+    if (root.num !== 16 || kids(root).length < 3) throw new Error('X.509 인증서 구조가 아닙니다');
+    const tbs = root.children[0], ch = kids(tbs); let i = 0, version = 1;
+    if (isCtx(ch[0], 0)) { version = Number(A.intBig(ch[0].children[0])) + 1; i++; }
+    const serial = ch[i++], sig = algId(ch[i++]), issuer = parseName(ch[i++]), validity = ch[i++], subject = parseName(ch[i++]), spki = spkiInfo(ch[i++]);
+    const exts = [];
+    for (; i < ch.length; i++) if (isCtx(ch[i], 3)) kids(ch[i].children[0]).forEach(e => {
+      const o = A.oid(e.children[0]); let crit = false, val;
+      if (e.children[1].num === 1) { crit = e.children[1].content[0] !== 0; val = e.children[2]; } else val = e.children[1];
+      let parsed; try { parsed = parseExt(o, val.content); } catch (err) { parsed = { text: '해석 실패: ' + err.message }; }
+      exts.push(Object.assign({ oid: o, name: oname(o), critical: crit }, parsed));
+    });
+    const ext = o => exts.find(e => e.oid === o);
+    const c = {
+      kind: 'cert', der, root, version, serialHex: A.intHex(serial).toUpperCase(), serialDec: A.intBig(serial).toString(), sigAlg: sig.name, sigAlgOid: sig.oid, issuer, subject,
+      notBefore: A.time(validity.children[0]), notAfter: A.time(validity.children[1]), spki, exts, fingerprint: fp(der),
+      sigBits: root.children[2] ? (root.children[2].content.length - 1) * 8 : 0,
+    };
+    c.ski = ext('2.5.29.14') && ext('2.5.29.14').hex; c.akiKey = ext('2.5.29.35') && ext('2.5.29.35').keyId;
+    c.isCA = !!(ext('2.5.29.19') && ext('2.5.29.19').ca);
+    c.selfIssued = issuer.hex === subject.hex;
+    c.selfSigned = c.selfIssued && (!c.akiKey || !c.ski || c.akiKey === c.ski);
+    c.san = ext('2.5.29.17') ? ext('2.5.29.17').list : [];
+    c.cn = dnGet(subject, 'CN') || dnRfc(subject);
+    return c;
+  }
+  function parseCsr(der) {
+    const root = A.decode(der, 0, der.length); const info = root.children[0]; const ch = kids(info);
+    const csr = { kind: 'csr', der, root, version: Number(A.intBig(ch[0])) + 1, subject: parseName(ch[1]), spki: spkiInfo(ch[2]), sigAlg: algId(root.children[1]).name, exts: [], attrs: [] };
+    const attrs = ch.find(x => isCtx(x, 0));
+    if (attrs) kids(attrs).forEach(a => {
+      const o = A.oid(a.children[0]);
+      if (o === '1.2.840.113549.1.9.14') kids(a.children[1].children[0]).forEach(e => { const eo = A.oid(e.children[0]); let crit = false, val; if (e.children[1].num === 1) { crit = e.children[1].content[0] !== 0; val = e.children[2]; } else val = e.children[1]; let parsed; try { parsed = parseExt(eo, val.content); } catch (err) { parsed = { text: '해석 실패' }; } csr.exts.push(Object.assign({ oid: eo, name: oname(eo), critical: crit }, parsed)); });
+      else csr.attrs.push({ oid: o, name: oname(o), value: (() => { try { const v = a.children[1].children[0]; return A.str(v); } catch (e) { return ''; } })() });
+    });
+    csr.cn = dnGet(csr.subject, 'CN') || dnRfc(csr.subject);
+    csr.fingerprint = fp(der);
+    return csr;
+  }
+  function certsFromPkcs7(der) {
+    const root = A.decode(der, 0, der.length);
+    if (A.oid(root.children[0]) !== '1.2.840.113549.1.7.2') throw new Error('PKCS#7 signedData가 아닙니다');
+    const sd = root.children[1].children[0];
+    const certsNode = kids(sd).find(x => isCtx(x, 0));
+    return certsNode ? kids(certsNode).map(x => x.raw) : [];
+  }
+  /** DER 바이트가 어떤 구조인지 추정 */
+  function sniffDer(der) {
+    let r; try { r = A.decode(der, 0, der.length); } catch (e) { return null; }
+    if (r.num !== 16 || !r.children) return null;
+    const c0 = r.children[0];
+    if (c0 && c0.num === 6) { const o = A.oid(c0); if (o === '1.2.840.113549.1.7.2') return 'pkcs7'; return null; }
+    if (c0 && c0.num === 2 && r.children[1] && r.children[1].num === 16 && r.children[1].children && r.children[1].children[0] && r.children[1].children[0].num === 6 && A.oid(r.children[1].children[0]).startsWith('1.2.840.113549.1.7')) return 'pkcs12';
+    if (c0 && c0.num === 16 && c0.children) {
+      const t = c0.children;
+      if (r.children.length === 3 && t[0] && t[0].cls === 2 && t[0].num === 0) return 'cert';
+      if (r.children.length === 3 && t[0] && t[0].num === 2 && t.length >= 6) return 'cert';
+      if (r.children.length === 3 && t[0] && t[0].num === 2 && t.length <= 4 && t[1] && t[1].num === 16 && t[2] && t[2].num === 16 && t[2].children && t[2].children[0] && t[2].children[0].num === 16) return 'csr';
+      if (t[0] && t[0].num === 6 && r.children.length === 2) return 'spki';
+    }
+    if (c0 && c0.num === 2 && r.children.length >= 2 && r.children.every(x => x.num === 2)) return r.children.length === 2 ? 'rsapub' : 'rsapriv';
+    return null;
+  }
+  return { parseCert, parseCsr, certsFromPkcs7, sniffDer, spkiInfo, dnRfc, dnOpenssl, dnGet, oname, OID, colonHex, ipStr, fp, parseName };
+})();
+DU.X509E = X509E;
+
+/** JKS / JCEKS 키스토어 목록 (비밀번호 없이 인증서 목록 표시, 비밀번호 입력 시 무결성 확인) */
+const JksE = (() => {
+  function parse(b, password) {
+    const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    const magic = dv.getUint32(0);
+    if (magic !== 0xFEEDFEED && magic !== 0xCECECECE) throw new Error('JKS 키스토어가 아닙니다');
+    const type = magic === 0xFEEDFEED ? 'JKS' : 'JCEKS';
+    const version = dv.getUint32(4), count = dv.getUint32(8); let p = 12;
+    const need = n => { if (p + n > b.length) throw new Error('키스토어 데이터가 잘렸습니다'); };
+    const utf = () => { need(2); const n = dv.getUint16(p); p += 2; need(n); const s = decodeUtf8(b.subarray(p, p + n)); p += n; return s; };
+    const u32 = () => { need(4); const v = dv.getUint32(p); p += 4; return v; };
+    const entries = []; let stopped = null;
+    for (let i = 0; i < count; i++) {
+      const tag = u32(); const alias = utf(); need(8); const ts = Number(dv.getBigUint64(p)); p += 8;
+      if (tag === 1) {
+        const kl = u32(); need(kl); const keyBytes = b.subarray(p, p + kl); p += kl;
+        let keyAlg = ''; try { const k = Asn1E.decode(keyBytes, 0, keyBytes.length); keyAlg = X509E.oname(Asn1E.oid(k.children[0].children[0])); } catch (e) { keyAlg = '?'; }
+        const n = u32(); const chain = [];
+        for (let k = 0; k < n; k++) { if (version === 2) utf(); const cl = u32(); need(cl); chain.push(b.subarray(p, p + cl)); p += cl; }
+        entries.push({ type: 'PrivateKeyEntry', alias, date: ts, keyAlg, keySize: kl, chain });
+      } else if (tag === 2) {
+        if (version === 2) utf(); const cl = u32(); need(cl);
+        entries.push({ type: 'trustedCertEntry', alias, date: ts, chain: [b.subarray(p, p + cl)] }); p += cl;
+      } else { stopped = `${alias}: 비밀키(SecretKey) 항목은 Java 직렬화 형식이라 이후 항목을 읽을 수 없습니다`; entries.push({ type: 'SecretKeyEntry', alias, date: ts, chain: [] }); break; }
+    }
+    let integrity = null;
+    if (!stopped && p + 20 <= b.length) {
+      const digest = b.subarray(p, p + 20);
+      if (password) {
+        const pw = new Uint8Array(password.length * 2); for (let i = 0; i < password.length; i++) { pw[2 * i] = password.charCodeAt(i) >> 8; pw[2 * i + 1] = password.charCodeAt(i) & 255; }
+        const salt = utf8('Mighty Aphrodite'); const all = new Uint8Array(pw.length + salt.length + p); all.set(pw); all.set(salt, pw.length); all.set(b.subarray(0, p), pw.length + salt.length);
+        const h = Hash.digest('sha1', all); integrity = h.every((x, i) => x === digest[i]);
+      }
+    }
+    return { type, version, count, entries, stopped, integrity };
+  }
+  return { parse };
+})();
+DU.JksE = JksE;
+
+/* ---------- 입력 해석: PEM 텍스트 / DER / JKS / PKCS#7 ---------- */
+const CertInE = (() => {
+  const PEM_RE = /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/g;
+  function fromBytes(b, name = '') {
+    if (b.length >= 4 && ((b[0] === 0xFE && b[1] === 0xED && b[2] === 0xFE && b[3] === 0xED) || (b[0] === 0xCE && b[1] === 0xCE && b[2] === 0xCE && b[3] === 0xCE))) return { source: 'JKS', jks: b };
+    if (b[0] === 0x30) {
+      const k = X509E.sniffDer(b);
+      if (k) return { source: 'DER', blocks: [{ type: k, der: b, label: name || 'DER' }] };
+    }
+    const text = decodeBytes(b).text;
+    return fromText(text);
+  }
+  function fromText(text) {
+    const blocks = []; const notes = []; let m;
+    PEM_RE.lastIndex = 0;
+    while ((m = PEM_RE.exec(text))) {
+      const label = m[1]; const body = m[2].replace(/^[\w-]+:.*$/gm, '').replace(/[^A-Za-z0-9+/=]/g, '');
+      if (/PRIVATE KEY/.test(label)) { notes.push(`${label} 블록은 개인키라서 표시하지 않습니다 (이 입력은 저장되지 않습니다)`); continue; }
+      let der; try { der = b64ToBytes(body); } catch (e) { notes.push(`${label}: Base64 오류`); continue; }
+      const type = /CERTIFICATE REQUEST/.test(label) ? 'csr' : /PKCS7|CMS/.test(label) ? 'pkcs7' : /^RSA PUBLIC KEY$/.test(label) ? 'rsapub' : /PUBLIC KEY/.test(label) ? 'spki' : /CERTIFICATE/.test(label) ? 'cert' : (X509E.sniffDer(der) || 'unknown');
+      blocks.push({ type, der: type === 'cert' && /TRUSTED/.test(label) ? firstTlv(der) : der, label });
+    }
+    if (!blocks.length) {
+      const s = text.trim().replace(/^"|"$/g, '').replace(/\\n|\\r|\s/g, '');
+      if (/^MII[A-Za-z0-9+/=_-]{40,}$/.test(s) || /^[A-Za-z0-9+/]{60,}={0,2}$/.test(s)) {
+        try { const der = b64ToBytes(s); const k = X509E.sniffDer(der); if (k) blocks.push({ type: k, der, label: 'Base64(헤더 없음)' }); } catch (e) { /* ignore */ }
+      } else if (/^([0-9a-fA-F]{2}[\s:]?){32,}$/.test(text.trim())) {
+        try { const der = hexToBytes(text); const k = X509E.sniffDer(der); if (k) blocks.push({ type: k, der, label: 'HEX' }); } catch (e) { /* ignore */ }
+      }
+    }
+    return { source: 'PEM', blocks, notes };
+  }
+  function firstTlv(der) { try { return Asn1E.decode(der, 0, der.length).raw; } catch (e) { return der; } }
+  /** → { items: [...], notes, source, jks? } */
+  function analyze(input, opt = {}) {
+    const r = typeof input === 'string' ? fromText(input) : fromBytes(input, opt.name);
+    const out = { source: r.source, items: [], notes: (r.notes || []).slice() };
+    if (r.jks) {
+      const j = JksE.parse(r.jks, opt.password);
+      out.jks = j; out.source = j.type;
+      if (j.stopped) out.notes.push(j.stopped);
+      j.entries.forEach(e => e.chain.forEach((der, k) => { try { const c = X509E.parseCert(der); c.alias = e.alias; c.entryType = e.type; c.chainPos = k; out.items.push(c); } catch (err) { out.notes.push(`${e.alias}: 인증서 해석 실패 — ${err.message}`); } }));
+      return out;
+    }
+    (r.blocks || []).forEach(bk => {
+      try {
+        if (bk.type === 'cert') out.items.push(X509E.parseCert(bk.der));
+        else if (bk.type === 'csr') out.items.push(X509E.parseCsr(bk.der));
+        else if (bk.type === 'pkcs7') { const cs = X509E.certsFromPkcs7(bk.der); if (!cs.length) out.notes.push('PKCS#7에 인증서가 없습니다'); cs.forEach(d => out.items.push(X509E.parseCert(d))); out.source = 'PKCS#7'; }
+        else if (bk.type === 'spki') { const n = Asn1E.decode(bk.der, 0, bk.der.length); out.items.push({ kind: 'pubkey', der: bk.der, root: n, spki: X509E.spkiInfo(n), fingerprint: X509E.fp(bk.der) }); }
+        else if (bk.type === 'rsapub') { const n = Asn1E.decode(bk.der, 0, bk.der.length); out.items.push({ kind: 'pubkey', der: bk.der, root: n, spki: { algName: 'RSA (PKCS#1)', bits: Asn1E.bitLen(n.children[0].content), exponent: Number(Asn1E.intBig(n.children[1])), text: `RSA ${Asn1E.bitLen(n.children[0].content)}비트 (PKCS#1)` }, fingerprint: X509E.fp(bk.der) }); }
+        else if (bk.type === 'pkcs12') out.notes.push('PKCS#12(.p12/.pfx) 키스토어는 내용이 암호화되어 있어 목록 표시를 지원하지 않습니다. keytool -list -v -keystore 파일.p12 -storetype PKCS12 를 사용하세요');
+        else if (bk.type === 'rsapriv') out.notes.push('RSA 개인키(PKCS#1)는 표시하지 않습니다');
+        else out.notes.push(`${bk.label}: 알 수 없는 구조`);
+      } catch (e) { out.notes.push(`${bk.label}: 해석 실패 — ${e.message}`); }
+    });
+    return out;
+  }
+  /** 체인 분석 */
+  function chain(certs) {
+    const cs = certs.filter(c => c.kind === 'cert'); const findings = [];
+    if (!cs.length) return { findings, roles: [] };
+    const roles = cs.map(c => (c.selfSigned ? '루트 (자체 서명)' : c.isCA ? '중간 CA' : '최종 (리프)'));
+    if (cs.length > 1) {
+      let ordered = true;
+      for (let i = 0; i < cs.length - 1; i++) if (cs[i].issuer.hex !== cs[i + 1].subject.hex) ordered = false;
+      findings.push(ordered ? { lv: 'ok', msg: '체인 순서가 올바릅니다 (각 인증서의 발급자가 다음 인증서의 주체)' } : { lv: 'warn', msg: '체인 순서가 표준(리프 → 중간 → 루트)과 다르거나 서로 관련 없는 인증서가 섞여 있습니다' });
+    }
+    cs.forEach((c, i) => {
+      if (c.selfSigned) return;
+      const iss = cs.find(x => x !== c && x.subject.hex === c.issuer.hex);
+      if (!iss) findings.push({ lv: i === cs.length - 1 && c.isCA ? 'info' : 'warn', msg: `${c.cn}: 발급자 인증서(${X509E.dnGet(c.issuer, 'CN') || X509E.dnRfc(c.issuer)})가 목록에 없습니다${c.isCA ? ' — 루트는 보통 신뢰 저장소에 있으므로 서버 체인에서 생략해도 됩니다' : ' — 서버에 중간 인증서가 빠지면 일부 클라이언트(Java 등)에서 PKIX path building failed 오류가 납니다'}` });
+      else if (c.akiKey && iss.ski && c.akiKey !== iss.ski) findings.push({ lv: 'err', msg: `${c.cn}: AKI(${c.akiKey.slice(0, 16)}…)와 발급자의 SKI(${iss.ski.slice(0, 16)}…)가 다릅니다 — 이름만 같은 다른 인증서일 수 있습니다` });
+      else if (!iss.isCA) findings.push({ lv: 'warn', msg: `${c.cn}: 발급자 인증서에 CA 기본 제약이 없습니다` });
+    });
+    const now = Date.now();
+    cs.forEach(c => { if (c.notAfter < now) findings.push({ lv: 'err', msg: `${c.cn}: 만료됨 (${fmtKst(c.notAfter)})` }); else if (c.notBefore > now) findings.push({ lv: 'warn', msg: `${c.cn}: 아직 유효 기간이 시작되지 않았습니다` }); else if (c.notAfter - now < 30 * 86400000) findings.push({ lv: 'warn', msg: `${c.cn}: ${Math.ceil((c.notAfter - now) / 86400000)}일 후 만료` }); });
+    cs.forEach(c => { if (/sha1With|md5With|md2With/i.test(c.sigAlg) && !c.selfSigned) findings.push({ lv: 'warn', msg: `${c.cn}: 취약한 서명 알고리즘 ${c.sigAlg}` }); if (c.spki.algName === 'RSA' && c.spki.bits < 2048) findings.push({ lv: 'warn', msg: `${c.cn}: RSA ${c.spki.bits}비트 — 2048비트 이상 권장` }); });
+    return { findings, roles };
+  }
+  function toPem(der, label = 'CERTIFICATE') { return `-----BEGIN ${label}-----\n${bytesToB64(der).replace(/(.{64})/g, '$1\n').replace(/\n$/, '')}\n-----END ${label}-----`; }
+  return { analyze, chain, toPem, fromText };
+})();
+DU.CertInE = CertInE;
+
+injectCss(`
+.crt-view { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.crt-view > * { flex-shrink: 0; }
+.crt-card { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elev); overflow: hidden; }
+.crt-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 9px 12px; background: var(--bg-sunk); border-bottom: 1px solid var(--border); }
+.crt-head b { font-size: 14px; }
+.crt-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+.crt-tree { font: 12px/19px var(--mono); padding: 6px 8px 20px; }
+.crt-tree .an { white-space: nowrap; cursor: default; border-radius: 3px; padding: 0 4px; }
+.crt-tree .an:hover { background: var(--bg-hover); }
+.crt-tree .ak { padding-left: 18px; border-left: 1px dotted var(--border-strong); margin-left: 5px; }
+.crt-tree .at { color: var(--syn-kw); font-weight: 600; } .crt-tree .ao { color: var(--text-faint); } .crt-tree .av { color: var(--syn-str); }
+.crt-tree .tg { cursor: pointer; color: var(--text-faint); display: inline-block; width: 12px; }
+.crt-fp { font-family: var(--mono); font-size: 11.5px; word-break: break-all; }
+`);
+
+defineTool({
+  id: 'cert-viewer', group: 'encode', abbr: 'CRT', name: '인증서 뷰어',
+  desc: 'X.509 PEM/DER · 체인 분석 · CSR · PKCS#7 · JKS 키스토어 목록 · 지문 · ASN.1 구조',
+  keywords: 'certificate cert x509 pem der crt cer csr pkcs7 p7b jks keystore ssl tls 인증서 체인 만료 지문 fingerprint asn1 san 공동인증서',
+  inputs: { input: '인증서' }, fill: true,
+  help: `PEM(<code>-----BEGIN CERTIFICATE-----</code>) 여러 개(체인), DER/CRT/CER 파일, PKCS#7(.p7b), CSR, 공개키, <b>JKS 키스토어</b>를 분석합니다. 파일은 패널에 끌어다 놓거나 [파일 열기]로 엽니다.<br>
+    JKS는 비밀번호 없이 인증서 목록을 보여줍니다. 비밀번호를 입력하면 키스토어 무결성(변조 여부)만 확인합니다. PKCS#12는 암호화 형식이라 목록 표시를 지원하지 않습니다.<br>
+    입력은 저장되지 않으며 개인키 블록은 표시하지 않습니다. 실시간 서버 인증서는 브라우저에서 가져올 수 없으므로 <code>openssl s_client -connect host:443 -showcerts</code> 결과를 붙여넣으세요.`,
+  init(root) {
+    const pw = h('<input class="inp sm" type="password" placeholder="JKS 비밀번호 (무결성 확인, 선택)" autocomplete="off" style="width:220px">');
+    const bar = h('<div class="toolbar"></div>');
+    let bytesIn = null, fileName = '';
+    bar.append(btn('분석', () => run(), 'primary', 'Ctrl+Enter'), btn('파일 열기', async () => { const f = await pickFile('.pem,.crt,.cer,.der,.p7b,.p7c,.csr,.jks,.keystore,.truststore,.p12,.pfx,.txt'); if (f) loadFile(f); }), pw,
+      h('<span class="sp"></span>'), sampleBtn('예제', () => { bytesIn = null; inp.set(CERT_SAMPLE_E); run(); }));
+    const inp = Pane({ title: '인증서 입력 (PEM · Base64) — 저장되지 않음', placeholder: '-----BEGIN CERTIFICATE-----\nMIID…\n-----END CERTIFICATE-----\n\nopenssl s_client -showcerts 결과를 그대로 붙여넣어도 됩니다', actions: ['open', 'wrap', 'clear'] });
+    const res = h('<div class="pane"><div class="pane-head"><span class="pane-title">분석 결과</span><span class="sp"></span></div><div class="pane-view crt-view"></div></div>');
+    const view = $('.pane-view', res);
+    const split = h('<div class="split"></div>'); split.append(inp.el, res);
+    root.append(bar, split);
+    async function loadFile(f) {
+      const b = new Uint8Array(await f.arrayBuffer()); bytesIn = b; fileName = f.name;
+      const txt = decodeBytes(b.subarray(0, 4096)).text;
+      inp.set(/-----BEGIN/.test(txt) ? decodeBytes(b).text : `(바이너리 파일: ${f.name} · ${fmtBytes(f.size)})`, { snap: false });
+      run();
+    }
+    on(inp.el, 'drop', e => { const f = e.dataTransfer.files[0]; if (!f) return; e.preventDefault(); e.stopImmediatePropagation(); inp.el.classList.remove('drop'); loadFile(f); }, true);
+    inp.onInput(debounce(() => { bytesIn = null; run(); }, 300));
+    on(pw, 'change', () => run());
+    function run() {
+      view.innerHTML = '';
+      const src = bytesIn || inp.get();
+      if (!bytesIn && !src.trim()) { view.innerHTML = '<div class="empty-state">PEM 인증서를 붙여넣거나 파일을 끌어다 놓으세요</div>'; return; }
+      let r;
+      try { r = CertInE.analyze(src, { password: pw.value, name: fileName }); } catch (e) { view.appendChild(h(`<div class="note err">${esc(e.message)}</div>`)); return; }
+      if (/PRIVATE KEY/.test(typeof src === 'string' ? src : '')) view.appendChild(h('<div class="note warn">입력에 <b>개인키</b>가 포함되어 있습니다. 이 화면은 외부로 전송하지 않고 저장하지도 않지만, 공유할 때 주의하세요.</div>'));
+      r.notes.forEach(n => view.appendChild(h(`<div class="note warn">${esc(n)}</div>`)));
+      if (r.jks) {
+        const j = r.jks;
+        const head = h(`<div class="card card-pad"><div class="row"><b>${esc(j.type)} 키스토어</b><span class="badge">버전 ${j.version}</span><span class="badge">항목 ${j.entries.length}개</span>${j.integrity === true ? '<span class="badge ok">✓ 비밀번호 일치 · 무결성 확인</span>' : j.integrity === false ? '<span class="badge err">✕ 비밀번호 불일치 또는 변조됨</span>' : '<span class="badge">무결성 미확인 (비밀번호 입력 시 확인)</span>'}</div></div>`);
+        const tw = h('<div class="tbl-wrap" style="margin-top:8px"></div>');
+        tw.innerHTML = `<table class="tbl"><thead><tr><th>별칭 (alias)</th><th>유형</th><th>생성일</th><th>체인</th><th>내용</th></tr></thead><tbody>${j.entries.map(e => `<tr><td class="mono"><b>${esc(e.alias)}</b></td><td>${e.type === 'PrivateKeyEntry' ? '<span class="badge warn">개인키 항목</span>' : e.type === 'trustedCertEntry' ? '<span class="badge info">신뢰 인증서</span>' : '<span class="badge">비밀키</span>'}</td><td class="mono">${esc(fmtKst(e.date))}</td><td>${e.chain.length}</td><td class="dim">${e.type === 'PrivateKeyEntry' ? `키 ${esc(e.keyAlg)} (암호화됨)` : ''}</td></tr>`).join('')}</tbody></table>`;
+        head.appendChild(tw); view.appendChild(head);
+      }
+      const certs = r.items.filter(x => x.kind === 'cert');
+      if (certs.length && !r.jks) {
+        const ch = CertInE.chain(certs);
+        if (ch.findings.length) {
+          const box = h('<div class="card findings"><div class="pane-head"><span class="pane-title">체인 · 상태 점검</span></div></div>');
+          const ic = { ok: '✓', warn: '⚠', err: '✕', info: 'ℹ' };
+          ch.findings.forEach(f => box.appendChild(h(`<div class="f"><span class="badge ${f.lv}">${ic[f.lv]}</span><span>${esc(f.msg)}</span></div>`)));
+          view.appendChild(box);
+        }
+      }
+      if (!r.items.length && !r.jks) { view.appendChild(h('<div class="empty-state">인증서를 찾지 못했습니다</div>')); return; }
+      r.items.forEach((it, i) => view.appendChild(card(it, i, certs)));
+    }
+    function card(c, i, certs) {
+      const now = Date.now();
+      const el = h('<div class="crt-card"><div class="crt-head"></div><div class="crt-body"></div></div>');
+      const head = $('.crt-head', el), body = $('.crt-body', el);
+      if (c.kind === 'pubkey') {
+        head.innerHTML = `<span class="badge info">공개키</span><b>${esc(c.spki.text)}</b>`;
+        body.appendChild(kvList([['알고리즘', c.spki.algName], ['키', c.spki.text], ['SHA-256 지문', c.fingerprint.sha256]]));
+        body.appendChild(actions(c, 'PUBLIC KEY'));
+        return el;
+      }
+      const isCsr = c.kind === 'csr';
+      const days = isCsr ? null : Math.floor((c.notAfter - now) / 86400000);
+      const role = isCsr ? 'CSR' : c.alias ? `${c.alias}${c.chainPos ? ` (체인 ${c.chainPos + 1})` : ''}` : (c.selfSigned ? '루트 (자체 서명)' : c.isCA ? '중간 CA' : '최종 (리프)');
+      head.innerHTML = `<span class="badge info">${esc(role)}</span><b></b>${isCsr ? '<span class="badge">인증서 서명 요청 (PKCS#10)</span>' : c.notAfter < now ? `<span class="badge err">만료됨 (${-days}일 지남)</span>` : c.notBefore > now ? '<span class="badge warn">유효 기간 시작 전</span>' : `<span class="badge ${days < 30 ? 'warn' : 'ok'}">유효 · D-${days}</span>`}${!isCsr && c.isCA ? '<span class="badge">CA</span>' : ''}`;
+      $('b', head).textContent = c.cn;
+      const rows = [['주체 (Subject)', X509E.dnRfc(c.subject)]];
+      if (!isCsr) rows.push(['발급자 (Issuer)', X509E.dnRfc(c.issuer)], ['일련번호', c.serialHex.replace(/(..)(?=.)/g, '$1:')], ['유효 기간', `${fmtKst(c.notBefore)} ~ ${fmtKst(c.notAfter)}`], ['버전', 'v' + c.version]);
+      rows.push(['서명 알고리즘', c.sigAlg], ['공개키', c.spki.text]);
+      if (!isCsr && c.san.length) rows.push(['SAN', c.san.map(s => `${s.label}: ${s.value}`).join('\n')]);
+      rows.push(['SHA-256 지문', c.fingerprint.sha256], ['SHA-1 지문', c.fingerprint.sha1]);
+      body.appendChild(kvList(rows));
+      if (c.exts.length) {
+        const tw = h('<div class="tbl-wrap"></div>');
+        tw.innerHTML = `<table class="tbl"><thead><tr><th style="width:30%">확장</th><th>값</th></tr></thead><tbody>${c.exts.map(e => `<tr><td>${esc(e.name)}${e.name !== e.oid ? `<div class="faint mono" style="font-size:11px">${esc(e.oid)}</div>` : ''}${e.critical ? ' <span class="badge warn">critical</span>' : ''}</td><td class="mono" style="white-space:pre-wrap">${esc(e.list ? e.list.map(x => typeof x === 'string' ? x : `${x.label}: ${x.value}`).join('\n') : e.text)}</td></tr>`).join('')}</tbody></table>`;
+        body.appendChild(tw);
+      }
+      if (isCsr && c.attrs.length) body.appendChild(kvList(c.attrs.map(a => [a.name, a.value])));
+      body.appendChild(actions(c, isCsr ? 'CERTIFICATE REQUEST' : 'CERTIFICATE'));
+      return el;
+    }
+    function actions(c, label) {
+      const row = h('<div class="row"></div>');
+      const base = (c.cn || 'cert').replace(/[^\w.가-힣-]+/g, '_').slice(0, 40);
+      row.append(btn('PEM 복사', () => copyText(CertInE.toPem(c.der, label)), 'sm'), btn('PEM 저장', () => download(base + (label === 'CERTIFICATE' ? '.pem' : label === 'CERTIFICATE REQUEST' ? '.csr' : '.pub.pem'), CertInE.toPem(c.der, label)), 'sm'),
+        btn('DER 저장', () => download(base + (label === 'CERTIFICATE' ? '.der' : '.der'), new Blob([c.der], { type: 'application/pkix-cert' })), 'sm'),
+        btn('SHA-256 지문 복사', () => copyText(c.fingerprint.sha256), 'sm ghost'), btn('ASN.1 구조', () => asnModal(c), 'sm ghost'));
+      return row;
+    }
+    function asnModal(c) {
+      const box = h('<div class="crt-tree"></div>');
+      box.appendChild(asnNode(c.root, 0));
+      openModal({ title: `ASN.1 구조 — ${c.cn || ''} (${fmtNum(c.der.length)}바이트)`, body: box, wide: true });
+    }
+    function asnNode(n, depth) {
+      const wrap = h('<div></div>');
+      const line = h('<div class="an"><span class="tg"></span><span class="ao"></span> <span class="at"></span> <span class="ao"></span> <span class="av"></span></div>');
+      const [tg, off, tn, ln, val] = Array.from(line.children);
+      off.textContent = `${n.off}+${n.hl}`; tn.textContent = Asn1E.tagName(n); ln.textContent = `(${n.len}바이트)`;
+      let kidsN = n.children;
+      if (!kidsN && n.cls === 0 && (n.num === 3 || n.num === 4)) { const enc = Asn1E.tryEncap(n.num === 3 ? n.content.subarray(1) : n.content); if (enc) { kidsN = [enc]; val.textContent = '(DER 포함)'; } }
+      if (!kidsN) val.textContent = preview(n);
+      wrap.appendChild(line);
+      if (kidsN && kidsN.length) {
+        const k = h('<div class="ak"></div>');
+        tg.textContent = depth < 4 ? '▾' : '▸'; if (depth >= 4) k.classList.add('hidden');
+        let built = false; const build = () => { if (built) return; built = true; kidsN.forEach(x => k.appendChild(asnNode(x, depth + 1))); };
+        if (depth < 4) build();
+        on(tg, 'click', () => { build(); k.classList.toggle('hidden'); tg.textContent = k.classList.contains('hidden') ? '▸' : '▾'; });
+        wrap.appendChild(k);
+      }
+      return wrap;
+    }
+    function preview(n) {
+      if (n.cls !== 0) return bytesToHex(n.content.subarray(0, 24)) + (n.content.length > 24 ? '…' : '');
+      try {
+        switch (n.num) {
+          case 6: { const o = Asn1E.oid(n); const nm = X509E.oname(o); return nm !== o ? `${o} (${nm})` : o; }
+          case 2: return n.content.length > 8 ? Asn1E.intHex(n).toUpperCase().slice(0, 48) + (n.content.length > 24 ? '…' : '') : Asn1E.intBig(n).toString();
+          case 1: return n.content[0] ? 'TRUE' : 'FALSE';
+          case 5: return '';
+          case 23: case 24: return fmtKst(Asn1E.time(n));
+          case 3: case 4: return bytesToHex(n.content.subarray(0, 24)) + (n.content.length > 24 ? '…' : '');
+          default: return Asn1E.UNIV[n.num] && /String$/.test(Asn1E.UNIV[n.num]) ? Asn1E.str(n) : bytesToHex(n.content.subarray(0, 24));
+        }
+      } catch (e) { return '?'; }
+    }
+    return { run, receive(slot, t) { bytesIn = null; inp.set(t); run(); }, loadFile };
+  },
+});
+const CERT_SAMPLE_E = `-----BEGIN CERTIFICATE-----
+MIID6DCCA26gAwIBAgIUYaefpDh6lQRzWIIoH3Em1Z5c/JYwCgYIKoZIzj0EAwIw
+PjELMAkGA1UEBhMCS1IxEDAOBgNVBAoMB1Rlc3QgQ0ExHTAbBgNVBAMMFFRlc3Qg
+SW50ZXJtZWRpYXRlIENBMB4XDTI2MTAyODAxNDU1M1oXDTI3MTEyOTAxNDU1M1ow
+XDELMAkGA1UEBhMCS1IxDjAMBgNVBAgMBVNlb3VsMRUwEwYDVQQKDAxFeGFtcGxl
+IENvcnAxDDAKBgNVBAsMA0RldjEYMBYGA1UEAwwPd3d3LmV4YW1wbGUuY29tMIIB
+IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp5x/iggVg7dhwhrXxk+i+R28
+tckWRAFocHLimgRV8LM1ZdiwylRGzCCOaWa3J0sgSJZsb53jxag0ADdZrgjrPV11
+raMmAxb5ZnbraGvHe2U6LpDFD0ZH8i0UOdqieO1MclAxhhL6Cfj3vvSBM5fxrBET
+SUDlv+E22+jnCaU8lfWe9CjbA8cALn2v3mIF9zXg2AFgYqUt6SE1jXYjvjexrxV+
+PofqXLJ/EK38fPePq5AdYFDnjZPt1220n7sdU/2UYEO6Z+akI4PTvGpmVaERJf8/
+duTH31ff5Xx1GbB7/AHxyHGkFak2hkmiSILhD9dNLKi7ECQXieNNm6deMA3/LwID
+AQABo4IBXzCCAVswCQYDVR0TBAIwADAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYw
+FAYIKwYBBQUHAwEGCCsGAQUFBwMCMFYGA1UdEQRPME2CD3d3dy5leGFtcGxlLmNv
+bYIPYXBpLmV4YW1wbGUuY29thwQKAAABhxAgAQ24AAAAAAAAAAAAAAABgRFhZG1p
+bkBleGFtcGxlLmNvbTAdBgNVHQ4EFgQUKLHQfI7DmoboogA0Ox0Hi1/goxMwHwYD
+VR0jBBgwFoAUiE9fdauY4CyTiYRE+TQNgYBeDSQwIQYDVR0gBBowGDAIBgZngQwB
+AgIwDAYKKoMajJpEBQIBATAvBgNVHR8EKDAmMCSgIqAghh5odHRwOi8vY3JsLmV4
+YW1wbGUuY29tL2ludC5jcmwwMwYIKwYBBQUHAQEEJzAlMCMGCCsGAQUFBzABhhdo
+dHRwOi8vb2NzcC5leGFtcGxlLmNvbTAKBggqhkjOPQQDAgNoADBlAjEA1cqiFssZ
+FBzFgydbOkPGgVzlz3xCF0vc+lhwvychUuln+EqRIgFuuCrUZkQcZ6ttAjBQbhGG
+2rHpWonK9w9Bnt7XRDCe407/ynLKrMAe3vXmlZ6uW+yaJ4CsMVbOys/wPPY=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIETzCCAjegAwIBAgIUQ5KSUBbCrgzwBNNuBb8daTh2xL4wDQYJKoZIhvcNAQEL
+BQAwNjELMAkGA1UEBhMCS1IxEDAOBgNVBAoMB1Rlc3QgQ0ExFTATBgNVBAMMDFRl
+c3QgUm9vdCBDQTAeFw0yNjEwMjgwMTQ1NTJaFw0zMTEwMjcwMTQ1NTJaMD4xCzAJ
+BgNVBAYTAktSMRAwDgYDVQQKDAdUZXN0IENBMR0wGwYDVQQDDBRUZXN0IEludGVy
+bWVkaWF0ZSBDQTB2MBAGByqGSM49AgEGBSuBBAAiA2IABMwbV7KScUBLOCaxKdbL
+8itDol3/Ll0ByB7vCHkaMB3dVR7jjgfbskqyUk101e5IQErFdPlmr6ByyrSxz/9y
++Dy7mahM8mZDQbN8s4CfMC2MYsaTVmfcofoVvkq5Pg8imKOB+jCB9zASBgNVHRMB
+Af8ECDAGAQH/AgEAMA4GA1UdDwEB/wQEAwIBBjAdBgNVHQ4EFgQUiE9fdauY4CyT
+iYRE+TQNgYBeDSQwHwYDVR0jBBgwFoAUoE1EyU6l9kEaQ4rjd0xiKJpp/N0wMAYD
+VR0fBCkwJzAloCOgIYYfaHR0cDovL2NybC5leGFtcGxlLmNvbS9yb290LmNybDBf
+BggrBgEFBQcBAQRTMFEwIwYIKwYBBQUHMAGGF2h0dHA6Ly9vY3NwLmV4YW1wbGUu
+Y29tMCoGCCsGAQUFBzAChh5odHRwOi8vY2EuZXhhbXBsZS5jb20vcm9vdC5jcnQw
+DQYJKoZIhvcNAQELBQADggIBAE1IGh9wcWQymAbQw810RlCUtYHqYO5uQPKG/6Xu
+9h1sCKgrBjaCo+FTKHvX9dw9KjVMAbntWjy0eB8B8iiufeqJtn4bcp1HgBiQut7c
+Q8Y90a2Evp6ucsOYFipN/IXQZpqUXlG9fiA7tzp4Oe20hNU1KvjJKf8VvN1XTi3k
+mq6yfbDQyHT4+3qRvUXDu+RFKpi8/j7YVDH7rbZ2CZSU8DL1IhnCpUEW3yjnoACP
+j09HVE2UwPgjx8woDr2l8xsUPLo+A3FuinDPOJUnzUUE9hjIdydMbxcTzv5QRlA7
+QWIiOe30jBA5GcFtX/NE/rspnBf8ZcNbgbbWoUJfV4diUpJoWJgdxIw5/SS1wuAQ
+cuZgNVHj3AW4YjOeB+O7o+6Yu1kKOk3xuds9VDNtrUBWxit/ieVqxX8FrDqKB8dD
+Kc+cqtO+juZz/IXauM0XIGaGf+vMHL631AkKpbMQDEYcI5i+eXMYvgUY5RYi5UcZ
+U2BoIcUemDY/TuFo6WG4PQT2PJSE1KQe5SJoOUGw7vU2jerziGGPkgx1UPbpkQlz
+fLn29IB9BSUAgl4jIxww+/4QRaaACflnFUDmJay+Q4LwM6EJq2iR0RATi5m6xqZS
+Eo54X0N5igqfKYuAub1gsfwkPYCRXMow1DcozbtGbqCIXlqJ+qSGacEgLBL7RgGe
+DmT5
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIFYDCCA0igAwIBAgIUdKXuJcRP3uv1IVjoedz6bBa1F00wDQYJKoZIhvcNAQEL
+BQAwNjELMAkGA1UEBhMCS1IxEDAOBgNVBAoMB1Rlc3QgQ0ExFTATBgNVBAMMDFRl
+c3QgUm9vdCBDQTAeFw0yNjEwMjgwMTQ1NTJaFw0zNjEwMjUwMTQ1NTJaMDYxCzAJ
+BgNVBAYTAktSMRAwDgYDVQQKDAdUZXN0IENBMRUwEwYDVQQDDAxUZXN0IFJvb3Qg
+Q0EwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDBfRc5fQcv1LjL/SMh
+0LH/yrqedv93ywBEsdxnjcDJIZNg4rja43OcgITXgs0DV9m3ao3hNue8fpqO62Md
+9sn91Dls/wKtxsiSKoFZLRz/Ix6ohJnpQhJPz0CzA47I4t1yUEzESVEnV/JmG5Mi
+4hn7WhOUA24809rXWRYuWDSIrJJ33N0nqt78t5fa06+JhCbfcBnd3273IC/1uXG+
+8Q2W+3CbEoq7xPcGU3iyZ0Z5N6eUKTAPbJe0gvWVSf2xldkC0G2Wd195OYXl/11r
+1KrFJqC9MIkWUa14YAWF7+bysDZIuq4btmJlvvjrTewOl7aVc88vzJrGz9w85mMW
+NfLOVEfdahUJZF481YQMp9NLCFL3GvkvHZJq7bmEBd3hpiRWJ8mLumYR03YFVYw4
+LcrUXAjGMS/RTJ5ceQc3S5kYIvoYeW2+JTjmyRf+BUt/aODlrb49/MjKYBrN5YkT
+GnL1Y6/ydJyo3pF6RAk4MBCobLoJVObmEDMp553CbidijFv6sYkjtMdyGJjtEPzx
+qzuBQjs0m7XKRihvcBmQ5TpuNRrxI8QEqwn36hlcAurxa1GROH9AzmCuWCqhfiBP
+y7Lg/MJSX+CAV6cTfBy9/GYKXUsZ+U/cM7FucHf56F3wyKVxujwy2Ny3oHE+G+eN
+HL7ZVtV8Ut+5bH1t1DzzdQG1eQIDAQABo2YwZDAfBgNVHSMEGDAWgBSgTUTJTqX2
+QRpDiuN3TGIommn83TASBgNVHRMBAf8ECDAGAQH/AgEBMA4GA1UdDwEB/wQEAwIB
+BjAdBgNVHQ4EFgQUoE1EyU6l9kEaQ4rjd0xiKJpp/N0wDQYJKoZIhvcNAQELBQAD
+ggIBACPmr3DR4dfrKXD9VxPT8Zeiqx+a3Tx7ZT9n4Jb/MkVaoeKSfeYMKX8l9TTS
+Qer59dLM/z5VKcr4RBh3XXmDM8dew+KGxzElc+t24OZc5chiqYEsKWVNP+udCZRq
+YwTYI4y4/v7Z5Wl9fBHj0ha9wYK1kXJQfrofPyj4puFU/xHRasMTiRmOiPQWul/o
+JqnPf0agdyAZ98oCJ/c5RDiiMlrF3WA9nwdBoPpWDe+3rIrl7ocARIzkWMcFcWM2
+URqzt6d/dnvu1NnxL3HO/CrLyTbieuV/WCZVOuwH/0nn4mN6sW2L1PQHPT6umZL4
+4DrKlOzCzW6jKjwHH1DDa0ZB6PpGUhDyM8Aua984W6nkVfHgljLx2qEbvAe4ehRA
+PpsD/mACqry+n2Vi+awsn9aKYOvVxU+4ylzHGdNg37r5LF83luoLYmWyyYt/zz2l
+ikLwyzmFK5Kke5xvtPO/4iljoizeAFgGDhxhu8zqvJgzrC+m7+gQVlWMvMQ5N+7e
+2HhTZoN0W6HvT+DfCVpgRqAlVfEWE9gULSqFvuvl1s5Inda82veMTw/k8Hx5+RHV
+RpLGdtY69YAt0YS1YPrAcprBux9h4KzVtIzyXPSMPpALabJfRaLPf+yqZKZCmePY
+5MYrdw+pyVwLb6IOfiGplYxzNfNOtIaBSFPrVSE1+CDAle2O
+-----END CERTIFICATE-----`;
+
+/* ---------- Smart Paste 감지기 ---------- */
+defineDetector({ id: 'cert', test(text, c) {
+  const pem = /-----BEGIN (?:X509 |TRUSTED |NEW )?(?:CERTIFICATE|CERTIFICATE REQUEST|PKCS7|PUBLIC KEY|RSA PUBLIC KEY)-----/.test(c.text);
+  if (!pem && !/^MII[A-Za-z0-9+/=\s]{200,}$/.test(c.t)) return null;
+  let r; try { r = CertInE.analyze(c.text); } catch (e) { return null; }
+  if (!r.items.length) return null;
+  const it = r.items[0];
+  const label = r.items.length > 1 ? `X.509 인증서 ${r.items.length}개 (체인)` : it.kind === 'csr' ? 'CSR (인증서 서명 요청)' : it.kind === 'pubkey' ? `공개키 (${it.spki.text})` : 'X.509 인증서';
+  const detail = it.kind === 'cert' ? `${it.cn} · ${fmtKst(it.notAfter)} 만료${it.notAfter < Date.now() ? ' (이미 만료됨)' : ''} · 발급자 ${X509E.dnGet(it.issuer, 'CN')}` : it.kind === 'csr' ? it.cn : '';
+  return { key: 'cert', score: 98, label, detail, actions: [spAct('인증서 뷰어', 'cert-viewer')] };
+} });
+defineFileDetector({ id: 'cert-file', test(file, head, ext) {
+  const jks = (head[0] === 0xFE && head[1] === 0xED && head[2] === 0xFE && head[3] === 0xED) || (head[0] === 0xCE && head[1] === 0xCE && head[2] === 0xCE && head[3] === 0xCE);
+  let kind = jks ? 'jks' : null;
+  if (!kind && head[0] === 0x30 && file.size <= 65536) kind = X509E.sniffDer(head);
+  if (!kind && ['pem', 'crt', 'cer', 'der', 'p7b', 'p7c', 'csr', 'p12', 'pfx', 'keystore', 'truststore', 'jks'].includes(ext)) kind = ext;
+  if (!kind) return null;
+  const label = jks ? 'Java 키스토어 (JKS)' : kind === 'pkcs12' || ext === 'p12' || ext === 'pfx' ? 'PKCS#12 키스토어' : kind === 'csr' ? 'CSR 파일' : '인증서 파일';
+  return { key: 'cert', score: 97, label, actions: [{ label: '인증서 뷰어로 열기', run: f => { openTool('cert-viewer'); toolInst('cert-viewer').loadFile(f); } }] };
+} });
+
+/* =====================================================================
+ * OAuth PKCE · IP/CIDR 계산기 · 색상 도구
+ * ===================================================================== */
+const PkceE = (() => {
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const b64u = b => bytesToB64(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  function verifier(len = 64) { if (len < 43 || len > 128) throw new Error('code_verifier 길이는 43~128자여야 합니다 (RFC 7636)'); return Uuid.randomString(len, CHARS); }
+  function challenge(v, method = 'S256') { if (method === 'plain') return v; return b64u(Hash.digest('sha256', utf8(v))); }
+  function valid(v) { return /^[A-Za-z0-9\-._~]{43,128}$/.test(v); }
+  function rand(n = 32) { return b64u(crypto.getRandomValues(new Uint8Array(n))); }
+  return { verifier, challenge, valid, rand, b64u };
+})();
+DU.PkceE = PkceE;
+
+defineTool({
+  id: 'pkce', group: 'encode', abbr: 'PKC', name: 'OAuth PKCE 생성기',
+  desc: 'code_verifier · code_challenge(S256) · state/nonce · 인가 URL · 토큰 요청 예제 · 검증',
+  keywords: 'oauth pkce code_verifier code_challenge s256 oidc state nonce authorization url token 인가 인증',
+  help: `RFC 7636 PKCE 값을 만듭니다. SHA-256은 순수 JavaScript로 계산하므로 http:// 환경(WebCrypto 없음)에서도 동작합니다.<br>엔드포인트·client_id 등 공개 설정만 저장되고, code_verifier와 인가 코드는 저장되지 않습니다.`,
+  init(root) {
+    const box = h(`<div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">PKCE 값 생성</h3>
+        <div class="row"><span class="lbl">verifier 길이</span><input class="inp sm" type="number" min="43" max="128" value="64" data-ref="len" style="width:80px"><select class="inp sm" data-ref="method"><option value="S256">S256 (권장)</option><option value="plain">plain</option></select><button class="btn primary" data-ref="gen" type="button">새로 생성</button></div>
+        <div data-ref="vals"></div></div>
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">인가(Authorization) URL</h3>
+        <div class="grid2"><label class="field"><span>authorize 엔드포인트</span><input class="inp mono" data-ref="ep" placeholder="https://auth.example.com/oauth2/authorize"></label><label class="field"><span>client_id</span><input class="inp mono" data-ref="cid"></label>
+          <label class="field"><span>redirect_uri</span><input class="inp mono" data-ref="ru" placeholder="http://localhost:8080/login/oauth2/code/app"></label><label class="field"><span>scope</span><input class="inp mono" data-ref="scope" value="openid profile"></label>
+          <label class="field" style="grid-column:1/-1"><span>추가 파라미터 (k=v&amp;k2=v2, 선택)</span><input class="inp mono" data-ref="extra" placeholder="prompt=login&amp;response_mode=query"></label></div>
+        <div class="row"><input class="inp mono" data-ref="url" readonly style="flex:1"><button class="btn sm" data-ref="cpUrl" type="button">복사</button></div></div>
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">토큰 요청 예제</h3>
+        <div class="grid2"><label class="field"><span>token 엔드포인트</span><input class="inp mono" data-ref="tep" placeholder="https://auth.example.com/oauth2/token"></label><label class="field"><span>받은 인가 코드 (code)</span><input class="inp mono" data-ref="code" placeholder="리다이렉트 URL의 code 값" autocomplete="off"></label></div>
+        <pre class="code" data-ref="curl" style="border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all"></pre>
+        <div class="row"><button class="btn sm" data-ref="cpCurl" type="button">cURL 복사</button><button class="btn sm" data-ref="toHttp" type="button">HTTP 테스터로</button></div></div>
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">검증</h3>
+        <div class="grid2"><label class="field"><span>code_verifier</span><input class="inp mono" data-ref="vv" autocomplete="off"></label><label class="field"><span>code_challenge</span><input class="inp mono" data-ref="vc"></label></div>
+        <div class="row"><select class="inp sm" data-ref="vm"><option value="S256">S256</option><option value="plain">plain</option></select><button class="btn sm" data-ref="ver" type="button">일치 확인</button><span data-ref="vr"></span></div></div></div>`);
+    const r = refs(box); root.appendChild(box);
+    ['ep', 'cid', 'ru', 'scope', 'extra', 'tep'].forEach(k => bindPersist(r[k], 'pkce:' + k));
+    bindPersist(r.method, 'pkce:m'); bindPersist(r.len, 'pkce:len');
+    let cur = null;
+    function gen() {
+      try {
+        const v = PkceE.verifier(clamp(+r.len.value || 64, 43, 128));
+        cur = { v, c: PkceE.challenge(v, r.method.value), m: r.method.value, state: PkceE.rand(24), nonce: PkceE.rand(24) };
+      } catch (e) { toast(e.message, 'err'); return; }
+      r.vals.innerHTML = ''; r.vals.appendChild(kvList([['code_verifier', cur.v], ['code_challenge', cur.c], ['code_challenge_method', cur.m], ['state', cur.state], ['nonce', cur.nonce]]));
+      r.vv.value = cur.v; r.vc.value = cur.c; r.vm.value = cur.m; r.vr.innerHTML = '';
+      upd();
+    }
+    function upd() {
+      if (!cur) return;
+      const q = [['response_type', 'code'], ['client_id', r.cid.value], ['redirect_uri', r.ru.value], ['scope', r.scope.value], ['state', cur.state], ['nonce', cur.nonce], ['code_challenge', cur.c], ['code_challenge_method', cur.m]].filter(([, v]) => v);
+      const extra = r.extra.value.trim() ? '&' + r.extra.value.trim().replace(/^[?&]/, '') : '';
+      r.url.value = (r.ep.value.trim() || 'https://auth.example.com/oauth2/authorize') + '?' + q.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&') + extra;
+      const form = [['grant_type', 'authorization_code'], ['code', r.code.value || '<인가 코드>'], ['redirect_uri', r.ru.value], ['client_id', r.cid.value], ['code_verifier', cur.v]].filter(([, v]) => v);
+      r.curl.textContent = `curl -X POST '${r.tep.value.trim() || 'https://auth.example.com/oauth2/token'}' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  ${form.map(([k, v]) => `--data-urlencode '${k}=${String(v).replace(/'/g, "'\\''")}'`).join(' \\\n  ')}`;
+    }
+    on(r.gen, 'click', gen); ['ep', 'cid', 'ru', 'scope', 'extra', 'tep', 'code'].forEach(k => on(r[k], 'input', upd)); on(r.method, 'change', gen);
+    on(r.cpUrl, 'click', () => copyText(r.url.value)); on(r.cpCurl, 'click', () => copyText(r.curl.textContent)); on(r.toHttp, 'click', () => sendTo('http', 'curl', r.curl.textContent));
+    on(r.ver, 'click', () => {
+      const v = r.vv.value.trim(), c = r.vc.value.trim();
+      const okFmt = PkceE.valid(v); const match = PkceE.challenge(v, r.vm.value) === c;
+      r.vr.innerHTML = `${match ? '<span class="badge ok">✓ 일치</span>' : '<span class="badge err">✕ 불일치</span>'}${okFmt ? '' : ' <span class="badge warn">verifier 형식 오류 (43~128자, A-Z a-z 0-9 - . _ ~)</span>'}`;
+    });
+    gen();
+    return { run: gen };
+  },
+});
+
+/* ---------- IP / CIDR ---------- */
+const CidrE = (() => {
+  function parseV4(s) {
+    const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(String(s).trim()); if (!m) return null;
+    const p = m.slice(1); if (p.some(x => +x > 255 || (x.length > 1 && x[0] === '0'))) return null;
+    return BigInt(((+p[0] << 24) >>> 0) + (+p[1] << 16) + (+p[2] << 8) + +p[3]);
+  }
+  const v4str = n => [24n, 16n, 8n, 0n].map(s => Number((n >> s) & 255n)).join('.');
+  function parseV6(s) {
+    s = String(s).trim().replace(/^\[|\]$/g, '').replace(/%[\w.-]+$/, '');
+    if (s.length < 2 || !/^[0-9a-fA-F:.]+$/.test(s)) return null;
+    let tail4 = null; const m4 = /^(.*:)(\d{1,3}(?:\.\d{1,3}){3})$/.exec(s);
+    if (m4) { tail4 = parseV4(m4[2]); if (tail4 === null) return null; s = m4[1] + 'X'; }
+    const dbl = s.split('::'); if (dbl.length > 2) return null;
+    const part = x => (x === '' ? [] : x.split(':'));
+    const ex = arr => arr.flatMap(g => (g === 'X' ? [(tail4 >> 16n).toString(16), (tail4 & 0xffffn).toString(16)] : [g]));
+    const head = ex(part(dbl[0])), tail = dbl.length === 2 ? ex(part(dbl[1])) : [];
+    if (dbl.length === 1 && head.length !== 8) return null;
+    if (dbl.length === 2 && head.length + tail.length > 7) return null;
+    const g = dbl.length === 2 ? head.concat(Array(8 - head.length - tail.length).fill('0'), tail) : head;
+    if (g.some(x => !/^[0-9a-fA-F]{1,4}$/.test(x))) return null;
+    return g.reduce((a, x) => (a << 16n) | BigInt(parseInt(x, 16)), 0n);
+  }
+  const groups6 = n => Array.from({ length: 8 }, (_, i) => Number((n >> BigInt((7 - i) * 16)) & 0xffffn));
+  function v6str(n) {
+    const g = groups6(n);
+    if (g.slice(0, 5).every(x => x === 0) && g[5] === 0xffff) return '::ffff:' + v4str(n & 0xffffffffn);
+    let best = -1, bl = 0; for (let i = 0; i < 8;) { if (g[i] === 0) { let j = i; while (j < 8 && g[j] === 0) j++; if (j - i > bl && j - i >= 2) { best = i; bl = j - i; } i = j; } else i++; }
+    const hx = g.map(x => x.toString(16));
+    return best < 0 ? hx.join(':') : hx.slice(0, best).join(':') + '::' + hx.slice(best + bl).join(':');
+  }
+  const v6full = n => groups6(n).map(x => x.toString(16).padStart(4, '0')).join(':');
+  function parseAddr(s) { const a = parseV4(s); if (a !== null) return { v: 4, n: a, bits: 32 }; const b = parseV6(s); if (b !== null) return { v: 6, n: b, bits: 128 }; return null; }
+  function maskToPrefix(m) { const n = parseV4(m); if (n === null) return null; const b = n.toString(2).padStart(32, '0'); if (!/^1*0*$/.test(b)) return null; return b.indexOf('0') < 0 ? 32 : b.indexOf('0'); }
+  /** "a.b.c.d/nn", "a.b.c.d/255.255.255.0", "2001:db8::/32", 또는 주소 하나 */
+  function parseCidr(s) {
+    s = String(s).trim(); const i = s.indexOf('/'); const a = parseAddr(i < 0 ? s : s.slice(0, i)); if (!a) return null;
+    let p = a.bits;
+    if (i >= 0) { const ps = s.slice(i + 1).trim(); if (/^\d{1,3}$/.test(ps)) p = +ps; else if (a.v === 4) { p = maskToPrefix(ps); if (p === null) return null; } else return null; }
+    if (p < 0 || p > a.bits) return null;
+    return Object.assign(a, { prefix: p, hasPrefix: i >= 0 });
+  }
+  const str = (v, n) => (v === 4 ? v4str(n) : v6str(n));
+  function info(c) {
+    const host = BigInt(c.bits - c.prefix), size = 1n << host, mask = ((1n << BigInt(c.bits)) - 1n) ^ (size - 1n);
+    const net = c.n & mask, last = net + size - 1n;
+    const o = { v: c.v, prefix: c.prefix, addr: c.n, net, last, size, mask };
+    if (c.v === 4) {
+      o.first = c.prefix >= 31 ? net : net + 1n; o.lastHost = c.prefix >= 31 ? last : last - 1n;
+      o.hosts = c.prefix === 32 ? 1n : c.prefix === 31 ? 2n : size - 2n;
+    } else { o.first = net; o.lastHost = last; o.hosts = size; }
+    return o;
+  }
+  function classify(v, n) {
+    if (v === 4) {
+      const inR = (cidr) => { const c = parseCidr(cidr); const i = info(c); return n >= i.net && n <= i.last; };
+      const T = [['10.0.0.0/8', '사설 (RFC 1918)'], ['172.16.0.0/12', '사설 (RFC 1918)'], ['192.168.0.0/16', '사설 (RFC 1918)'], ['127.0.0.0/8', '루프백'], ['169.254.0.0/16', '링크 로컬 (APIPA)'], ['100.64.0.0/10', 'CGNAT 공유 주소 (RFC 6598)'],
+        ['0.0.0.0/8', '현재 네트워크 ("this" network)'], ['224.0.0.0/4', '멀티캐스트'], ['255.255.255.255/32', '제한된 브로드캐스트'], ['240.0.0.0/4', '예약 (미래 사용)'], ['192.0.2.0/24', '문서용 (TEST-NET-1)'], ['198.51.100.0/24', '문서용 (TEST-NET-2)'], ['203.0.113.0/24', '문서용 (TEST-NET-3)'], ['198.18.0.0/15', '벤치마크 테스트'], ['192.0.0.0/24', 'IETF 프로토콜 할당'], ['192.88.99.0/24', '6to4 릴레이 (폐지)']];
+      for (const [c, l] of T) if (inR(c)) return l;
+      return '공인 (글로벌)';
+    }
+    const top = n >> 112n;
+    if (n === 0n) return '미지정 주소 (::)'; if (n === 1n) return '루프백 (::1)';
+    if ((n >> 32n) === 0xffffn) return 'IPv4 매핑 주소 (::ffff:0:0/96)';
+    if ((n >> 32n) === 0x64ff9b0000000000000000n) return 'NAT64 (64:ff9b::/96)';
+    if ((top & 0xffc0n) === 0xfe80n) return '링크 로컬 (fe80::/10)'; if ((top & 0xfe00n) === 0xfc00n) return '고유 로컬 ULA (fc00::/7)'; if ((top & 0xff00n) === 0xff00n) return '멀티캐스트 (ff00::/8)';
+    if ((n >> 96n) === 0x20010db8n) return '문서용 (2001:db8::/32)'; if ((top & 0xe000n) === 0x2000n) return '글로벌 유니캐스트 (2000::/3)';
+    return '기타 / 예약';
+  }
+  function contains(c, a) { if (c.v !== a.v) return false; const i = info(c); return a.n >= i.net && a.n <= i.last; }
+  function split(c, newPrefix, max = 4096) {
+    if (newPrefix < c.prefix || newPrefix > c.bits) throw new Error(`새 프리픽스는 /${c.prefix} ~ /${c.bits} 사이여야 합니다`);
+    const i = info(c), step = 1n << BigInt(c.bits - newPrefix), total = 1n << BigInt(newPrefix - c.prefix);
+    const out = []; for (let k = 0n; k < total && out.length < max; k++) out.push({ v: c.v, n: i.net + k * step, bits: c.bits, prefix: newPrefix });
+    return { list: out, total };
+  }
+  function rangeToCidrs(start, end, bits, v) {
+    const out = []; if (start > end) [start, end] = [end, start];
+    while (start <= end && out.length < 100000) {
+      let s = 0n; while (s < BigInt(bits)) { const blk = 1n << (s + 1n); if (start % blk !== 0n || start + blk - 1n > end) break; s++; }
+      out.push({ v, n: start, bits, prefix: bits - Number(s) }); start += 1n << s;
+    }
+    return out;
+  }
+  function aggregate(cidrs) {
+    const by = { 4: [], 6: [] };
+    cidrs.forEach(c => { const i = info(c); by[c.v].push([i.net, i.last]); });
+    const out = [];
+    [4, 6].forEach(v => {
+      const rs = by[v].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)); const merged = [];
+      rs.forEach(r => { const l = merged[merged.length - 1]; if (l && r[0] <= l[1] + 1n) { if (r[1] > l[1]) l[1] = r[1]; } else merged.push([r[0], r[1]]); });
+      merged.forEach(([s, e]) => out.push(...rangeToCidrs(s, e, v === 4 ? 32 : 128, v)));
+    });
+    return out;
+  }
+  const fmt = c => `${str(c.v, c.n)}/${c.prefix}`;
+  const bin4 = n => n.toString(2).padStart(32, '0').replace(/(.{8})(?=.)/g, '$1.');
+  function reverse(c) { if (c.v === 4) return v4str(c.n).split('.').reverse().join('.') + '.in-addr.arpa'; return v6full(c.n).replace(/:/g, '').split('').reverse().join('.') + '.ip6.arpa'; }
+  return { parseV4, parseV6, v4str, v6str, v6full, parseAddr, parseCidr, info, classify, contains, split, rangeToCidrs, aggregate, fmt, str, bin4, reverse, maskToPrefix };
+})();
+DU.CidrE = CidrE;
+
+defineTool({
+  id: 'cidr', group: 'misc', abbr: 'IP', name: 'IP · CIDR 계산기',
+  desc: '서브넷 · 네트워크/브로드캐스트 · 호스트 수 · IPv6 압축/확장 · 포함 여부 · 분할 · 범위→CIDR 병합',
+  keywords: 'ip cidr subnet netmask ipv4 ipv6 서브넷 넷마스크 네트워크 브로드캐스트 사설 아이피 방화벽 대역 계산',
+  inputs: { input: 'IP · CIDR', range: '범위 → CIDR 병합' },
+  init(root) {
+    const tabs = Tabs([{ id: 'calc', label: '계산기' }, { id: 'contains', label: '포함 여부' }, { id: 'split', label: '서브넷 분할' }, { id: 'merge', label: '범위 → CIDR · 병합' }], id => { Object.entries(panes).forEach(([k, el]) => el.classList.toggle('hidden', k !== id)); persistSet('cidr:tab', id); });
+    const calc = h(`<div style="display:flex;flex-direction:column;gap:10px"><div class="row"><input class="inp mono" data-ref="q" style="flex:1;font-size:14px;height:34px" placeholder="192.168.10.77/26 · 10.0.0.0/255.255.0.0 · 2001:db8::1/64"><button class="btn primary" data-ref="go" type="button">계산</button></div><div data-ref="out"></div></div>`);
+    const cr = refs(calc); bindPersist(cr.q, 'cidr:q');
+    const cont = h(`<div style="display:flex;flex-direction:column;gap:10px"><div class="grid2"><label class="field"><span>IP 목록 (한 줄에 하나)</span><textarea class="inp" rows="8" data-ref="ips" placeholder="10.1.2.3\n192.168.0.5"></textarea></label><label class="field"><span>CIDR 목록 (방화벽·허용 대역)</span><textarea class="inp" rows="8" data-ref="cidrs" placeholder="10.0.0.0/8\n172.16.0.0/12"></textarea></label></div><button class="btn primary" data-ref="go" type="button" style="align-self:flex-start">확인</button><div data-ref="out"></div></div>`);
+    const tr = refs(cont); bindPersist(tr.ips, 'cidr:ips'); bindPersist(tr.cidrs, 'cidr:cidrs');
+    const spl = h(`<div style="display:flex;flex-direction:column;gap:10px"><div class="row"><input class="inp mono" data-ref="c" style="width:240px" placeholder="10.0.0.0/22"><select class="inp sm" data-ref="mode"><option value="n">개수로 나누기</option><option value="p">새 프리픽스로</option></select><input class="inp sm" type="number" data-ref="n" value="4" style="width:80px"><button class="btn primary" data-ref="go" type="button">분할</button></div><div data-ref="out"></div></div>`);
+    const sr = refs(spl); bindPersist(sr.c, 'cidr:sc');
+    const mer = h(`<div style="display:flex;flex-direction:column;gap:10px"><label class="field"><span>범위(시작 - 끝) 또는 CIDR · IP 목록 — 한 줄에 하나</span><textarea class="inp" rows="8" data-ref="in" placeholder="192.168.0.10 - 192.168.0.100\n10.0.0.0/25\n10.0.0.128/25"></textarea></label><button class="btn primary" data-ref="go" type="button" style="align-self:flex-start">최소 CIDR로 변환</button><div data-ref="out"></div></div>`);
+    const mr = refs(mer); bindPersist(mr.in, 'cidr:merge');
+    const panes = { calc, contains: cont, split: spl, merge: mer };
+    root.append(tabs.el, calc, cont, spl, mer); tabs.set(persistGet('cidr:tab', 'calc'));
+    const S = CidrE;
+    function doCalc() {
+      cr.out.innerHTML = ''; const c = S.parseCidr(cr.q.value);
+      if (!cr.q.value.trim()) return;
+      if (!c) { cr.out.innerHTML = '<div class="note err">IP 또는 CIDR 형식이 아닙니다</div>'; return; }
+      const i = S.info(c); const rows = [];
+      if (c.v === 4) {
+        rows.push(['주소', S.v4str(c.n)], ['CIDR', `${S.v4str(i.net)}/${c.prefix}`], ['넷마스크', S.v4str(i.mask)], ['와일드카드', S.v4str(((1n << 32n) - 1n) ^ i.mask)], ['네트워크 주소', S.v4str(i.net)], ['브로드캐스트', c.prefix >= 31 ? '(없음)' : S.v4str(i.last)],
+          ['사용 가능 호스트', `${S.v4str(i.first)} ~ ${S.v4str(i.lastHost)}`], ['호스트 수', `${fmtNum(Number(i.hosts))}${c.prefix === 31 ? ' (점대점 링크, RFC 3021)' : ''}`], ['전체 주소 수', fmtNum(Number(i.size))],
+          ['분류', S.classify(4, c.n)], ['클래스 (참고)', (() => { const a = Number(c.n >> 24n); return a < 128 ? 'A' : a < 192 ? 'B' : a < 224 ? 'C' : a < 240 ? 'D (멀티캐스트)' : 'E (예약)'; })()],
+          ['주소 (2진)', S.bin4(c.n)], ['마스크 (2진)', S.bin4(i.mask)], ['역방향 DNS', S.reverse(c)], ['정수 값', c.n.toString()], ['16진', '0x' + c.n.toString(16).toUpperCase().padStart(8, '0')]);
+      } else {
+        rows.push(['압축 표기', S.v6str(c.n)], ['전체 표기', S.v6full(c.n)], ['프리픽스', `/${c.prefix}`], ['네트워크', `${S.v6str(i.net)}/${c.prefix}`], ['범위 시작', S.v6full(i.net)], ['범위 끝', S.v6full(i.last)],
+          ['주소 수', i.size.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (c.prefix <= 64 ? ` (2^${128 - c.prefix})` : '')], ['분류', S.classify(6, c.n)], ['역방향 DNS', S.reverse(c)]);
+      }
+      cr.out.appendChild(kvList(rows));
+    }
+    function doContains() {
+      tr.out.innerHTML = '';
+      const cs = tr.cidrs.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).map(s => ({ s, c: S.parseCidr(s) }));
+      const bad = cs.filter(x => !x.c); const ips = tr.ips.value.split(/[\n,\s]+/).map(s => s.trim()).filter(Boolean);
+      const rows = ips.map(ip => { const a = S.parseAddr(ip); if (!a) return `<tr><td class="mono">${esc(ip)}</td><td><span class="badge err">형식 오류</span></td><td></td></tr>`; const hit = cs.filter(x => x.c && S.contains(x.c, a)).map(x => x.s); return `<tr><td class="mono">${esc(ip)}</td><td>${hit.length ? '<span class="badge ok">포함</span>' : '<span class="badge warn">없음</span>'}</td><td class="mono">${esc(hit.join(', '))}</td></tr>`; });
+      if (bad.length) tr.out.appendChild(h(`<div class="note warn">해석할 수 없는 CIDR: ${esc(bad.map(x => x.s).join(', '))}</div>`));
+      const tw = h('<div class="tbl-wrap"></div>'); tw.innerHTML = `<table class="tbl"><thead><tr><th>IP</th><th>결과</th><th>일치하는 CIDR</th></tr></thead><tbody>${rows.join('')}</tbody></table>`; tr.out.appendChild(tw);
+    }
+    function doSplit() {
+      sr.out.innerHTML = ''; const c = S.parseCidr(sr.c.value); if (!c) { sr.out.innerHTML = '<div class="note err">CIDR 형식이 아닙니다</div>'; return; }
+      const n = Math.max(1, +sr.n.value || 1);
+      const np = sr.mode.value === 'n' ? c.prefix + Math.ceil(Math.log2(n)) : n;
+      let r; try { r = S.split(c, np); } catch (e) { sr.out.innerHTML = `<div class="note err">${esc(e.message)}</div>`; return; }
+      sr.out.appendChild(h(`<div class="dim">/${c.prefix} → /${np} : 서브넷 ${r.total.toString()}개${r.total > BigInt(r.list.length) ? ` (앞 ${r.list.length}개 표시)` : ''}</div>`));
+      const tw = h('<div class="tbl-wrap" style="max-height:52vh"></div>');
+      tw.innerHTML = `<table class="tbl"><thead><tr><th>#</th><th>서브넷</th><th>범위</th><th>호스트</th></tr></thead><tbody>${r.list.map((x, k) => { const i = S.info(x); return `<tr><td class="faint">${k + 1}</td><td class="mono">${esc(S.fmt(x))}</td><td class="mono">${esc(S.str(x.v, i.first))} ~ ${esc(S.str(x.v, i.lastHost))}</td><td class="mono">${esc(i.hosts.toString())}</td></tr>`; }).join('')}</tbody></table>`;
+      sr.out.appendChild(tw);
+    }
+    function doMerge() {
+      mr.out.innerHTML = ''; const items = [], bad = [];
+      mr.in.value.split('\n').map(s => s.trim()).filter(Boolean).forEach(l => {
+        const m = /^(\S+)\s*(?:-|~|–)\s*(\S+)$/.exec(l);
+        if (m) { const a = S.parseAddr(m[1]), b = S.parseAddr(m[2]); if (a && b && a.v === b.v) items.push(...S.rangeToCidrs(a.n, b.n, a.bits, a.v)); else bad.push(l); }
+        else { const c = S.parseCidr(l); if (c) items.push(c); else bad.push(l); }
+      });
+      if (bad.length) mr.out.appendChild(h(`<div class="note warn">해석할 수 없는 줄: ${esc(bad.join(', '))}</div>`));
+      const agg = S.aggregate(items); const text = agg.map(S.fmt).join('\n');
+      mr.out.appendChild(h(`<div class="dim">입력 ${items.length}개 대역 → 최소 CIDR ${agg.length}개</div>`));
+      const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;max-height:46vh;overflow:auto"></pre>'); pre.textContent = text; mr.out.appendChild(pre);
+      mr.out.appendChild(copyBtn(text));
+    }
+    on(cr.go, 'click', doCalc); on(cr.q, 'keydown', e => { if (e.key === 'Enter') doCalc(); }); on(cr.q, 'input', debounce(doCalc, 250));
+    on(tr.go, 'click', doContains); on(sr.go, 'click', doSplit); on(mr.go, 'click', doMerge);
+    if (cr.q.value) doCalc(); else { cr.q.value = '192.168.10.77/26'; doCalc(); }
+    return { run: () => ({ calc: doCalc, contains: doContains, split: doSplit, merge: doMerge })[tabs.cur](), receive(slot, t) { if (slot === 'range') { tabs.set('merge'); mr.in.value = t.trim(); doMerge(); return; } tabs.set('calc'); cr.q.value = t.trim(); doCalc(); } };
+  },
+});
+defineDetector({ id: 'cidr', test(text, c) {
+  if (!c.oneLine || c.t.length > 60) return null;
+  const m = /^(\S+)\s*(?:-|~)\s*(\S+)$/.exec(c.t);
+  const ra = m && CidrE.parseAddr(m[1]), rb = m && CidrE.parseAddr(m[2]);
+  if (ra && rb && ra.v === rb.v) { const cs = CidrE.rangeToCidrs(ra.n, rb.n, ra.bits, ra.v); return { key: 'cidr', score: 85, label: 'IP 범위', detail: cs.slice(0, 6).map(CidrE.fmt).join(', ') + (cs.length > 6 ? ` 외 ${cs.length - 6}개` : ''), actions: [spAct('최소 CIDR로 변환', 'cidr', { slot: 'range' })] }; }
+  const p = CidrE.parseCidr(c.t); if (!p) return null;
+  if (p.v === 6 && !p.hasPrefix && c.t.split(':').length < 3) return null;
+  const i = CidrE.info(p);
+  return { key: 'cidr', score: p.hasPrefix ? 90 : 80, label: p.hasPrefix ? `CIDR 대역 (IPv${p.v})` : `IPv${p.v} 주소`, detail: p.hasPrefix ? `${CidrE.str(p.v, i.net)} ~ ${CidrE.str(p.v, i.last)} · ${CidrE.classify(p.v, p.n)}` : CidrE.classify(p.v, p.n), actions: [spAct('IP · CIDR 계산기', 'cidr')] };
+} });
+
+/* ---------- 색상 ---------- */
+const ColorE = (() => {
+  const NAMED = {};
+  ('aliceblue f0f8ff antiquewhite faebd7 aqua 00ffff aquamarine 7fffd4 azure f0ffff beige f5f5dc bisque ffe4c4 black 000000 blanchedalmond ffebcd blue 0000ff blueviolet 8a2be2 brown a52a2a burlywood deb887 cadetblue 5f9ea0 chartreuse 7fff00 chocolate d2691e coral ff7f50 cornflowerblue 6495ed cornsilk fff8dc crimson dc143c cyan 00ffff darkblue 00008b darkcyan 008b8b darkgoldenrod b8860b darkgray a9a9a9 darkgreen 006400 darkgrey a9a9a9 darkkhaki bdb76b darkmagenta 8b008b darkolivegreen 556b2f darkorange ff8c00 darkorchid 9932cc darkred 8b0000 darksalmon e9967a darkseagreen 8fbc8f darkslateblue 483d8b darkslategray 2f4f4f darkslategrey 2f4f4f darkturquoise 00ced1 darkviolet 9400d3 deeppink ff1493 deepskyblue 00bfff dimgray 696969 dimgrey 696969 dodgerblue 1e90ff firebrick b22222 floralwhite fffaf0 forestgreen 228b22 fuchsia ff00ff gainsboro dcdcdc ghostwhite f8f8ff gold ffd700 goldenrod daa520 gray 808080 green 008000 greenyellow adff2f grey 808080 honeydew f0fff0 hotpink ff69b4 indianred cd5c5c indigo 4b0082 ivory fffff0 khaki f0e68c lavender e6e6fa lavenderblush fff0f5 lawngreen 7cfc00 lemonchiffon fffacd lightblue add8e6 lightcoral f08080 lightcyan e0ffff lightgoldenrodyellow fafad2 lightgray d3d3d3 lightgreen 90ee90 lightgrey d3d3d3 lightpink ffb6c1 lightsalmon ffa07a lightseagreen 20b2aa lightskyblue 87cefa lightslategray 778899 lightslategrey 778899 lightsteelblue b0c4de lightyellow ffffe0 lime 00ff00 limegreen 32cd32 linen faf0e6 magenta ff00ff maroon 800000 mediumaquamarine 66cdaa mediumblue 0000cd mediumorchid ba55d3 mediumpurple 9370db mediumseagreen 3cb371 mediumslateblue 7b68ee mediumspringgreen 00fa9a mediumturquoise 48d1cc mediumvioletred c71585 midnightblue 191970 mintcream f5fffa mistyrose ffe4e1 moccasin ffe4b5 navajowhite ffdead navy 000080 oldlace fdf5e6 olive 808000 olivedrab 6b8e23 orange ffa500 orangered ff4500 orchid da70d6 palegoldenrod eee8aa palegreen 98fb98 paleturquoise afeeee palevioletred db7093 papayawhip ffefd5 peachpuff ffdab9 peru cd853f pink ffc0cb plum dda0dd powderblue b0e0e6 purple 800080 rebeccapurple 663399 red ff0000 rosybrown bc8f8f royalblue 4169e1 saddlebrown 8b4513 salmon fa8072 sandybrown f4a460 seagreen 2e8b57 seashell fff5ee sienna a0522d silver c0c0c0 skyblue 87ceeb slateblue 6a5acd slategray 708090 slategrey 708090 snow fffafa springgreen 00ff7f steelblue 4682b4 tan d2b48c teal 008080 thistle d8bfd8 tomato ff6347 turquoise 40e0d0 violet ee82ee wheat f5deb3 white ffffff whitesmoke f5f5f5 yellow ffff00 yellowgreen 9acd32')
+    .split(' ').forEach((w, i, a) => { if (i % 2 === 0) NAMED[w] = a[i + 1]; });
+  const clamp01 = x => Math.min(1, Math.max(0, x));
+  const num = (s, max) => { s = s.trim(); return s.endsWith('%') ? (parseFloat(s) / 100) * max : parseFloat(s); };
+  function hsl2rgb(h, s, l) { h = ((h % 360) + 360) % 360 / 360; const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q; const f = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; }; return s === 0 ? [l, l, l].map(x => Math.round(x * 255)) : [f(h + 1 / 3), f(h), f(h - 1 / 3)].map(x => Math.round(x * 255)); }
+  function hsv2rgb(h, s, v) { h = ((h % 360) + 360) % 360; const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c; const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]; return [r, g, b].map(t => Math.round((t + m) * 255)); }
+  function parse(s) {
+    if (!s) return null; let t = String(s).trim().toLowerCase(), m;
+    if (NAMED[t]) t = '#' + NAMED[t];
+    if (t === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+    if ((m = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(t)) && (t[0] === '#' || /[a-f]/.test(m[1]) || m[1].length >= 6)) {
+      let x = m[1]; if (x.length <= 4) x = x.split('').map(c => c + c).join('');
+      return { r: parseInt(x.slice(0, 2), 16), g: parseInt(x.slice(2, 4), 16), b: parseInt(x.slice(4, 6), 16), a: x.length === 8 ? +(parseInt(x.slice(6, 8), 16) / 255).toFixed(3) : 1 };
+    }
+    if ((m = /^0x([0-9a-f]{8}|[0-9a-f]{6})$/.exec(t))) { const x = m[1]; if (x.length === 6) return { r: parseInt(x.slice(0, 2), 16), g: parseInt(x.slice(2, 4), 16), b: parseInt(x.slice(4, 6), 16), a: 1 }; return { a: +(parseInt(x.slice(0, 2), 16) / 255).toFixed(3), r: parseInt(x.slice(2, 4), 16), g: parseInt(x.slice(4, 6), 16), b: parseInt(x.slice(6, 8), 16) }; }
+    if ((m = /^rgba?\(\s*([^)]+)\)$/.exec(t))) { const p = m[1].split(/\s*[,/]\s*|\s+/).filter(Boolean); if (p.length < 3) return null; const [r, g, b] = p.slice(0, 3).map(x => Math.round(clampN(num(x, 255), 0, 255))); return { r, g, b, a: p[3] !== undefined ? clamp01(num(p[3], 1)) : 1 }; }
+    if ((m = /^hsla?\(\s*([^)]+)\)$/.exec(t))) { const p = m[1].split(/\s*[,/]\s*|\s+/).filter(Boolean); if (p.length < 3) return null; const [r, g, b] = hsl2rgb(parseFloat(p[0]), clamp01(num(p[1], 1)), clamp01(num(p[2], 1))); return { r, g, b, a: p[3] !== undefined ? clamp01(num(p[3], 1)) : 1 }; }
+    if ((m = /^hsv\(\s*([^)]+)\)$/.exec(t))) { const p = m[1].split(/\s*,\s*|\s+/).filter(Boolean); if (p.length < 3) return null; const [r, g, b] = hsv2rgb(parseFloat(p[0]), clamp01(num(p[1], 1)), clamp01(num(p[2], 1))); return { r, g, b, a: 1 }; }
+    if ((m = /^(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})$/.exec(t)) && [m[1], m[2], m[3]].every(x => +x <= 255)) return { r: +m[1], g: +m[2], b: +m[3], a: 1 };
+    return null;
+  }
+  const clampN = (x, a, b) => Math.min(b, Math.max(a, x));
+  function toHsl({ r, g, b }) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let h = 0, s = 0; if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) }; }
+  function toHsv({ r, g, b }) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0; if (d) { h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return { h: Math.round(h), s: Math.round((mx ? d / mx : 0) * 100), v: Math.round(mx * 100) }; }
+  const h2 = n => Math.round(n).toString(16).padStart(2, '0');
+  const hex = (c, alpha) => '#' + h2(c.r) + h2(c.g) + h2(c.b) + (alpha && c.a < 1 ? h2(c.a * 255) : '');
+  function lum(c) { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); }
+  function blend(fg, bg) { const a = fg.a == null ? 1 : fg.a; return { r: fg.r * a + bg.r * (1 - a), g: fg.g * a + bg.g * (1 - a), b: fg.b * a + bg.b * (1 - a), a: 1 }; }
+  function contrast(fg, bg) { const f = lum(blend(fg, bg)), b = lum(bg); const [hi, lo] = f > b ? [f, b] : [b, f]; return (hi + 0.05) / (lo + 0.05); }
+  function mix(c, t, w) { return { r: c.r + (t.r - c.r) * w, g: c.g + (t.g - c.g) * w, b: c.b + (t.b - c.b) * w, a: c.a }; }
+  function formats(c) {
+    const hs = toHsl(c), hv = toHsv(c), a = c.a, ai = Math.round(a * 255);
+    const argb = '0x' + (h2(ai) + h2(c.r) + h2(c.g) + h2(c.b)).toUpperCase();
+    return [['HEX', hex(c).toUpperCase()], ['HEX (알파 포함)', (hex(c) + h2(ai)).toUpperCase()], ['rgb()', a < 1 ? `rgba(${c.r}, ${c.g}, ${c.b}, ${+a.toFixed(3)})` : `rgb(${c.r}, ${c.g}, ${c.b})`],
+      ['hsl()', a < 1 ? `hsla(${hs.h}, ${hs.s}%, ${hs.l}%, ${+a.toFixed(3)})` : `hsl(${hs.h}, ${hs.s}%, ${hs.l}%)`], ['HSV', `hsv(${hv.h}, ${hv.s}%, ${hv.v}%)`],
+      ['Java AWT', a < 1 ? `new Color(${c.r}, ${c.g}, ${c.b}, ${ai})` : `new Color(${c.r}, ${c.g}, ${c.b})`], ['Android / Java int (ARGB)', argb], ['Kotlin Compose', `Color(${argb})`], ['10진 RGB', `${c.r}, ${c.g}, ${c.b}`]];
+  }
+  return { parse, hex, toHsl, toHsv, lum, contrast, mix, formats, NAMED, hsl2rgb };
+})();
+DU.ColorE = ColorE;
+
+injectCss(`
+.clr-sw { width: 100%; height: 64px; border-radius: 8px; border: 1px solid var(--border); background-image: repeating-conic-gradient(var(--bg-sunk) 0 25%, transparent 0 50%); background-size: 16px 16px; position: relative; overflow: hidden; }
+.clr-sw > div { position: absolute; inset: 0; }
+.clr-sample { border-radius: 8px; padding: 14px 16px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.clr-ratio { font: 700 34px var(--mono); }
+.clr-pal { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 3px; }
+.clr-pal button { height: 34px; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font: 9px var(--mono); padding: 0; }
+`);
+defineTool({
+  id: 'color', group: 'misc', abbr: 'CLR', name: '색상 변환 · 대비 검사',
+  desc: 'HEX · RGB · HSL · HSV · Java/Android 색상 변환 · WCAG 명도 대비 · 팔레트',
+  keywords: 'color colour hex rgb hsl hsv wcag contrast accessibility 색상 컬러 대비 명도 접근성 팔레트 java android',
+  inputs: { input: '색상' },
+  init(root) {
+    const box = h(`<div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">전경색 (글자)</h3><div class="row"><input type="color" data-ref="fp"><input class="inp mono" data-ref="fg" style="flex:1" value="#2F6FDE" placeholder="#2F6FDE · rgb(47,111,222) · hsl(218,73%,53%) · 0xFF2F6FDE · navy"><button class="btn sm" data-ref="swap" type="button" title="전경/배경 바꾸기">⇅</button></div>
+          <div class="clr-sw"><div data-ref="fsw"></div></div><div data-ref="ffmt"></div></div>
+        <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">배경색</h3><div class="row"><input type="color" data-ref="bp"><input class="inp mono" data-ref="bg" style="flex:1" value="#FFFFFF"></div><div data-ref="bfmt"></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">명도 대비 (WCAG 2.x)</h3><div class="row"><span class="clr-ratio" data-ref="ratio"></span><span class="sp"></span><div data-ref="badges" class="row"></div></div>
+          <div class="clr-sample" data-ref="sample"><div style="font-size:14px">본문 텍스트 예시 — 가나다라마바사 ABC abc 123</div><div style="font-size:19px;font-weight:700">큰 글자 예시 (18.66px 굵게 / 24px 이상)</div></div>
+          <div class="faint" style="font-size:12px">AA 기준: 일반 4.5:1, 큰 글자 3:1 · AAA 기준: 일반 7:1, 큰 글자 4.5:1 · 반투명 전경색은 배경과 합성해 계산</div></div>
+        <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">명암 단계 (클릭하여 HEX 복사)</h3><div class="clr-pal" data-ref="tints"></div><div class="clr-pal" data-ref="shades"></div></div></div></div>`);
+    const r = refs(box); root.appendChild(box);
+    bindPersist(r.fg, 'color:fg'); bindPersist(r.bg, 'color:bg');
+    const fmtTable = c => { const el = h('<div class="kvlist"></div>'); ColorE.formats(c).forEach(([k, v]) => { const kd = h('<div class="k"></div>'); kd.textContent = k; const vd = h('<div class="v"></div>'); vd.textContent = v; const ad = h('<div class="a"></div>'); ad.appendChild(copyBtn(v)); el.append(kd, vd, ad); }); return el; };
+    function upd() {
+      const f = ColorE.parse(r.fg.value), b = ColorE.parse(r.bg.value);
+      r.fg.style.borderColor = f ? '' : 'var(--err)'; r.bg.style.borderColor = b ? '' : 'var(--err)';
+      r.ffmt.innerHTML = ''; r.bfmt.innerHTML = ''; r.tints.innerHTML = ''; r.shades.innerHTML = '';
+      if (f) { r.fsw.style.background = `rgba(${f.r},${f.g},${f.b},${f.a})`; r.fp.value = ColorE.hex(f); r.ffmt.appendChild(fmtTable(f)); }
+      if (b) { r.bp.value = ColorE.hex(b); r.bfmt.appendChild(fmtTable(b)); }
+      if (f && b) {
+        const cr = ColorE.contrast(f, b); r.ratio.textContent = cr.toFixed(2) + ':1';
+        const bd = (ok, l) => `<span class="badge ${ok ? 'ok' : 'err'}">${ok ? '✓' : '✕'} ${l}</span>`;
+        r.badges.innerHTML = bd(cr >= 4.5, 'AA 일반') + bd(cr >= 3, 'AA 큰 글자') + bd(cr >= 7, 'AAA 일반') + bd(cr >= 4.5, 'AAA 큰 글자');
+        r.sample.style.color = `rgba(${f.r},${f.g},${f.b},${f.a})`; r.sample.style.background = ColorE.hex(b);
+      } else { r.ratio.textContent = '—'; r.badges.innerHTML = '<span class="badge err">색상 형식 오류</span>'; }
+      if (f) {
+        const W = { r: 255, g: 255, b: 255 }, K = { r: 0, g: 0, b: 0 };
+        for (let i = 0; i <= 10; i++) { [[r.tints, ColorE.mix(f, W, i / 10)], [r.shades, ColorE.mix(f, K, i / 10)]].forEach(([el, c]) => { const hx = ColorE.hex(c).toUpperCase(); const bt = h('<button type="button"></button>'); bt.style.background = hx; bt.style.color = ColorE.lum(c) > 0.4 ? '#000' : '#fff'; bt.textContent = `${i * 10}%`; bt.title = hx; on(bt, 'click', () => copyText(hx, hx + ' 복사')); el.appendChild(bt); }); }
+      }
+    }
+    on(r.fg, 'input', upd); on(r.bg, 'input', upd);
+    on(r.fp, 'input', () => { r.fg.value = r.fp.value.toUpperCase(); persistSet('color:fg', r.fg.value); upd(); });
+    on(r.bp, 'input', () => { r.bg.value = r.bp.value.toUpperCase(); persistSet('color:bg', r.bg.value); upd(); });
+    on(r.swap, 'click', () => { const t = r.fg.value; r.fg.value = r.bg.value; r.bg.value = t; persistSet('color:fg', r.fg.value); persistSet('color:bg', r.bg.value); upd(); });
+    upd();
+    return { run: upd, receive(slot, t) { r.fg.value = t.trim(); upd(); } };
+  },
+});
+defineDetector({ id: 'color', test(text, c) {
+  if (!c.oneLine || c.t.length > 60) return null;
+  if (!/^(#[0-9a-f]{3,8}|rgba?\(.+\)|hsla?\(.+\)|hsv\(.+\)|0x[0-9a-f]{8})$/i.test(c.t)) return null;
+  if (/^#[0-9a-f]+$/i.test(c.t) && ![4, 5, 7, 9].includes(c.t.length)) return null;
+  const col = ColorE.parse(c.t); if (!col) return null;
+  return { key: 'color', score: /^#\d{3}$/.test(c.t) ? 50 : 88, label: '색상 값', detail: ColorE.formats(col).slice(0, 4).map(x => x[1]).join(' · '), actions: [spAct('색상 변환 · 대비 검사', 'color')] };
+} });
+
+/* =====================================================================
+ * 민감정보 · 비밀값 마스킹 (로그 공유 전 정리)
+ * ===================================================================== */
+const PiiE = (() => {
+  const TRIVIAL = /^(true|false|null|none|nil|undefined|empty|n\/a|-|\*+|x+|•+|\.{3}|\$\{[^}]*\}|\{\{[^}]*\}\}|<[^>]*>|%[\w(]+\)?s?|\?|changeme|password|secret|token)$/i;
+  const nonTrivial = v => !!v && v.length >= 3 && !TRIVIAL.test(v) && !/^\d{1,3}$/.test(v) && !/^(\$\{|\{\{|#\{|%\()/.test(v);
+  const SECRET_KEY = String.raw`[\w.-]*(?:password|passwd|pwd|passphrase|secret|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|client[_-]?secret|credentials?|auth[_-]?token|session[_-]?key|signing[_-]?key)[\w.-]*`;
+  const rrnSum = d => { const w = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5]; let s = 0; for (let i = 0; i < 12; i++) s += +d[i] * w[i]; return (11 - (s % 11)) % 10 === +d[12]; };
+  const frnSum = d => { const w = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5]; let s = 0; for (let i = 0; i < 12; i++) s += +d[i] * w[i]; return (13 - (s % 11)) % 10 === +d[12]; };
+  const luhn = d => { let s = 0, alt = false; for (let i = d.length - 1; i >= 0; i--) { let n = +d[i]; if (alt) { n *= 2; if (n > 9) n -= 9; } s += n; alt = !alt; } return s % 10 === 0; };
+  const brnSum = d => { const w = [1, 3, 7, 1, 3, 7, 1, 3, 5]; let s = 0; for (let i = 0; i < 9; i++) s += +d[i] * w[i]; s += Math.floor((+d[8] * 5) / 10); return (10 - (s % 10)) % 10 === +d[9]; };
+  const validDate = (yy, mm, dd, g) => { const y = (/[1256]/.test(g) ? 1900 : /[3478]/.test(g) ? 2000 : 1800) + +yy; const dt = new Date(Date.UTC(y, +mm - 1, +dd)); return dt.getUTCMonth() === +mm - 1 && dt.getUTCDate() === +dd; };
+  const isPrivV4 = ip => { const [a, b] = ip.split('.').map(Number); return a === 10 || a === 127 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254) || (a === 100 && b >= 64 && b <= 127) || a === 0; };
+  const keep = (v, a, b) => (v.length <= a + b ? '*'.repeat(v.length) : v.slice(0, a) + v.slice(a, v.length - b).replace(/[^\s\-.@:/]/g, '*') + v.slice(v.length - b));
+  // id, 라벨, 높은 확신(Smart Paste), 정규식, 그룹, 검증, 부분 마스킹, 색상
+  const RULES = [
+    { id: 'privkey', label: '개인키 블록', high: true, re: String.raw`-----BEGIN ((?:[A-Z0-9]+ )*PRIVATE KEY)-----([\s\S]*?)-----END \1-----`, g: 2, partial: () => '\n(개인키 내용 삭제됨)\n', c: 1 },
+    { id: 'jwt', label: 'JWT 토큰', high: true, re: String.raw`\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}`, g: 0, partial: v => v.split('.')[0] + '.****.****', c: 1 },
+    { id: 'auth', label: '인증 헤더 값', high: true, re: String.raw`\b(?:Authorization|Proxy-Authorization)["']?\s*[:=]\s*["']?(?:Bearer|Basic|Token|Digest|Negotiate|NTLM)\s+([A-Za-z0-9._~+/=-]{6,})`, flags: 'i', g: 1, partial: v => keep(v, 4, 0), c: 1 },
+    { id: 'bearer', label: 'Bearer 토큰', high: true, re: String.raw`\bBearer\s+([A-Za-z0-9._~+/=-]{16,})`, g: 1, partial: v => keep(v, 4, 0), c: 1 },
+    { id: 'aws', label: 'AWS 액세스 키', high: true, re: String.raw`\b((?:AKIA|ASIA|AIDA|AROA)[0-9A-Z]{16})\b`, g: 1, partial: v => keep(v, 4, 2), c: 1 },
+    { id: 'awssecret', label: 'AWS 비밀 키', high: true, re: String.raw`\baws_?secret_?(?:access_?)?key["']?\s*[:=]\s*["']?([A-Za-z0-9/+=]{40})`, flags: 'i', g: 1, partial: v => keep(v, 2, 0), c: 1 },
+    { id: 'apitoken', label: '서비스 토큰 (GitHub·Slack·Google 등)', high: true, re: String.raw`\b(gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{22,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|sk-[A-Za-z0-9_-]{20,}|glpat-[A-Za-z0-9_-]{20})`, g: 1, partial: v => keep(v, 6, 0), c: 1 },
+    { id: 'urlcred', label: 'URL 속 비밀번호', high: true, re: String.raw`\b[a-z][a-z0-9+.-]*://[^\s:/@"']+:([^\s@/"']+)@`, flags: 'i', g: 1, partial: () => '****', c: 1 },
+    { id: 'jdbc', label: 'JDBC 비밀번호', high: true, re: String.raw`\bjdbc:oracle:[a-z]+:[\w.$-]+/([^@\s"']+)@`, flags: 'i', g: 1, partial: () => '****', c: 1 },
+    { id: 'jsonsecret', label: 'JSON 비밀값', high: true, re: String.raw`"` + SECRET_KEY + String.raw`"\s*:\s*"((?:[^"\\]|\\.)*)"`, flags: 'i', g: 1, valid: nonTrivial, partial: () => '****', c: 1 },
+    { id: 'xmlsecret', label: 'XML 비밀값', high: true, re: String.raw`<((?:[\w-]+:)?` + SECRET_KEY + String.raw`)(?:\s[^>]*)?>([^<]+)</\1>`, flags: 'i', g: 2, valid: nonTrivial, partial: () => '****', c: 1 },
+    { id: 'kvsecretq', label: '설정 비밀값', high: true, re: String.raw`\b` + SECRET_KEY + String.raw`\s*[=:]\s*(["'])((?:(?!\1).){1,500})\1`, flags: 'i', g: 2, valid: nonTrivial, partial: () => '****', c: 1 },
+    { id: 'kvsecret', label: '설정 비밀값', high: true, re: String.raw`\b` + SECRET_KEY + String.raw`\s*[=:]\s*(?!["'\s])([^\s,;&"'<>)}\]]+)`, flags: 'i', g: 1, valid: nonTrivial, partial: () => '****', c: 1 },
+    { id: 'session', label: '세션 ID', high: true, re: String.raw`\b(?:JSESSIONID|PHPSESSID|SESSIONID|ASP\.NET_SessionId|connect\.sid|WMONID|SESSION)=([^;\s&"',]{8,})`, flags: 'i', g: 1, partial: v => keep(v, 4, 0), c: 2 },
+    { id: 'rrn', label: '주민등록번호', high: true, re: String.raw`(?<![\d-])(\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\s?-\s?([1-4])(\d{6})(?![\d-])`, g: 0, valid: (v, m, o) => validDate(m[1], m[2], m[3], m[4]) && (!o.rrnChecksum || rrnSum(v.replace(/\D/g, ''))), partial: v => v.replace(/(\d{6}\s?-\s?\d)\d{6}/, '$1******'), c: 0 },
+    { id: 'rrn13', label: '주민등록번호', high: true, re: String.raw`(?<!\d)(\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([1-4])\d{6}(?!\d)`, g: 0, valid: (v, m) => validDate(m[1], m[2], m[3], m[4]) && rrnSum(v), partial: v => v.slice(0, 7) + '******', c: 0 },
+    { id: 'frn', label: '외국인등록번호', high: true, re: String.raw`(?<![\d-])(\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\s?-\s?([5-8])(\d{6})(?![\d-])`, g: 0, valid: (v, m, o) => validDate(m[1], m[2], m[3], m[4]) && (!o.rrnChecksum || frnSum(v.replace(/\D/g, ''))), partial: v => v.replace(/(\d{6}\s?-\s?\d)\d{6}/, '$1******'), c: 0 },
+    { id: 'card', label: '신용카드 번호', high: true, re: String.raw`(?<![\d-])((?:4\d{3}|5[1-5]\d{2}|2[2-7]\d{2}|6(?:011|5\d{2})|35\d{2})(?:[ -]?\d{4}){3}|9\d{3}(?:[ -]\d{4}){3}|3[47]\d{2}[ -]?\d{6}[ -]?\d{5})(?![\d-])`, g: 1, valid: v => luhn(v.replace(/\D/g, '')), partial: v => v.replace(/\d(?=(?:[ -]?\d){4})/g, (d, i) => (i < 4 ? d : '*')), c: 0 },
+    { id: 'brn', label: '사업자등록번호', high: true, re: String.raw`(?<![\d-])(\d{3})-(\d{2})-(\d{5})(?![\d-])`, g: 0, valid: v => brnSum(v.replace(/\D/g, '')), partial: v => v.slice(0, 7) + '*****', c: 3 },
+    { id: 'account', label: '계좌번호', high: true, re: String.raw`(?:계좌(?:번호)?|입금\s?계좌|account[_\s-]?(?:no|num(?:ber)?)|acct[_\s-]?(?:no|num)?|bank[_\s-]?account)["']?\s*[:=]?\s*["']?(\d{2,6}(?:-\d{2,7}){1,3}|\d{10,14})(?![\d-])`, flags: 'i', g: 1, partial: v => keep(v, 3, 3), c: 0 },
+    { id: 'passport', label: '여권번호', high: true, re: String.raw`(?:여권(?:\s?번호)?|passport[_\s-]?(?:no|num(?:ber)?)?)["']?\s*[:=]?\s*["']?([A-Z]{1,2}\d{7,8}|[MSRODG]\d{3}[A-Z]\d{4})(?![A-Za-z0-9])`, flags: 'i', g: 1, partial: v => keep(v, 1, 2), c: 0 },
+    { id: 'mobile', label: '휴대폰 번호', high: true, re: String.raw`(?<![\d-])(?:\+82[-\s]?1[016789]|01[016789])([-.\s]?)(\d{3,4})\1(\d{4})(?![\d-])`, g: 0, valid: v => /[-.\s]/.test(v.slice(3)) || /^\+82/.test(v) || v.replace(/\D/g, '').length === 11, partial: v => v.replace(/(\d{3,4})([-.\s]?\d{4})$/, (m, a, b) => '*'.repeat(a.length) + b), c: 2 },
+    { id: 'phone', label: '전화번호', high: false, re: String.raw`(?<![\d-])(0(?:2|3[1-3]|4[1-4]|5[1-5]|6[1-4]|70|50\d{1,2}))-(\d{3,4})-(\d{4})(?![\d-])`, g: 0, partial: v => v.replace(/-(\d{3,4})-/, (m, a) => '-' + '*'.repeat(a.length) + '-'), c: 2 },
+    { id: 'email', label: '이메일', high: false, re: String.raw`(?<![\w.%+-])([A-Za-z0-9._%+-]+)@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})(?![\w.-])`, g: 0, partial: v => { const [l, d] = v.split('@'); return l[0] + '*'.repeat(Math.max(2, l.length - 1)) + '@' + d; }, c: 4 },
+    { id: 'ipv4', label: 'IPv4 주소', high: false, re: String.raw`(?<![\d.])((?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})(?![\d.]|\w)`, g: 1, valid: (v, m, o) => !(o.keepPrivateIp && isPrivV4(v)), partial: v => v.split('.').slice(0, 2).join('.') + '.*.*', c: 5 },
+    { id: 'ipv6', label: 'IPv6 주소', high: false, re: String.raw`(?<![\w:.])((?:[0-9A-Fa-f]{1,4}:){2,7}[0-9A-Fa-f]{1,4}|(?:[0-9A-Fa-f]{1,4}:){1,7}:(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)(?![\w:.])`, g: 1, valid: (v, m, o) => { const p = typeof CidrE !== 'undefined' ? CidrE.parseV6(v) : null; if (p === null) return false; const groups = v.split(':').filter(Boolean).length; if (groups < 3 && !/^fe80:|^2001:/i.test(v)) return false; return !(o.keepPrivateIp && /^(fe80:|f[cd]|::1$)/i.test(v)); }, partial: v => v.split(':').slice(0, 2).join(':') + ':****', c: 5 },
+  ];
+  const LABELS = {}; RULES.forEach(r => { LABELS[r.id] = r.label; });
+  const CATS = [['privkey', ['privkey']], ['jwt', ['jwt']], ['auth', ['auth', 'bearer']], ['cloud', ['aws', 'awssecret', 'apitoken']], ['urlcred', ['urlcred', 'jdbc']], ['secret', ['jsonsecret', 'xmlsecret', 'kvsecretq', 'kvsecret']], ['session', ['session']],
+    ['rrn', ['rrn', 'rrn13']], ['frn', ['frn']], ['card', ['card']], ['brn', ['brn']], ['account', ['account']], ['passport', ['passport']], ['mobile', ['mobile', 'phone']], ['email', ['email']], ['ip', ['ipv4', 'ipv6']]];
+  const CAT_LABEL = { privkey: '개인키', jwt: 'JWT', auth: '인증 헤더/Bearer', cloud: '클라우드·서비스 키', urlcred: 'URL·JDBC 비밀번호', secret: '설정 비밀값 (password=, "token": …)', session: '세션 ID', rrn: '주민등록번호', frn: '외국인등록번호', card: '신용카드', brn: '사업자등록번호', account: '계좌번호', passport: '여권번호', mobile: '전화번호', email: '이메일', ip: 'IP 주소' };
+  const ruleCat = {}; CATS.forEach(([c, ids]) => ids.forEach(id => { ruleCat[id] = c; }));
+  let hasIndices = true; try { new RegExp('a', 'd'); } catch (e) { hasIndices = false; }
+  const cache = {};
+  function compile(src, flags) { const k = src + '/' + flags; if (!cache[k]) cache[k] = new RegExp(src, flags + (hasIndices ? 'd' : '')); return cache[k]; }
+  /** → [{start, end, id, cat, label, value}] (겹침 제거, 위치순) */
+  function scan(text, opt = {}) {
+    const off = new Set(opt.off || []); let spans = []; // 위치순 · 겹침 없음
+    const rules = RULES.filter(r => !off.has(ruleCat[r.id]) && (!opt.only || opt.only(r))).concat((opt.custom || []).filter(c => c.on !== false && c.re).map((c, i) => ({ id: 'custom' + i, label: c.name || '사용자 규칙', re: c.re, flags: c.flags || '', g: +c.g || 0, c: 3, custom: true })));
+    for (const r of rules) {
+      let re; try { re = compile(r.re, 'g' + (r.flags || '').replace(/[gd]/g, '')); } catch (e) { continue; }
+      re.lastIndex = 0; let m, k = 0; const add = [];
+      while ((m = re.exec(text))) {
+        if (m[0] === '') { re.lastIndex++; continue; }
+        const v = m[r.g]; if (v == null || v === '') continue;
+        let s;
+        if (hasIndices && m.indices && m.indices[r.g]) s = m.indices[r.g][0]; else s = m.index + (r.g ? m[0].indexOf(v) : 0);
+        const e = s + v.length;
+        if (r.valid && !r.valid(v, m, opt)) continue;
+        // 같은 규칙의 매치는 위치순이므로 기존 구간 포인터만 앞으로 이동 (O(n))
+        while (k < spans.length && spans[k].end <= s) k++;
+        if (k < spans.length && spans[k].start < e) continue;
+        add.push({ start: s, end: e, id: r.id, cat: r.custom ? 'custom' : ruleCat[r.id], label: r.label, value: v, rule: r });
+      }
+      if (add.length) { const merged = []; let i = 0, j = 0; while (i < spans.length || j < add.length) merged.push(j >= add.length || (i < spans.length && spans[i].start < add[j].start) ? spans[i++] : add[j++]); spans = merged; }
+    }
+    return spans;
+  }
+  function maskValue(sp, style, keepLen) {
+    const v = sp.value;
+    if (sp.id === 'privkey') return style === 'tag' ? '\n[REDACTED:개인키]\n' : '\n(개인키 내용 삭제됨)\n';
+    if (style === 'tag') return `[${sp.label}]`;
+    if (style === 'hash') return `[${sp.label}#${bytesToHex(Hash.digest('sha256', utf8(v))).slice(0, 8)}]`;
+    if (style === 'partial' && sp.rule.partial) return sp.rule.partial(v);
+    if (style === 'partial') return keep(v, Math.min(2, Math.floor(v.length / 4)), Math.min(2, Math.floor(v.length / 4)));
+    return keepLen ? v.replace(/[^\s]/g, '*').slice(0, 200) : '****';
+  }
+  function mask(text, opt = {}) {
+    const spans = scan(text, opt); let out = '', last = 0;
+    spans.forEach(sp => { out += text.slice(last, sp.start) + maskValue(sp, opt.style || 'partial', opt.keepLen !== false); last = sp.end; });
+    out += text.slice(last);
+    const counts = {}; spans.forEach(sp => { counts[sp.cat] = (counts[sp.cat] || 0) + 1; });
+    return { out, spans, counts };
+  }
+  return { scan, mask, CATS, CAT_LABEL, LABELS, rrnSum, luhn, brnSum, frnSum };
+})();
+DU.PiiE = PiiE;
+
+injectCss(`
+.pii-view { font: var(--code-size)/var(--code-lh) var(--mono); white-space: pre-wrap; word-break: break-all; padding: 8px 10px 30px; }
+.pii-m { border-radius: 3px; padding: 0 1px; }
+.pii-c0 { background: var(--del-hl); } .pii-c1 { background: var(--err-weak); outline: 1px solid var(--err-line); } .pii-c2 { background: var(--warn-weak); outline: 1px solid var(--warn-line); }
+.pii-c3 { background: var(--mark); } .pii-c4 { background: var(--info-weak); outline: 1px solid var(--info-line); } .pii-c5 { background: var(--add-hl); }
+`);
+const PII_SAMPLE_E = `2026-10-28 09:15:22.123 INFO  [http-nio-8080-exec-1] c.e.member.MemberController - 회원 가입 요청: name=홍길동, rrn=900101-1234568, phone=010-1234-5678, email=hong.gildong@example.com
+2026-10-28 09:15:22.130 DEBUG [http-nio-8080-exec-1] c.e.pay.PayService - 카드 승인 요청 card=4111-1111-1111-1111 amount=15000 계좌번호: 110-123-456789
+2026-10-28 09:15:22.140 DEBUG [http-nio-8080-exec-1] o.s.web.client.RestTemplate - HTTP POST https://api.example.com/v1/pay Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJob25nIiwicm9sZSI6IlVTRVIifQ.c2lnbmF0dXJlLWV4YW1wbGU
+2026-10-28 09:15:22.150 INFO  [main] c.e.config.DataSourceConfig - url=jdbc:oracle:thin:app_user/S3cr3t!pw@10.0.12.34:1521/ORCL spring.datasource.password=P@ssw0rd123
+2026-10-28 09:15:22.160 WARN  [main] c.e.config.S3Config - aws.accessKeyId=AKIAIOSFODNN7EXAMPLE client IP 203.0.113.45 → 사설 192.168.0.10, Cookie: JSESSIONID=8F2A1C0D9E3B4A5F6C7D8E9F0A1B2C3D
+{"userId":"hong","password":"qwer1234!","apiKey":"abcd-1234-efgh-5678","traceId":"a1b2c3d4"}`;
+
+defineTool({
+  id: 'pii-mask', group: 'encode', abbr: 'PII', name: '민감정보 마스킹',
+  desc: '로그 공유 전 주민번호 · 카드 · 전화 · 이메일 · 토큰 · 비밀번호 · 개인키 자동 가림',
+  keywords: 'pii mask masking redact secret password token 민감정보 개인정보 마스킹 주민번호 카드번호 전화번호 비밀번호 로그 공유 가림 jwt aws',
+  inputs: { input: '텍스트' }, fill: true,
+  help: `로그·설정·JSON을 붙여넣으면 개인정보와 비밀값을 찾아 가립니다. 모든 처리는 이 브라우저 안에서만 이루어지며 <b>입력은 저장되지 않습니다</b>.<br>
+    <b>부분 마스킹</b>은 형식을 알아볼 수 있게 일부만 남기고(예: 900101-1******, 010-****-5678), <b>해시</b>는 같은 값이 같은 표시가 되어 로그 상관관계를 유지합니다.<br>
+    주민등록번호 <b>체크섬 검증</b>은 오탐을 줄이지만 2020년 10월 이후 발급 번호는 검증 자리가 없으므로 기본은 꺼져 있습니다. 탐지 규칙은 보수적으로 설계되어 있으니 공유 전 결과를 한 번 확인하세요.`,
+  init(root) {
+    const style = sel([['partial', '부분 마스킹'], ['full', '전체 *'], ['tag', '[유형] 표시'], ['hash', '해시 (상관관계 유지)']], 'pii:style', 'partial');
+    const oLen = chk('길이 유지', 'pii:len', true, '전체 * 방식에서 원래 길이만큼 *'), oPriv = chk('사설 IP 유지', 'pii:priv', false), oRrn = chk('주민번호 체크섬 검증', 'pii:rrnck', false);
+    let off = new Set(persistGet('pii:off', [])); let custom = persistGet('pii:custom', []) || [];
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('마스킹', run, 'primary', 'Ctrl+Enter'), style, oLen.el, oPriv.el, oRrn.el, h('<span class="sep"></span>'), btn('결과 복사', () => copyText(out.get()), 'sm'), btn('사용자 규칙', editCustom, 'sm ghost'), h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(PII_SAMPLE_E); run(); }));
+    const chips = h('<div class="toolbar"></div>');
+    const inp = Pane({ title: '원본 (저장되지 않음)', placeholder: '공유할 로그 · 설정 · JSON을 붙여넣으세요', actions: ['open', 'wrap', 'clear'] });
+    const out = Pane({ title: '마스킹 결과', readonly: true, sendFrom: 'pii-mask', filename: 'masked.log' });
+    const tabs = Tabs([{ id: 'out', label: '마스킹 결과' }, { id: 'hl', label: '탐지 위치' }], id => { out.el.classList.toggle('hidden', id !== 'out'); hlBox.classList.toggle('hidden', id !== 'hl'); });
+    const right = h('<div style="display:flex;flex-direction:column;min-height:0;min-width:0;gap:6px"></div>');
+    const hlBox = h('<div class="pane hidden" style="flex:1"><div class="pane-view"><div class="pii-view"></div></div></div>');
+    out.el.style.flex = '1';
+    right.append(tabs.el, out.el, hlBox);
+    const split = h('<div class="split"></div>'); split.append(inp.el, right);
+    root.append(bar, chips, split); tabs.set('out', true);
+    const opts = () => ({ off: Array.from(off), style: style.value, keepLen: oLen.get(), keepPrivateIp: oPriv.get(), rrnChecksum: oRrn.get(), custom });
+    function run() {
+      const text = inp.get();
+      const r = PiiE.mask(text, opts());
+      out.set(r.out, { lang: null }); out.status(r.spans.length ? `${r.spans.length}곳 가림` : '탐지된 민감정보 없음', r.spans.length ? 'ok' : 'info');
+      const all = PiiE.scan(text, Object.assign(opts(), { off: [] }));
+      const totals = {}; all.forEach(s => { totals[s.cat] = (totals[s.cat] || 0) + 1; });
+      chips.innerHTML = '<span class="lbl">유형</span>';
+      PiiE.CATS.map(c => c[0]).concat(custom.length ? ['custom'] : []).forEach(cat => {
+        const n = totals[cat] || 0;
+        const c = h(`<span class="chip${off.has(cat) ? ' off' : ''}" title="클릭하여 켜기/끄기"><span></span><b>${n}</b></span>`); c.firstChild.textContent = PiiE.CAT_LABEL[cat] || '사용자 규칙';
+        if (!n) c.style.opacity = off.has(cat) ? '.35' : '.6';
+        on(c, 'click', () => { off.has(cat) ? off.delete(cat) : off.add(cat); persistSet('pii:off', Array.from(off)); run(); });
+        chips.appendChild(c);
+      });
+      let html = '', last = 0;
+      r.spans.forEach(sp => { html += esc(text.slice(last, sp.start)) + `<span class="pii-m pii-c${sp.rule.c || 0}" title="${esc(sp.label)}">${esc(sp.value)}</span>`; last = sp.end; });
+      $('.pii-view', hlBox).innerHTML = html + esc(text.slice(last));
+    }
+    function editCustom() {
+      const body = h(`<div style="display:flex;flex-direction:column;gap:8px"><div class="dim" style="font-size:12px">사내 고유 식별자(사번, 고객번호 등)를 정규식으로 추가합니다. 규칙은 이 브라우저에 저장됩니다 (값은 저장되지 않음). 그룹 번호를 지정하면 그 부분만 가립니다.</div><div data-l style="display:flex;flex-direction:column;gap:6px"></div></div>`);
+      const list = $('[data-l]', body);
+      const draw = () => { list.innerHTML = ''; custom.forEach((c, i) => { const row = h('<div class="row"><input class="inp sm" placeholder="이름" style="width:110px"><input class="inp sm mono" placeholder="정규식 예: EMP\\d{6}" style="flex:1"><input class="inp sm mono" placeholder="플래그" style="width:50px"><input class="inp sm" type="number" min="0" placeholder="그룹" style="width:60px"><button class="btn xs ghost" type="button">✕</button></div>'); const [n, re, fl, g] = $$('input', row); n.value = c.name || ''; re.value = c.re || ''; fl.value = c.flags || ''; g.value = c.g || 0; [n, re, fl, g].forEach(x => on(x, 'input', () => { c.name = n.value; c.re = re.value; c.flags = fl.value.replace(/[^imsu]/g, ''); c.g = +g.value || 0; try { new RegExp(c.re); re.style.borderColor = ''; } catch (e) { re.style.borderColor = 'var(--err)'; } })); on($('button', row), 'click', () => { custom.splice(i, 1); draw(); }); list.appendChild(row); }); };
+      draw();
+      const foot = h('<div class="row"></div>');
+      const m = openModal({ title: '사용자 정의 마스킹 규칙', body, foot, onClose: () => { custom = custom.filter(c => c.re); persistSet('pii:custom', custom); run(); } });
+      foot.append(btn('+ 규칙 추가', () => { custom.push({ name: '', re: '', flags: '', g: 0 }); draw(); }), btn('닫기', () => m.close(), 'primary'));
+    }
+    [style, oLen.input, oPriv.input, oRrn.input].forEach(x => on(x, 'change', run));
+    inp.onInput(debounce(run, 300)); run();
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+defineOp({ id: 'mask-secrets', name: '민감정보 · 비밀값 마스킹', group: '텍스트', desc: '주민번호·카드·전화·이메일·토큰·비밀번호 등을 가립니다', params: [{ k: 'style', label: '방식', type: 'select', options: [['partial', '부분'], ['full', '전체 *'], ['tag', '[유형]'], ['hash', '해시']] }, { k: 'ip', label: 'IP 포함', type: 'bool', def: true }],
+  run: (v, p) => PiiE.mask(v, { style: p.style, off: p.ip ? [] : ['ip'] }).out });
+
+defineDetector({ id: 'pii', test(text, c) {
+  if (text.length > 5e6) return null;
+  const sp = PiiE.scan(text.slice(0, 2e6), { only: r => r.high });
+  if (!sp.length) return null;
+  // 붙여넣은 값 전체가 JWT 하나뿐이면 JWT 디코더가 우선
+  if (sp.length === 1 && sp[0].id === 'jwt' && c.oneLine) return null;
+  const kinds = Array.from(new Set(sp.map(s => s.label)));
+  return { key: 'pii', score: 70, label: `민감정보 ${sp.length}건 포함 (${kinds.slice(0, 3).join(', ')}${kinds.length > 3 ? ' 등' : ''})`, detail: '공유 전에 마스킹하세요', actions: [spAct('민감정보 마스킹', 'pii-mask')] };
+} });
+
+/* =====================================================================
+ * 유니코드 정규화 · 보이지 않는 문자 검사 / Markdown 미리보기
+ * ===================================================================== */
+const UnormE = (() => {
+  const NAMES = {
+    0x200B: ['ZWSP 폭 없는 공백', 'invisible'], 0x200C: ['ZWNJ 폭 없는 비결합자', 'invisible'], 0x200D: ['ZWJ 폭 없는 결합자', 'invisible'], 0x2060: ['WJ 단어 결합자', 'invisible'], 0xFEFF: ['BOM / ZWNBSP', 'invisible'],
+    0x00AD: ['SHY 소프트 하이픈', 'invisible'], 0x034F: ['CGJ 결합 자소 결합자', 'invisible'], 0x180E: ['MVS 몽골 모음 구분자', 'invisible'], 0x2061: ['함수 적용 (보이지 않음)', 'invisible'], 0x2062: ['보이지 않는 곱셈', 'invisible'], 0x2063: ['보이지 않는 구분자', 'invisible'], 0x2064: ['보이지 않는 덧셈', 'invisible'],
+    0x00A0: ['NBSP 줄바꿈 없는 공백', 'space'], 0x202F: ['NNBSP 좁은 줄바꿈 없는 공백', 'space'], 0x2007: ['FIGURE SPACE 숫자 폭 공백', 'space'], 0x3000: ['전각 공백 (IDEOGRAPHIC SPACE)', 'space'], 0x205F: ['MMSP 수식 공백', 'space'], 0x1680: ['OGHAM 공백', 'space'],
+    0x200E: ['LRM 왼→오 표시', 'bidi'], 0x200F: ['RLM 오→왼 표시', 'bidi'], 0x061C: ['ALM 아랍 문자 표시', 'bidi'], 0x202A: ['LRE 왼→오 삽입', 'bidi'], 0x202B: ['RLE 오→왼 삽입', 'bidi'], 0x202C: ['PDF 방향 서식 끝', 'bidi'], 0x202D: ['LRO 왼→오 강제', 'bidi'], 0x202E: ['RLO 오→왼 강제', 'bidi'],
+    0x2066: ['LRI 왼→오 격리', 'bidi'], 0x2067: ['RLI 오→왼 격리', 'bidi'], 0x2068: ['FSI 첫 강문자 격리', 'bidi'], 0x2069: ['PDI 격리 끝', 'bidi'],
+    0x115F: ['한글 초성 채움 문자', 'filler'], 0x1160: ['한글 중성 채움 문자', 'filler'], 0x3164: ['한글 채움 문자', 'filler'], 0xFFA0: ['반각 한글 채움 문자', 'filler'], 0x2800: ['점자 빈칸', 'filler'],
+    0x2028: ['LINE SEPARATOR 줄 구분자', 'control'], 0x2029: ['PARAGRAPH SEPARATOR 문단 구분자', 'control'], 0xFFFC: ['개체 대체 문자', 'other'], 0xFFFD: ['대체 문자 (깨진 글자 �)', 'other'],
+  };
+  for (let c = 0x2000; c <= 0x200A; c++) NAMES[c] = [`U+${c.toString(16).toUpperCase()} 특수 공백 (${['EN QUAD', 'EM QUAD', 'EN SPACE', 'EM SPACE', '3-PER-EM', '4-PER-EM', '6-PER-EM', 'FIGURE', 'PUNCTUATION', 'THIN', 'HAIR'][c - 0x2000]})`, 'space'];
+  const KIND = { invisible: '보이지 않는 문자', space: '특수 공백', bidi: '양방향 제어 (Trojan Source 위험)', filler: '채움 문자', control: '제어 문자', variation: '이체 선택자', tag: '태그 문자', other: '기타' };
+  function classify(cp) {
+    if (NAMES[cp]) return NAMES[cp];
+    if ((cp >= 0xFE00 && cp <= 0xFE0F) || (cp >= 0xE0100 && cp <= 0xE01EF)) return [`VS${cp <= 0xFE0F ? cp - 0xFE00 + 1 : cp - 0xE0100 + 17} 이체 선택자`, 'variation'];
+    if (cp >= 0xE0000 && cp <= 0xE007F) return ['태그 문자 (숨김 텍스트에 악용 가능)', 'tag'];
+    if ((cp < 0x20 && cp !== 9 && cp !== 10 && cp !== 13) || cp === 0x7F || (cp >= 0x80 && cp <= 0x9F)) return [`제어 문자 U+${cp.toString(16).toUpperCase().padStart(4, '0')}`, 'control'];
+    return null;
+  }
+  const isJamo = cp => (cp >= 0x1100 && cp <= 0x11FF) || (cp >= 0xA960 && cp <= 0xA97F) || (cp >= 0xD7B0 && cp <= 0xD7FF);
+  function inspect(text) {
+    const found = []; let line = 1, col = 1, jamo = 0, i = 0;
+    for (const ch of text) {
+      const cp = ch.codePointAt(0);
+      const c = classify(cp);
+      if (c) found.push({ i, line, col, cp, ch, name: c[0], kind: c[1] });
+      if (isJamo(cp)) jamo++;
+      if (ch === '\n') { line++; col = 1; } else col++;
+      i += ch.length;
+    }
+    const nfc = text.normalize('NFC');
+    return { found, jamo, isNfc: nfc === text, nfdHangul: jamo > 0 && nfc !== text, homoglyphs: homoglyphs(text) };
+  }
+  let SCRIPT_RE = null;
+  try { SCRIPT_RE = { tok: new RegExp('[\\p{L}\\p{N}_]+', 'gu'), lat: /\p{Script=Latin}/u, cyr: /\p{Script=Cyrillic}/u, grk: /\p{Script=Greek}/u, han: /\p{Script=Hangul}/u }; } catch (e) { SCRIPT_RE = null; }
+  function homoglyphs(text) {
+    if (!SCRIPT_RE) return [];
+    const out = []; const seen = new Set(); let m; SCRIPT_RE.tok.lastIndex = 0;
+    while ((m = SCRIPT_RE.tok.exec(text)) && out.length < 200) {
+      const w = m[0]; if (seen.has(w)) continue;
+      const lat = SCRIPT_RE.lat.test(w), cyr = SCRIPT_RE.cyr.test(w), grk = SCRIPT_RE.grk.test(w);
+      if (lat && (cyr || grk)) { seen.add(w); out.push({ word: w, i: m.index, chars: Array.from(w).filter(c => SCRIPT_RE.cyr.test(c) || SCRIPT_RE.grk.test(c)).map(c => `${c} U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')} (${SCRIPT_RE.cyr.test(c) ? '키릴' : '그리스'})`) }); }
+    }
+    return out;
+  }
+  /** opt: removeInvisible, removeBidi, spaces(→ 일반 공백), removeVariation, removeFiller, removeControl, form */
+  function clean(text, opt = {}) {
+    let out = '';
+    for (const ch of text) {
+      const c = classify(ch.codePointAt(0));
+      if (!c) { out += ch; continue; }
+      const k = c[1];
+      if (k === 'space') out += opt.spaces !== false ? ' ' : ch;
+      else if ((k === 'invisible' && opt.removeInvisible !== false) || (k === 'bidi' && opt.removeBidi !== false) || (k === 'variation' && opt.removeVariation) || (k === 'filler' && opt.removeFiller !== false) || (k === 'tag' && opt.removeInvisible !== false) || (k === 'control' && opt.removeControl !== false)) { /* 제거 */ }
+      else out += ch;
+    }
+    return opt.form ? out.normalize(opt.form) : out;
+  }
+  return { inspect, clean, classify, KIND, isJamo };
+})();
+DU.UnormE = UnormE;
+
+injectCss(`
+.unm-view { font: var(--code-size)/var(--code-lh) var(--mono); white-space: pre-wrap; word-break: break-all; padding: 8px 10px 20px; }
+.unm-mk { display: inline-block; font: 600 9.5px/14px var(--font); padding: 0 3px; margin: 0 1px; border-radius: 3px; background: var(--warn-weak); color: var(--warn); border: 1px solid var(--warn-line); vertical-align: 1px; }
+.unm-mk.bidi, .unm-mk.tag { background: var(--err-weak); color: var(--err); border-color: var(--err-line); }
+.unm-mk.space { background: var(--info-weak); color: var(--info); border-color: var(--info-line); }
+.unm-jamo { background: var(--mark); border-radius: 2px; }
+`);
+defineTool({
+  id: 'unicode-norm', group: 'text', abbr: 'NFC', name: '유니코드 정규화 · 숨은 문자',
+  desc: 'NFC/NFD 변환 · macOS 자소 분리 한글 복구 · 보이지 않는 문자 · 양방향 제어 · 동형 문자 탐지',
+  keywords: 'unicode normalize nfc nfd nfkc nfkd zero width space zwsp bom nbsp bidi trojan source homoglyph 정규화 자소 분리 맥 한글 깨짐 보이지 않는 문자 공백',
+  inputs: { input: '텍스트' }, fill: true,
+  help: `<b>자소 분리 한글</b> — macOS에서 만든 파일명·텍스트는 "한글"이 "ㅎㅏㄴㄱㅡㄹ" 조합형(NFD)으로 저장되어 Windows/서버에서 검색·비교가 안 됩니다. <b>NFC로 변환</b>하면 해결됩니다.<br>
+    <b>보이지 않는 문자</b> — 복사한 코드·설정에 섞인 ZWSP, BOM, NBSP 등은 "같아 보이는데 다른" 문자열 문제를 일으킵니다. <b>양방향 제어 문자</b>(RLO 등)는 소스 코드가 보이는 것과 다르게 동작하게 만들 수 있습니다(Trojan Source).<br>
+    <b>동형 문자</b> — 라틴 문자와 모양이 같은 키릴·그리스 문자가 섞인 단어(예: p\u0430ypal의 \u0430)를 찾습니다.`,
+  init(root) {
+    const bar = h('<div class="toolbar"></div>');
+    const conv = f => () => { out.set(inp.get().normalize(f)); out.status(`${f} 변환`, 'ok'); };
+    const oVar = chk('이체 선택자도 제거', 'unm:var', false, '이모지 표시 방식(VS16 등)이 바뀔 수 있음');
+    bar.append(btn('NFC (권장)', conv('NFC'), 'primary', 'Ctrl+Enter'), btn('NFD', conv('NFD')), btn('NFKC', conv('NFKC')), btn('NFKD', conv('NFKD')), h('<span class="sep"></span>'),
+      btn('숨은 문자 제거', () => { out.set(UnormE.clean(inp.get(), { spaces: false, removeVariation: oVar.get() })); out.status('보이지 않는 문자 · 양방향 제어 · 채움 문자 제거', 'ok'); }),
+      btn('특수 공백 → 일반 공백', () => { out.set(UnormE.clean(inp.get(), { removeInvisible: false, removeBidi: false, removeFiller: false, removeControl: false })); out.status('특수 공백을 일반 공백으로', 'ok'); }),
+      btn('모두 정리', () => { out.set(UnormE.clean(inp.get(), { form: 'NFC', removeVariation: oVar.get() })); out.status('NFC + 숨은 문자 제거 + 공백 정리', 'ok'); }), oVar.el,
+      h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set('보고서_' + '한글파일명'.normalize('NFD') + '.xlsx\nconst admin\u200B = true;\nif (accessLevel != "user\u202E \u2066// Check if admin\u2069 \u2066") {\np\u0430ypal.com 로그인 (\u0430는 키릴 문자)\n금액:\u00A01,000원\u3000비고\uFEFF'); analyze(); }));
+    const stats = h('<div class="stat-row" style="min-height:20px"></div>');
+    const inp = Pane({ title: '입력', persist: 'unm', placeholder: '검사할 텍스트 (파일명 목록, 코드, 설정 등)', sendFrom: 'unicode-norm' });
+    const out = Pane({ title: '결과', readonly: true, sendFrom: 'unicode-norm' });
+    const split = h('<div class="split" style="min-height:220px"></div>'); split.append(inp.el, out.el);
+    const lower = h('<div class="grid2"><div class="pane" style="min-height:160px;max-height:34vh"><div class="pane-head"><span class="pane-title">숨은 문자 표시</span></div><div class="pane-view"><div class="unm-view"></div></div></div><div class="tbl-wrap" style="max-height:34vh"></div></div>');
+    root.append(bar, stats, split, lower);
+    const view = $('.unm-view', lower), tbl = $('.tbl-wrap', lower);
+    function analyze() {
+      const t = inp.get(); const r = UnormE.inspect(t);
+      const by = {}; r.found.forEach(f => { by[f.kind] = (by[f.kind] || 0) + 1; });
+      stats.innerHTML = `<span>문자 <b>${fmtNum(Array.from(t).length)}</b></span><span>정규화 <b class="${r.isNfc ? 't-ok' : 't-warn'}">${r.isNfc ? 'NFC' : 'NFC 아님'}</b></span>` +
+        (r.nfdHangul ? `<span class="badge warn">자소 분리(NFD) 한글 자모 ${fmtNum(r.jamo)}개 — NFC 변환 필요</span>` : '') +
+        Object.entries(by).map(([k, n]) => `<span class="badge ${k === 'bidi' || k === 'tag' ? 'err' : 'warn'}">${esc(UnormE.KIND[k])} ${n}</span>`).join('') +
+        (r.homoglyphs.length ? `<span class="badge err">동형 문자 섞인 단어 ${r.homoglyphs.length}</span>` : '') + (!r.found.length && !r.nfdHangul && !r.homoglyphs.length && t ? '<span class="badge ok">✓ 숨은 문자 없음</span>' : '');
+      let html = '', last = 0; const marks = r.found.slice(0, 5000);
+      marks.forEach(f => { html += escJamo(t.slice(last, f.i)) + `<span class="unm-mk ${f.kind}" title="${esc(f.name)}">${esc(shortName(f))}</span>${f.kind === 'space' || f.ch === '\n' ? ' ' : ''}`; last = f.i + f.ch.length; });
+      view.innerHTML = html + escJamo(t.slice(last));
+      const rows = r.found.slice(0, 1000).map(f => `<tr><td class="mono">${f.line}:${f.col}</td><td class="mono">U+${f.cp.toString(16).toUpperCase().padStart(4, '0')}</td><td>${esc(f.name)}</td><td>${esc(UnormE.KIND[f.kind])}</td></tr>`)
+        .concat(r.homoglyphs.map(g => `<tr><td class="mono">${esc(lineColOf(t, g.i).line + ':' + lineColOf(t, g.i).col)}</td><td class="mono">${esc(g.word)}</td><td colspan="2">동형 문자: ${esc(g.chars.join(', '))}</td></tr>`));
+      tbl.innerHTML = rows.length ? `<table class="tbl"><thead><tr><th>줄:열</th><th>코드</th><th>이름</th><th>분류</th></tr></thead><tbody>${rows.join('')}</tbody></table>` : '<div class="empty-state">발견된 항목 없음</div>';
+    }
+    const shortName = f => (f.kind === 'space' ? '␣' + f.name.split(' ')[0] : f.name.split(' ')[0]);
+    const escJamo = s => { let o = '', run = ''; for (const ch of s) { if (UnormE.isJamo(ch.codePointAt(0))) run += ch; else { if (run) { o += `<span class="unm-jamo" title="자소 분리 한글 (NFD)">${esc(run)}</span>`; run = ''; } o += esc(ch); } } return o + (run ? `<span class="unm-jamo" title="자소 분리 한글 (NFD)">${esc(run)}</span>` : ''); };
+    inp.onInput(debounce(analyze, 250)); analyze();
+    return { run: conv('NFC'), receive(slot, t) { inp.set(t); analyze(); } };
+  },
+});
+defineOp({ id: 'normalize', name: '유니코드 정규화 (NFC 등)', group: '텍스트', params: [{ k: 'form', label: '형식', type: 'select', options: [['NFC', 'NFC'], ['NFD', 'NFD'], ['NFKC', 'NFKC'], ['NFKD', 'NFKD']] }], run: (v, p) => v.normalize(p.form) });
+defineOp({ id: 'remove-invisible', name: '보이지 않는 문자 제거', group: '텍스트', params: [{ k: 'spaces', label: '특수 공백 → 공백', type: 'bool', def: true }], run: (v, p) => UnormE.clean(v, { spaces: p.spaces }) });
+defineDetector({ id: 'unicode-norm', test(text) {
+  if (text.length > 2e6) return null;
+  let jamo = 0, bidi = 0, inv = 0;
+  for (const ch of text) { const cp = ch.codePointAt(0); if (UnormE.isJamo(cp)) jamo++; else if ((cp >= 0x202A && cp <= 0x202E) || (cp >= 0x2066 && cp <= 0x2069)) bidi++; else if (cp === 0x200B || cp === 0x2060 || (cp === 0xFEFF)) inv++; }
+  if (text.charCodeAt(0) === 0xFEFF) inv--;
+  if (jamo >= 2 && text.normalize('NFC') !== text) return { key: 'unicode-norm', score: 84, label: `자소 분리(NFD) 한글 — 자모 ${jamo}개`, detail: text.normalize('NFC').slice(0, 120), actions: [spAct('NFC로 정규화', 'unicode-norm', { after: 'run' }), { label: 'NFC 결과 복사', run: () => copyText(text.normalize('NFC')) }] };
+  if (bidi) return { key: 'unicode-norm', score: 82, label: `양방향 제어 문자 ${bidi}개 (Trojan Source 위험)`, actions: [spAct('숨은 문자 검사', 'unicode-norm')] };
+  if (inv >= 1) return { key: 'unicode-norm', score: 60, label: `보이지 않는 문자 ${inv}개 포함 (ZWSP/BOM 등)`, actions: [spAct('숨은 문자 검사', 'unicode-norm')] };
+  return null;
+} });
+
+/* ---------- Markdown ---------- */
+const MdE = (() => {
+  const HL_LANG = { json: 'json', xml: 'xml', html: 'xml', svg: 'xml', xhtml: 'xml', sql: 'sql', yaml: 'yaml', yml: 'yaml', properties: 'props', props: 'props', ini: 'props', conf: 'props' };
+  function safeHref(h) {
+    const u = String(h).trim();
+    if (/^(javascript|vbscript|data|file):/i.test(u.replace(/[\s\x00-\x1f]/g, ''))) return null;
+    return u;
+  }
+  function render(src, opt = {}) {
+    const toc = []; const ids = {};
+    const slug = t => { let s = t.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[#\w]+;/g, '').trim().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s+/g, '-') || 'section'; if (ids[s] != null) { ids[s]++; s = `${s}-${ids[s]}`; } else ids[s] = 0; return s; };
+    function inline(s) {
+      const store = []; const ph = html => '\u0001' + (store.push(html) - 1) + '\u0002';
+      s = s.replace(/\\([\\`*_{}[\]()#+\-.!|~<>"'])/g, (m, c) => ph(esc(c)));
+      s = codeSpans(s, ph);
+      s = s.replace(/!\[([^\]]*)\]\(\s*<?((?:[^\s()<>]|\([^\s()<>]*\))*)>?(?:\s+["']([^"']*)["'])?\s*\)/g, (m, alt, src2, title) => ph(img(alt, src2, title)));
+      s = s.replace(/\[((?:[^[\]]|\[[^\]]*\])*)\]\(\s*<?((?:[^\s()<>]|\([^\s()<>]*\))*)>?(?:\s+["']([^"']*)["'])?\s*\)/g, (m, text, href, title) => { const u = safeHref(href); return ph(u === null ? inline(text) : `<a href="${esc(u)}"${title ? ` title="${esc(title)}"` : ''} target="_blank" rel="noopener noreferrer">${inline(text)}</a>`); });
+      s = s.replace(/<((?:https?|ftp):\/\/[^\s<>]+)>/g, (m, u) => ph(`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u)}</a>`));
+      s = s.replace(/<([\w.+-]+@[\w-]+(?:\.[\w-]+)+)>/g, (m, e) => ph(`<a href="mailto:${esc(e)}">${esc(e)}</a>`));
+      s = s.replace(/\bhttps?:\/\/[^\s<>()"'\u0001\u0002]+[^\s<>()"'.,;:!?\u0001\u0002]/g, u => ph(`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u)}</a>`));
+      s = esc(s);
+      s = s.replace(/\*\*\*(?=\S)([\s\S]*?\S)\*\*\*/g, '<strong><em>$1</em></strong>');
+      s = s.replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, '<strong>$1</strong>').replace(/(^|[^\w])__(?=\S)([\s\S]*?\S)__(?![\w])/g, '$1<strong>$2</strong>');
+      s = s.replace(/(^|[^*\w])\*(?=[^\s*])([^*]*?[^\s*])\*(?!\*)/g, '$1<em>$2</em>').replace(/(^|[^\w])_(?=\S)([^_]*?\S)_(?![\w])/g, '$1<em>$2</em>');
+      s = s.replace(/~~(?=\S)([\s\S]*?\S)~~/g, '<del>$1</del>');
+      s = s.replace(/(?: {2,}|\\)\n/g, '<br>\n');
+      for (let k = 0; k < 5 && /\u0001\d+\u0002/.test(s); k++) s = s.replace(/\u0001(\d+)\u0002/g, (m, n) => store[+n]);
+      return s;
+    }
+    /** 코드 스팬: 같은 길이의 백틱 묶음끼리 짝 (정규식 역추적 없이 선형에 가깝게) */
+    function codeSpans(s, ph) {
+      let out = '', i = 0;
+      while (i < s.length) {
+        const k = s.indexOf('`', i); if (k < 0) { out += s.slice(i); break; }
+        let e = k; while (s[e] === '`') e++; const n = e - k;
+        let j = e, close = -1;
+        while ((j = s.indexOf('`', j)) >= 0) { let q = j; while (s[q] === '`') q++; if (q - j === n) { close = j; break; } j = q; }
+        if (close < 0) { out += s.slice(i, e); i = e; continue; }
+        out += s.slice(i, k) + ph('<code>' + esc(s.slice(e, close).replace(/\n/g, ' ').replace(/^ ([\s\S]*) $/, '$1')) + '</code>'); i = close + n;
+      }
+      return out;
+    }
+    function img(alt, src2, title) {
+      const u = String(src2).trim();
+      if (/^data:image\/(png|jpe?g|gif|webp|bmp|svg\+xml)[;,]/i.test(u) || (!/^[a-z][\w+.-]*:/i.test(u) && !/^[\\/]{2}/.test(u) && u)) return `<img src="${esc(u)}" alt="${esc(alt)}"${title ? ` title="${esc(title)}"` : ''}>`;
+      if (/^https?:/i.test(u)) return opt.remoteImages ? `<img src="${esc(u)}" alt="${esc(alt)}" referrerpolicy="no-referrer">` : `<span class="md-imgblk" title="${esc(u)}">🖼 원격 이미지 차단됨: ${esc(alt || u)}</span>`;
+      return `<span class="md-imgblk">🖼 허용되지 않는 이미지 주소: ${esc(alt)}</span>`;
+    }
+    const isBlank = l => /^\s*$/.test(l); const MAX_DEPTH = 24; // 중첩 목록·인용 깊이 제한 (스택 오버플로 방지)
+    const FENCE = /^( {0,3})(`{3,}|~{3,})[ \t]*([^`\s]*)[^`]*$/;
+    const ATX = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
+    const HR = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
+    const LIST = /^( {0,3})([-*+]|(\d{1,9})([.)]))( +|\t|$)(.*)$/;
+    const QUOTE = /^ {0,3}>/;
+    const isDelim = l => /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(l) && l.includes('-');
+    const isStart = l => FENCE.test(l) || ATX.test(l) || HR.test(l) || QUOTE.test(l) || LIST.test(l);
+    const splitRow = l => { let s = l.trim(); if (s.startsWith('|')) s = s.slice(1); if (s.endsWith('|') && !s.endsWith('\\|')) s = s.slice(0, -1); return s.split(/(?<!\\)\|/).map(c => c.trim().replace(/\\\|/g, '|')); };
+    function heading(level, text) {
+      const html = inline(text.trim()); const id = slug(html);
+      toc.push({ level, id, text: html.replace(/<[^>]+>/g, '') });
+      return `<h${level} id="${esc(id)}"><a class="md-anchor" href="#${esc(id)}" aria-hidden="true">#</a>${html}</h${level}>`;
+    }
+    function code(body, lang) {
+      const l = (lang || '').toLowerCase(); const hl = HL_LANG[l];
+      return `<pre class="md-code"><code${l ? ` class="language-${esc(l)}"` : ''}>${hl && HL[hl] && body.length < 200000 ? HL[hl](body) : esc(body)}</code></pre>`;
+    }
+    function list(lines, i, depth) {
+      const first = LIST.exec(lines[i]); const ordered = !!first[3]; const bullet = first[2]; const start = ordered ? +first[3] : 1;
+      const items = []; let loose = false;
+      while (i < lines.length) {
+        const m = LIST.exec(lines[i]);
+        if (!m || !!m[3] !== ordered || (!ordered && m[2] !== bullet) || (ordered && m[4] !== first[4])) break;
+        const sp = m[5].length; const ci = m[1].length + m[2].length + (sp >= 5 ? 1 : Math.max(1, sp));
+        const it = [m[6] !== undefined ? (sp >= 5 ? ' '.repeat(sp - 1) + m[6] : m[6]) : ''];
+        i++; let blank = false;
+        while (i < lines.length) {
+          const l = lines[i];
+          if (isBlank(l)) { it.push(''); blank = true; i++; continue; }
+          const ind = l.match(/^ */)[0].length;
+          if (ind >= ci) { if (blank && it.slice(0, -1).some(x => x !== '')) loose = loose || !LIST.test(l.slice(ci)); it.push(l.slice(ci)); blank = false; i++; continue; }
+          if (blank) break;
+          if (LIST.test(l) || isStart(l)) break;
+          it.push(l.trim()); i++;
+        }
+        let trailing = 0; while (it.length && it[it.length - 1] === '') { it.pop(); trailing++; }
+        if (trailing && i < lines.length && LIST.test(lines[i]) && (() => { const n = LIST.exec(lines[i]); return !!n[3] === ordered && (ordered || n[2] === bullet); })()) loose = true;
+        items.push(it);
+      }
+      const tag = ordered ? 'ol' : 'ul';
+      const html = items.map(it => {
+        let task = null; const tm = /^\[([ xX])\][ \t]+/.exec(it[0] || '');
+        if (tm) { task = tm[1] !== ' '; it[0] = it[0].slice(tm[0].length); }
+        let inner = blocks(it, depth + 1);
+        if (!loose) inner = inner.replace(/^<p>([\s\S]*?)<\/p>/, '$1').replace(/\n<p>([\s\S]*?)<\/p>/g, '\n$1');
+        return `<li${task !== null ? ' class="md-task"' : ''}>${task !== null ? `<input type="checkbox" disabled${task ? ' checked' : ''}> ` : ''}${inner}</li>`;
+      }).join('\n');
+      return { html: `<${tag}${ordered && start !== 1 ? ` start="${start}"` : ''}>\n${html}\n</${tag}>`, next: i };
+    }
+    function blocks(lines, depth = 0) {
+      const out = []; let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        if (isBlank(line)) { i++; continue; }
+        let m = FENCE.exec(line);
+        if (m) {
+          const f = m[2], ind = m[1].length, close = new RegExp('^ {0,3}' + (f[0] === '`' ? '`' : '~') + '{' + f.length + ',}[ \\t]*$');
+          const body = []; i++;
+          while (i < lines.length && !close.test(lines[i])) { body.push(lines[i].replace(new RegExp('^ {0,' + ind + '}'), '')); i++; }
+          i++; out.push(code(body.join('\n'), m[3])); continue;
+        }
+        if ((m = ATX.exec(line))) { out.push(heading(m[1].length, m[2] || '')); i++; continue; }
+        if (HR.test(line)) { out.push('<hr>'); i++; continue; }
+        if (depth < MAX_DEPTH && QUOTE.test(line)) {
+          const q = [];
+          while (i < lines.length && (QUOTE.test(lines[i]) || (q.length && !isBlank(lines[i]) && !isStart(lines[i]) && !isBlank(q[q.length - 1])))) { q.push(QUOTE.test(lines[i]) ? lines[i].replace(/^ {0,3}> ?/, '') : lines[i]); i++; }
+          out.push('<blockquote>\n' + blocks(q, depth + 1) + '\n</blockquote>'); continue;
+        }
+        if (depth < MAX_DEPTH && LIST.test(line)) { const r = list(lines, i, depth); out.push(r.html); i = r.next; continue; }
+        if (/^( {4}|\t)/.test(line)) {
+          const body = [];
+          while (i < lines.length && (/^( {4}|\t)/.test(lines[i]) || isBlank(lines[i]))) { body.push(lines[i].replace(/^( {4}|\t)/, '')); i++; }
+          while (body.length && isBlank(body[body.length - 1])) body.pop();
+          out.push(code(body.join('\n'), '')); continue;
+        }
+        if (line.includes('|') && i + 1 < lines.length && isDelim(lines[i + 1])) {
+          const head = splitRow(line), al = splitRow(lines[i + 1]).map(c => (/^:-+:$/.test(c) ? 'center' : /^-+:$/.test(c) ? 'right' : /^:-+$/.test(c) ? 'left' : ''));
+          if (head.length === al.length) {
+            i += 2; const rows = [];
+            while (i < lines.length && !isBlank(lines[i]) && lines[i].includes('|') && !isStart(lines[i])) { rows.push(splitRow(lines[i])); i++; }
+            const cell = (tg, c, k) => `<${tg}${al[k] ? ` style="text-align:${al[k]}"` : ''}>${inline(c || '')}</${tg}>`;
+            out.push(`<table>\n<thead><tr>${head.map((c, k) => cell('th', c, k)).join('')}</tr></thead>\n<tbody>${rows.map(r => `<tr>${head.map((x, k) => cell('td', r[k], k)).join('')}</tr>`).join('\n')}</tbody>\n</table>`);
+            continue;
+          }
+        }
+        const para = [line]; i++; let done = false;
+        while (i < lines.length && !isBlank(lines[i])) {
+          const sm = /^ {0,3}(=+|-+)[ \t]*$/.exec(lines[i]);
+          if (sm) { out.push(heading(sm[1][0] === '=' ? 1 : 2, para.join('\n'))); i++; done = true; break; }
+          if (isStart(lines[i]) && !(/^ {0,3}\d+[.)]/.test(lines[i]) && !/^ {0,3}1[.)]/.test(lines[i]))) break;
+          para.push(lines[i]); i++;
+        }
+        if (!done) out.push('<p>' + inline(para.join('\n').replace(/^[ \t]+/gm, '')) + '</p>');
+      }
+      return out.join('\n');
+    }
+    const html = blocks(String(src).replace(/\r\n?/g, '\n').replace(/\t/g, '    ').split('\n'));
+    return { html, toc };
+  }
+  function tocHtml(toc) { if (!toc.length) return ''; const min = Math.min(...toc.map(t => t.level)); return `<nav class="md-toc"><b>목차</b>${toc.map(t => `<a href="#${esc(t.id)}" style="padding-left:${(t.level - min) * 14}px">${esc(t.text)}</a>`).join('')}</nav>`; }
+  return { render, tocHtml, safeHref };
+})();
+DU.MdE = MdE;
+
+const MD_CSS_E = `.md-body { font: 14.5px/1.7 var(--font); color: var(--text); padding: 18px 24px 40px; max-width: 900px; word-wrap: break-word; }
+.md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 { margin: 1.3em 0 .5em; line-height: 1.3; position: relative; }
+.md-body h1 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: .25em; } .md-body h2 { font-size: 1.45em; border-bottom: 1px solid var(--border); padding-bottom: .2em; } .md-body h3 { font-size: 1.2em; }
+.md-body .md-anchor { position: absolute; left: -1em; color: var(--text-faint); text-decoration: none; opacity: 0; font-weight: 400; } .md-body h1:hover .md-anchor, .md-body h2:hover .md-anchor, .md-body h3:hover .md-anchor { opacity: 1; }
+.md-body p, .md-body ul, .md-body ol, .md-body blockquote, .md-body table, .md-body pre { margin: 0 0 1em; }
+.md-body code { font: .88em var(--mono); background: var(--bg-sunk); border: 1px solid var(--border); border-radius: 4px; padding: .1em .35em; }
+.md-body pre.md-code { background: var(--bg-sunk); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow: auto; } .md-body pre.md-code code { background: none; border: 0; padding: 0; font-size: 12.5px; line-height: 1.55; }
+.md-body blockquote { border-left: 4px solid var(--border-strong); padding: .2em 1em; color: var(--text-dim); background: var(--bg-sunk); border-radius: 0 6px 6px 0; }
+.md-body table { border-collapse: collapse; display: block; overflow: auto; } .md-body th, .md-body td { border: 1px solid var(--border); padding: 6px 12px; } .md-body th { background: var(--bg-sunk); }
+.md-body hr { border: 0; border-top: 2px solid var(--border); margin: 1.6em 0; } .md-body img { max-width: 100%; }
+.md-body li.md-task { list-style: none; margin-left: -1.3em; } .md-body li + li { margin-top: .2em; }
+.md-body .md-imgblk { display: inline-block; font-size: 12px; color: var(--text-faint); border: 1px dashed var(--border-strong); border-radius: 6px; padding: 4px 8px; }
+.md-toc { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; margin: 0 0 1.2em; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-sunk); font-size: 13px; } .md-toc a { color: var(--accent); text-decoration: none; }`;
+injectCss(MD_CSS_E);
+const MD_SAMPLE_E = `# 배포 체크리스트
+
+운영 반영 전에 **반드시** 확인합니다. 자세한 내용은 [위키](https://wiki.example.com/deploy)를 참고하세요.
+
+## 1. 사전 점검
+- [x] DB 마이그레이션 스크립트 검토
+- [ ] \`application-prod.yml\` 설정 확인
+  - 커넥션 풀: \`maximum-pool-size: 20\`
+  - 로그 레벨: *INFO*
+- [ ] 롤백 절차 공유
+
+## 2. 서버 목록
+
+| 서버 | 역할 | 포트 | 상태 |
+|:-----|:----:|----:|------|
+| was01 | JEUS | 8080 | ~~점검 중~~ 정상 |
+| was02 | Tomcat | 8081 | 정상 |
+
+## 3. 설정 예시
+
+\`\`\`json
+{ "env": "prod", "pool": { "max": 20 }, "debug": false }
+\`\`\`
+
+\`\`\`sql
+SELECT USER_ID, USER_NM FROM TB_USER WHERE STATUS = 'Y';
+\`\`\`
+
+> 주의: 운영 반영은 **18시 이후**에만 진행합니다.
+> 긴급 건은 팀장 승인 필요
+
+1. 빌드
+2. 배포
+   1. was01
+   2. was02
+3. 헬스 체크 → https://app.example.com/health
+
+---
+문의: <dev-team@example.com>`;
+defineTool({
+  id: 'markdown', group: 'data', abbr: 'MD', name: 'Markdown 미리보기',
+  desc: 'GFM 표 · 체크리스트 · 코드 강조 · 목차 · HTML 내보내기 (오프라인 렌더러)',
+  keywords: 'markdown md preview readme gfm 마크다운 미리보기 문서 위키 표 html 변환',
+  inputs: { input: 'Markdown' }, fill: true,
+  help: `외부 라이브러리 없이 CommonMark 핵심 문법과 GFM(표, 체크리스트, 취소선, 자동 링크)을 렌더링합니다. 코드 블록은 json · xml · sql · yaml · properties 언어를 강조합니다.<br>
+    안전을 위해 <b>HTML 태그는 그대로 글자로 표시</b>하고, <code>javascript:</code> 링크는 막습니다. 원격(http) 이미지는 외부 요청이 생기므로 기본으로 차단하며 체크박스로 허용할 수 있습니다.`,
+  init(root) {
+    const oImg = chk('원격 이미지 표시', 'md:img', false, 'http(s) 이미지를 불러옵니다 (외부 요청 발생)'), oToc = chk('목차', 'md:toc', true);
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('HTML 복사', () => copyText(render().html), 'sm'), btn('HTML 파일로 저장', saveHtml, 'sm'), oImg.el, oToc.el, h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(MD_SAMPLE_E); upd(); }));
+    const inp = Pane({ title: 'Markdown', persist: 'md', placeholder: '# 제목\n\n- 목록\n- [ ] 체크리스트\n\n| 열1 | 열2 |\n|---|---|\n| a | b |', sendFrom: 'markdown' });
+    const prev = h('<div class="pane"><div class="pane-head"><span class="pane-title">미리보기</span><span class="sp"></span><span class="faint" data-s style="font-size:11.5px;padding-right:8px"></span></div><div class="pane-view"><div class="md-body"></div></div></div>');
+    const split = h('<div class="split"></div>'); split.append(inp.el, prev);
+    root.append(bar, split);
+    const view = $('.md-body', prev), scroller = $('.pane-view', prev);
+    function render() { const r = MdE.render(inp.get(), { remoteImages: oImg.get() }); return { html: (oToc.get() ? MdE.tocHtml(r.toc) : '') + r.html, toc: r.toc }; }
+    function upd() { const r = render(); view.innerHTML = r.html || '<div class="empty-state">왼쪽에 Markdown을 입력하세요</div>'; $('[data-s]', prev).textContent = r.toc.length ? `제목 ${r.toc.length}개` : ''; }
+    function saveHtml() {
+      const r = render(); const title = (r.toc[0] && r.toc[0].text) || 'document';
+      const css = MD_CSS_E.replace(/var\(--font\)/g, '"Malgun Gothic","Apple SD Gothic Neo",sans-serif').replace(/var\(--mono\)/g, 'Consolas,"D2Coding",monospace').replace(/var\(--text\)/g, '#1c2230').replace(/var\(--text-dim\)/g, '#5a6474').replace(/var\(--text-faint\)/g, '#8b94a3').replace(/var\(--bg-sunk\)/g, '#f3f4f6').replace(/var\(--border-strong\)/g, '#c5cbd4').replace(/var\(--border\)/g, '#dde1e7').replace(/var\(--accent\)/g, '#2f6fde').replace(/var\(--code-size\)/g, '13px').replace(/var\(--[\w-]+\)/g, 'inherit');
+      const doc = `<!DOCTYPE html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title><style>body{margin:0 auto;max-width:960px}${css}.t-key{color:#8a35b8}.t-str{color:#17803d}.t-num{color:#b05300}.t-bool,.t-kw{color:#0a5fc2}.t-null,.t-com{color:#8b94a3}.t-tag{color:#b3261e}.t-attr{color:#8a35b8}</style></head><body><article class="md-body">${r.html}</article></body></html>`;
+      download(title.replace(/[\\/:*?"<>|]+/g, '_').slice(0, 60) + '.html', doc, 'text/html;charset=utf-8');
+    }
+    on(inp.ta, 'scroll', () => { const t = inp.ta; const ratio = t.scrollTop / Math.max(1, t.scrollHeight - t.clientHeight); scroller.scrollTop = ratio * (scroller.scrollHeight - scroller.clientHeight); });
+    [oImg.input, oToc.input].forEach(c => on(c, 'change', upd));
+    inp.onInput(debounce(upd, 150)); upd();
+    return { run: upd, receive(slot, t) { inp.set(t); upd(); } };
+  },
+});
+defineDetector({ id: 'markdown', test(text, c) {
+  if (c.lines.length < 3 || c.json) return null;
+  let s = 0;
+  if (/^#{1,6} \S/m.test(text)) s++;
+  if (/^\s*([-*+]|\d+\.) \S/m.test(text)) s++;
+  if (/^```/m.test(text)) s++;
+  if (/\[[^\]]+\]\([^)]+\)/.test(text)) s++;
+  if (/^\|?.*\|.*\n\|?\s*:?-{3,}/m.test(text)) s++;
+  if (/\*\*[^*]+\*\*/.test(text)) s++;
+  if (s < 2) return null;
+  return { key: 'markdown', score: 45, label: 'Markdown 문서', actions: [spAct('Markdown 미리보기', 'markdown')] };
+} });
+
+/* =====================================================================
  * 부팅
  * ===================================================================== */
 function boot() {
