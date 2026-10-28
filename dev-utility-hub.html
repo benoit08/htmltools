@@ -2662,7 +2662,8 @@ defineTool({
     });
 
     /* ---- 초안 저장/로드 ---- */
-    const isVarRef = v => /^\s*\{\{[^}]+\}\}\s*$/.test(v || '');
+    /** 비밀값 없이 {{변수}} 참조만 있는 값 (예: "Bearer {{token}}") */
+    const isVarRef = v => /\{\{[^}]+\}\}/.test(v || '') && !String(v).replace(/\{\{[^}]+\}\}/g, '').replace(/^\s*(Bearer|Basic|Token|Digest)\b/i, '').trim();
     /** 저장용 스냅샷: 민감 헤더·인증 비밀값은 {{변수}} 참조일 때만 유지 (설정에서 허용 시 전부 유지) */
     function snapshot() {
       const keepSens = cfg.saveSensitive;
@@ -3025,6 +3026,347 @@ public class DevCorsConfig implements WebMvcConfigurer {
     };
   },
 });
+
+/* =====================================================================
+ * HTTP 헤더 · 쿠키 분석
+ * ===================================================================== */
+const HDR_DOC = {
+  'accept': '클라이언트가 받을 수 있는 응답 형식 (예: application/json)', 'accept-encoding': '지원하는 압축 방식 (gzip, br)', 'accept-language': '선호 언어',
+  'authorization': '인증 정보 (Bearer 토큰, Basic 인증)', 'cache-control': '캐시 정책 (no-store, max-age 등)', 'connection': '연결 유지 여부', 'content-disposition': '첨부파일 이름 / 인라인 표시 방식',
+  'content-encoding': '본문 압축 방식', 'content-length': '본문 바이트 길이', 'content-type': '본문 형식과 문자셋', 'cookie': '브라우저가 보내는 쿠키', 'date': '응답 생성 시각 (GMT)',
+  'etag': '리소스 버전 식별자 (조건부 요청용)', 'expires': '캐시 만료 시각 (구형, Cache-Control 우선)', 'host': '요청 대상 호스트:포트', 'if-modified-since': '이후 변경된 경우에만 응답', 'if-none-match': 'ETag가 다를 때만 응답',
+  'last-modified': '리소스 마지막 수정 시각', 'location': '리다이렉트 대상 또는 생성된 리소스 위치', 'origin': '요청을 보낸 페이지의 출처 (CORS 판단 기준)', 'pragma': 'HTTP/1.0 캐시 제어 (no-cache)',
+  'referer': '이전 페이지 주소', 'server': '서버 소프트웨어 정보', 'set-cookie': '쿠키 설정', 'transfer-encoding': '전송 인코딩 (chunked)', 'user-agent': '클라이언트 브라우저/프로그램 정보', 'vary': '캐시 키에 포함할 요청 헤더',
+  'x-forwarded-for': '프록시를 거친 원래 클라이언트 IP 목록', 'x-forwarded-proto': '원래 요청 프로토콜 (https)', 'x-forwarded-host': '원래 요청 호스트', 'x-real-ip': '원래 클라이언트 IP (nginx)',
+  'x-requested-with': 'AJAX 요청 표시 (XMLHttpRequest)', 'x-powered-by': '서버 기술 정보 (노출 비권장)', 'strict-transport-security': 'HSTS — 이후 HTTPS로만 접속하도록 강제',
+  'content-security-policy': 'CSP — 스크립트·리소스 출처 제한 (XSS 방어)', 'x-content-type-options': 'MIME 스니핑 방지 (nosniff)', 'x-frame-options': '프레임 삽입 제한 (클릭재킹 방어)',
+  'x-xss-protection': '구형 브라우저 XSS 필터 (현재는 CSP 권장, 0 권장)', 'referrer-policy': 'Referer 헤더 전송 범위', 'permissions-policy': '카메라·위치 등 브라우저 기능 사용 제한',
+  'access-control-allow-origin': 'CORS — 응답을 읽을 수 있는 출처', 'access-control-allow-credentials': 'CORS — 쿠키/인증 포함 요청 허용', 'access-control-allow-methods': 'CORS — 허용 메서드 (preflight 응답)',
+  'access-control-allow-headers': 'CORS — 허용 요청 헤더 (preflight 응답)', 'access-control-expose-headers': 'CORS — 스크립트에 노출할 응답 헤더', 'access-control-max-age': 'CORS — preflight 결과 캐시 시간(초)',
+  'access-control-request-method': 'CORS preflight — 실제 요청 메서드', 'access-control-request-headers': 'CORS preflight — 실제 요청 헤더', 'www-authenticate': '필요한 인증 방식 (401 응답)', 'retry-after': '재시도까지 대기 시간',
+  'keep-alive': '연결 유지 시간/요청 수', 'upgrade': '프로토콜 전환 (websocket)', 'range': '부분 요청 범위', 'content-range': '부분 응답 범위', 'accept-ranges': '부분 요청 지원 여부', 'age': '캐시에 머문 시간(초)', 'via': '거쳐온 프록시',
+  'x-request-id': '요청 추적 ID', 'x-correlation-id': '요청 추적 ID', 'traceparent': 'W3C 분산 추적 컨텍스트', 'content-language': '본문 언어', 'link': '관련 리소스 링크 (preload 등)', 'alt-svc': '대체 프로토콜 (HTTP/3)',
+  'cross-origin-opener-policy': 'COOP — 다른 출처 창과 분리', 'cross-origin-embedder-policy': 'COEP — 교차 출처 리소스 삽입 제한', 'cross-origin-resource-policy': 'CORP — 다른 출처의 리소스 로드 제한',
+  'sec-fetch-site': '요청 출처 관계 (same-origin 등, 브라우저 자동)', 'sec-fetch-mode': '요청 모드 (cors, navigate)', 'sec-fetch-dest': '요청 목적지 (document, script)', 'sec-ch-ua': '브라우저 브랜드 (Client Hints)',
+  'proxy-authorization': '프록시 인증 정보', 'x-xsrf-token': 'CSRF 방어 토큰', 'x-csrf-token': 'CSRF 방어 토큰', 'dnt': 'Do Not Track', 'upgrade-insecure-requests': 'HTTPS 업그레이드 선호',
+};
+const HeaderAna = (() => {
+  function parse(text) {
+    const lines = text.replace(/\r\n?/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).filter(Boolean);
+    let start = null; const hs = [];
+    lines.forEach((l, i) => {
+      if (i === 0 && /^(HTTP\/[\d.]+\s+\d{3}|[A-Z]+\s+\S+\s+HTTP\/[\d.]+)/.test(l)) { start = l; return; }
+      const m = /^(:?[^:\s]+)\s*:\s?(.*)$/.exec(l);
+      if (m) hs.push([m[1], m[2]]);
+      else if (hs.length && /^\s/.test(l)) hs[hs.length - 1][1] += ' ' + l.trim();
+      else if (hs.length && !l.includes(':') && hs[hs.length - 1][1] === '') hs[hs.length - 1][1] = l.trim();
+      else if (!l.includes(':') && /^[\w-]+$/.test(l)) hs.push([l, '']);
+    });
+    // Chrome 복사 형식 (이름\n값 반복) 보정
+    const isResp = start ? /^HTTP/.test(start) : hs.some(([k]) => /^(set-cookie|server|content-length|date|x-powered-by|etag|last-modified)$/i.test(k)) && !hs.some(([k]) => /^(host|user-agent|cookie|accept-language)$/i.test(k));
+    return { start, headers: hs, isResp };
+  }
+  function parseSetCookie(v) {
+    const parts = v.split(';').map(s => s.trim()); const [nv, ...attrs] = parts; const i = nv.indexOf('=');
+    const c = { name: i < 0 ? nv : nv.slice(0, i), value: i < 0 ? '' : nv.slice(i + 1), attrs: {} };
+    attrs.forEach(a => { const j = a.indexOf('='); const k = (j < 0 ? a : a.slice(0, j)).toLowerCase(); c.attrs[k] = j < 0 ? true : a.slice(j + 1); });
+    return c;
+  }
+  function audit(p) {
+    const f = []; const get = n => p.headers.filter(([k]) => k.toLowerCase() === n).map(([, v]) => v);
+    const one = n => get(n)[0];
+    const add = (lv, msg) => f.push({ lv, msg });
+    if (p.isResp) {
+      const hsts = one('strict-transport-security');
+      if (!hsts) add('info', 'Strict-Transport-Security(HSTS)가 없습니다 — HTTPS 서비스라면 max-age=31536000 이상 권장');
+      else { const ma = /max-age=(\d+)/i.exec(hsts); if (!ma || +ma[1] < 15552000) add('warn', `HSTS max-age가 짧습니다 (${ma ? ma[1] + '초' : '없음'}, 180일 이상 권장)`); else add('ok', 'HSTS 설정됨'); }
+      const csp = one('content-security-policy');
+      if (!csp) add('warn', 'Content-Security-Policy가 없습니다 — XSS 피해를 줄이려면 설정 권장');
+      else { add('ok', 'CSP 설정됨'); if (/unsafe-inline/.test(csp)) add('info', "CSP에 'unsafe-inline'이 있어 인라인 스크립트 XSS 방어 효과가 줄어듭니다"); if (/unsafe-eval/.test(csp)) add('info', "CSP에 'unsafe-eval'이 있습니다"); }
+      const xcto = one('x-content-type-options');
+      if (!xcto || xcto.toLowerCase() !== 'nosniff') add('warn', 'X-Content-Type-Options: nosniff 가 없습니다'); else add('ok', 'X-Content-Type-Options: nosniff');
+      if (!one('x-frame-options') && !(csp && /frame-ancestors/.test(csp))) add('warn', 'X-Frame-Options 또는 CSP frame-ancestors가 없습니다 (클릭재킹 위험)'); else add('ok', '프레임 삽입 제한 설정됨');
+      if (!one('referrer-policy')) add('info', 'Referrer-Policy가 없습니다 (브라우저 기본값 strict-origin-when-cross-origin 적용)');
+      const sv = one('server'); if (sv && /\d/.test(sv)) add('warn', `Server 헤더에 버전 정보가 노출됩니다: ${sv}`);
+      const pw = one('x-powered-by'); if (pw) add('warn', `X-Powered-By 헤더가 기술 정보를 노출합니다: ${pw} (Tomcat: server.xml xpoweredBy="false", JEUS: 설정 제거)`);
+      const xx = one('x-xss-protection'); if (xx && /^1/.test(xx)) add('info', 'X-XSS-Protection: 1 은 구형 기능입니다. 0 또는 제거 후 CSP 사용 권장');
+      const acao = one('access-control-allow-origin'), acac = one('access-control-allow-credentials');
+      if (acao === '*' && acac === 'true') add('err', 'Access-Control-Allow-Origin: * 와 Allow-Credentials: true는 함께 쓸 수 없습니다 (브라우저가 거부)');
+      else if (acao === '*') add('info', 'CORS가 모든 출처(*)에 열려 있습니다 — 공개 API가 아니라면 출처를 제한하세요');
+      else if (acao === 'null') add('warn', "Access-Control-Allow-Origin: null 은 sandbox iframe 등 임의 출처에 악용될 수 있습니다");
+      if (get('set-cookie').length && !/no-store|private/.test(one('cache-control') || '')) add('info', 'Set-Cookie 응답인데 Cache-Control: no-store/private가 없어 공유 캐시에 저장될 수 있습니다');
+    }
+    get('set-cookie').forEach(v => {
+      const c = parseSetCookie(v); const nm = c.name;
+      const sess = /sess|jsession|token|auth|sid|remember/i.test(nm);
+      if (!c.attrs.secure) add(sess ? 'warn' : 'info', `쿠키 ${nm}: Secure 속성이 없어 HTTP로도 전송됩니다`);
+      if (!c.attrs.httponly) add(sess ? 'err' : 'info', `쿠키 ${nm}: HttpOnly가 없어 JavaScript로 읽을 수 있습니다${sess ? ' (세션 쿠키 탈취 위험)' : ''}`);
+      const ss = c.attrs.samesite;
+      if (!ss) add('info', `쿠키 ${nm}: SameSite 미지정 → 브라우저 기본값 Lax 적용`);
+      else if (String(ss).toLowerCase() === 'none' && !c.attrs.secure) add('err', `쿠키 ${nm}: SameSite=None 은 Secure가 있어야 합니다 (브라우저가 거부)`);
+    });
+    return f;
+  }
+  return { parse, parseSetCookie, audit };
+})();
+DU.HeaderAna = HeaderAna;
+defineTool({
+  id: 'headers', group: 'http', abbr: 'HDR', name: 'HTTP 헤더 · 쿠키 분석',
+  desc: '요청/응답 헤더 설명 · 보안 헤더 점검 · Set-Cookie 속성 · 만료 확인',
+  keywords: 'http header headers cookie set-cookie samesite httponly secure cors security 헤더 쿠키 보안 점검 jsessionid',
+  inputs: { input: '헤더' },
+  init(root) {
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('분석', run, 'primary', 'Ctrl+Enter'), h('<span class="dim" style="font-size:12px">브라우저 개발자 도구(F12) → Network → 요청 선택 → Headers의 "Raw"를 복사해 붙여넣으세요</span>'), h('<span class="sp"></span>'),
+      sampleBtn('응답 예제', () => { inp.set('HTTP/1.1 200 OK\nServer: Apache-Coyote/1.1 Tomcat/9.0.50\nX-Powered-By: JSP/2.3\nContent-Type: application/json;charset=UTF-8\nSet-Cookie: JSESSIONID=8F2A1C0D9E3B4A5F6C7D8E9F0A1B2C3D; Path=/app\nSet-Cookie: lang=ko; Max-Age=2592000; Path=/; SameSite=None\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Credentials: true\nCache-Control: no-cache\nX-Frame-Options: SAMEORIGIN\nDate: Wed, 28 Oct 2026 00:15:22 GMT'); run(); }),
+      sampleBtn('요청 예제', () => { inp.set('GET /api/users?page=1 HTTP/1.1\nHost: dev.example.com:8443\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0\nAccept: application/json\nAuthorization: Basic YWRtaW46cGFzc3dvcmQ=\nCookie: JSESSIONID=8F2A1C0D9E3B4A5F; lang=ko; theme=dark\nOrigin: http://localhost:3000\nX-Forwarded-For: 10.0.0.15, 192.168.0.1'); run(); }));
+    const inp = Pane({ title: '헤더 원문', persist: 'hdr', placeholder: 'HTTP/1.1 200 OK\nContent-Type: application/json\nSet-Cookie: JSESSIONID=…; Path=/; HttpOnly', sendFrom: 'headers' });
+    inp.el.style.height = '26vh'; inp.el.style.minHeight = '150px';
+    const res = h('<div style="display:flex;flex-direction:column;gap:10px"></div>');
+    root.append(bar, inp.el, res);
+    function run() {
+      res.innerHTML = '';
+      const p = HeaderAna.parse(inp.get());
+      if (!p.headers.length) { res.appendChild(h('<div class="empty-state">헤더를 붙여넣으세요</div>')); return; }
+      const f = HeaderAna.audit(p);
+      res.appendChild(h(`<div class="row"><span class="badge ${p.isResp ? 'info' : ''}">${p.isResp ? '응답 헤더' : '요청 헤더'}</span>${p.start ? `<span class="mono">${esc(p.start)}</span>` : ''}<span class="dim">${p.headers.length}개</span></div>`));
+      if (f.length) {
+        const ord = { err: 0, warn: 1, info: 2, ok: 3 }; const icon = { err: '✕', warn: '⚠', info: 'ℹ', ok: '✓' }; const cls = { err: 'err', warn: 'warn', info: 'info', ok: 'ok' };
+        const box = h('<div class="card findings"><div class="pane-head"><span class="pane-title">보안 점검</span></div></div>');
+        f.sort((a, b) => ord[a.lv] - ord[b.lv]).forEach(x => box.appendChild(h(`<div class="f"><span class="badge ${cls[x.lv]}">${icon[x.lv]}</span><span>${esc(x.msg)}</span></div>`)));
+        res.appendChild(box);
+      }
+      const tw = h('<div class="tbl-wrap"></div>');
+      tw.innerHTML = `<table class="tbl"><thead><tr><th>이름</th><th>값</th><th>설명</th></tr></thead><tbody>${p.headers.map(([k, v]) => {
+        const lk = k.toLowerCase(); let extra = '';
+        if (lk === 'authorization') { const m = /^Basic\s+(\S+)/i.exec(v); if (m) { try { const d = decodeUtf8(b64ToBytes(m[1])); extra = `<div class="faint">Basic 디코딩: 사용자 <b>${esc(d.split(':')[0])}</b> (비밀번호 ${d.includes(':') ? d.split(':').slice(1).join(':').length + '자, 표시 안 함' : '없음'})</div>`; } catch (e) { /* ignore */ } } if (/^Bearer\s+ey/i.test(v)) extra = '<div><button class="btn xs" data-jwt type="button">JWT 디코더로</button></div>'; }
+        if (lk === 'date' || lk === 'expires' || lk === 'last-modified') { const t = Date.parse(v); if (!isNaN(t)) extra = `<div class="faint">${fmtKst(t)} (${relTime(t)})</div>`; }
+        if (lk === 'x-forwarded-for') extra = `<div class="faint">원래 클라이언트: <b>${esc(v.split(',')[0].trim())}</b></div>`;
+        return `<tr><td class="mono nowrap"><b>${esc(k)}</b></td><td class="mono">${esc(v)}${extra}</td><td class="dim" style="font-size:12px">${esc(HDR_DOC[lk] || (lk.startsWith('sec-') ? '브라우저가 자동으로 붙이는 보안 메타데이터' : lk.startsWith('x-') ? '사용자 정의 헤더' : ''))}</td></tr>`;
+      }).join('')}</tbody></table>`;
+      res.appendChild(tw);
+      const jb = $('[data-jwt]', tw); if (jb) on(jb, 'click', () => sendTo('jwt', 'input', p.headers.find(([k]) => k.toLowerCase() === 'authorization')[1]));
+      const sc = p.headers.filter(([k]) => k.toLowerCase() === 'set-cookie');
+      if (sc.length) {
+        const cw = h('<div class="tbl-wrap"></div>');
+        cw.innerHTML = `<table class="tbl"><thead><tr><th>Set-Cookie</th><th>값</th><th>Domain</th><th>Path</th><th>만료</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th></tr></thead><tbody>${sc.map(([, v]) => {
+          const c = HeaderAna.parseSetCookie(v); const a = c.attrs;
+          let exp = '세션 (브라우저 종료 시)';
+          if (a['max-age'] !== undefined) { const s = +a['max-age']; exp = s <= 0 ? '<span class="t-err">즉시 삭제</span>' : `${fmtNum(s)}초 (${relTime(Date.now() + s * 1000).replace(' 후', '')})`; }
+          else if (a.expires) { const t = Date.parse(a.expires); exp = isNaN(t) ? esc(a.expires) : `${fmtKst(t)}${t < Date.now() ? ' <span class="t-err">만료됨</span>' : ''}`; }
+          const yn = x => x ? '<span class="t-ok">✓</span>' : '<span class="t-err">✕</span>';
+          return `<tr><td class="mono"><b>${esc(c.name)}</b></td><td class="mono">${esc(c.value.length > 40 ? c.value.slice(0, 40) + '…' : c.value)}</td><td class="mono">${esc(a.domain || '(현재 호스트)')}</td><td class="mono">${esc(a.path || '(요청 경로)')}</td><td>${exp}</td><td>${yn(a.secure)}</td><td>${yn(a.httponly)}</td><td>${esc(a.samesite === true ? '' : a.samesite || '(Lax)')}</td></tr>`;
+        }).join('')}</tbody></table>`;
+        res.appendChild(cw);
+      }
+      const ck = p.headers.filter(([k]) => k.toLowerCase() === 'cookie');
+      if (ck.length) {
+        const items = ck.flatMap(([, v]) => v.split(';').map(s => s.trim()).filter(Boolean).map(s => { const i = s.indexOf('='); return [i < 0 ? s : s.slice(0, i), i < 0 ? '' : s.slice(i + 1)]; }));
+        const cw = h('<div class="tbl-wrap"></div>');
+        cw.innerHTML = `<table class="tbl"><thead><tr><th>Cookie 이름</th><th>값</th><th>디코딩</th></tr></thead><tbody>${items.map(([k, v]) => { let d = ''; try { d = decodeURIComponent(v); } catch (e) { d = ''; } return `<tr><td class="mono"><b>${esc(k)}</b></td><td class="mono">${esc(v)}</td><td class="mono">${d !== v ? esc(d) : ''}</td></tr>`; }).join('')}</tbody></table>`;
+        res.appendChild(cw);
+      }
+    }
+    inp.onInput(debounce(run, 300)); run();
+    return { run, receive(slot, t) { inp.set(t); run(); } };
+  },
+});
+
+/* =====================================================================
+ * OpenAPI / Swagger 뷰어
+ * ===================================================================== */
+const OpenApi = (() => {
+  function resolve(spec, ref) {
+    if (!ref.startsWith('#/')) return null;
+    return ref.slice(2).split('/').reduce((o, k) => (o ? o[k.replace(/~1/g, '/').replace(/~0/g, '~')] : undefined), spec);
+  }
+  function deref(spec, s, seen = new Set()) { let n = 0; while (s && s.$ref && n++ < 20) { if (seen.has(s.$ref)) return {}; seen.add(s.$ref); s = resolve(spec, s.$ref) || {}; } return s; }
+  function example(spec, schema, depth = 0, seen = new Set()) {
+    if (!schema || depth > 7) return null;
+    if (schema.$ref) { if (seen.has(schema.$ref)) return {}; const s2 = new Set(seen); s2.add(schema.$ref); return example(spec, resolve(spec, schema.$ref), depth + 1, s2); }
+    if (schema.example !== undefined) return schema.example;
+    if (schema.examples && Array.isArray(schema.examples) && schema.examples.length) return schema.examples[0];
+    if (schema.default !== undefined) return schema.default;
+    if (schema.enum && schema.enum.length) return schema.enum[0];
+    if (schema.allOf) return schema.allOf.reduce((a, s) => Object.assign(a, example(spec, s, depth + 1, seen) || {}), {});
+    if (schema.oneOf || schema.anyOf) return example(spec, (schema.oneOf || schema.anyOf)[0], depth + 1, seen);
+    const type = Array.isArray(schema.type) ? schema.type.find(t => t !== 'null') : schema.type;
+    if (type === 'object' || schema.properties) {
+      const o = {}; Object.entries(schema.properties || {}).forEach(([k, v]) => { o[k] = example(spec, v, depth + 1, seen); });
+      if (!schema.properties && schema.additionalProperties && typeof schema.additionalProperties === 'object') o.key = example(spec, schema.additionalProperties, depth + 1, seen);
+      return o;
+    }
+    if (type === 'array') return [example(spec, schema.items, depth + 1, seen)];
+    if (type === 'integer') return 0;
+    if (type === 'number') return 0.0;
+    if (type === 'boolean') return true;
+    if (type === 'string') { const f = schema.format; return f === 'date-time' ? new Date().toISOString() : f === 'date' ? new Date().toISOString().slice(0, 10) : f === 'email' ? 'user@example.com' : f === 'uuid' ? '3fa85f64-5717-4562-b3fc-2c963f66afa6' : f === 'binary' ? '(파일)' : 'string'; }
+    return null;
+  }
+  function typeStr(spec, s) {
+    s = s || {}; if (s.$ref) return s.$ref.split('/').pop();
+    if (s.type === 'array') return `${typeStr(spec, s.items)}[]`;
+    return (Array.isArray(s.type) ? s.type.join('|') : s.type || (s.properties ? 'object' : '')) + (s.format ? ` (${s.format})` : '') + (s.enum ? ` enum: ${s.enum.slice(0, 6).join(', ')}` : '');
+  }
+  function baseUrl(spec) {
+    if (spec.servers && spec.servers[0] && spec.servers[0].url) {
+      let u = spec.servers[0].url; const vars = spec.servers[0].variables || {};
+      u = u.replace(/\{(\w+)\}/g, (m, k) => (vars[k] && vars[k].default != null ? vars[k].default : m));
+      return /^https?:/.test(u) ? u.replace(/\/$/, '') : '{{baseUrl}}' + u.replace(/\/$/, '');
+    }
+    if (spec.host) return `${(spec.schemes && spec.schemes[0]) || 'http'}://${spec.host}${(spec.basePath || '').replace(/\/$/, '')}`;
+    if (spec.basePath) return '{{baseUrl}}' + spec.basePath.replace(/\/$/, '');
+    return '{{baseUrl}}';
+  }
+  function operations(spec) {
+    const ops = [];
+    Object.entries(spec.paths || {}).forEach(([path, item]) => {
+      const common = (item.parameters || []).map(p => deref(spec, p));
+      ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'].forEach(m => {
+        const op = item[m]; if (!op) return;
+        const params = common.concat((op.parameters || []).map(p => deref(spec, p))).filter((p, i, a) => a.findIndex(q => q.name === p.name && q.in === p.in) === i);
+        ops.push({ method: m.toUpperCase(), path, op, params, tags: op.tags && op.tags.length ? op.tags : ['(태그 없음)'] });
+      });
+    });
+    return ops;
+  }
+  function requestBody(spec, o) {
+    const rb = o.op.requestBody ? deref(spec, o.op.requestBody) : null;
+    if (rb && rb.content) {
+      const ct = Object.keys(rb.content).find(c => /json/.test(c)) || Object.keys(rb.content)[0];
+      const media = rb.content[ct] || {};
+      let ex = media.example; if (ex === undefined && media.examples) { const f = Object.values(media.examples)[0]; ex = f && (deref(spec, f).value); }
+      if (ex === undefined) ex = example(spec, media.schema);
+      return { ct, ex, schema: media.schema, required: rb.required };
+    }
+    const bp = o.params.find(p => p.in === 'body');
+    if (bp) return { ct: (o.op.consumes || spec.consumes || ['application/json'])[0], ex: example(spec, bp.schema), schema: bp.schema, required: bp.required };
+    const fd = o.params.filter(p => p.in === 'formData');
+    if (fd.length) return { ct: 'application/x-www-form-urlencoded', form: fd };
+    return null;
+  }
+  return { operations, example, typeStr, baseUrl, requestBody, deref, resolve };
+})();
+DU.OpenApi = OpenApi;
+defineTool({
+  id: 'openapi', group: 'http', abbr: 'OAS', name: 'OpenAPI 뷰어',
+  desc: 'Swagger 2 / OpenAPI 3 (JSON · YAML) API 목록 · 파라미터 · 예제 본문 · HTTP 테스터 연동',
+  keywords: 'openapi swagger api docs spec 문서 명세 v3 api-docs springdoc yaml',
+  inputs: { input: '명세' }, fill: true,
+  help: `<code>/v3/api-docs</code>(springdoc) 또는 <code>/v2/api-docs</code>(springfox) 응답을 붙여넣거나 파일을 열어 주세요. JSON과 YAML 모두 지원합니다.<br>각 API의 <b>HTTP 테스터로</b> 버튼은 메서드·URL·쿼리 파라미터·예제 본문을 채워서 보냅니다.`,
+  init(root) {
+    const inp = Pane({ title: 'OpenAPI 명세 (JSON / YAML)', persist: 'oas', placeholder: '{"openapi":"3.0.1","paths":{…}}', actions: ['open', 'clear'] });
+    inp.el.style.height = '22vh'; inp.el.style.minHeight = '120px'; inp.el.style.flex = 'none';
+    const q = h('<input class="inp sm" style="width:240px" placeholder="경로 · 요약 · 태그 검색">');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(btn('불러오기', load, 'primary', 'Ctrl+Enter'), btn('명세 입력 접기', () => inp.el.classList.toggle('hidden'), 'sm ghost'), q, h('<span class="sp"></span>'), sampleBtn('예제', () => { inp.set(JSON.stringify(SAMPLE_OAS, null, 2)); load(); }));
+    const info = h('<div></div>');
+    const list = h('<div style="flex:1;overflow:auto;min-height:200px"></div>');
+    root.append(bar, inp.el, info, list);
+    let spec = null, ops = [];
+    function load() {
+      const s = inp.get().trim(); info.innerHTML = ''; list.innerHTML = '';
+      if (!s) return;
+      try { spec = /^[{[]/.test(s) ? JSONX.toJS(JSONX.smartParse(s).node) : Yaml.parse(s)[0]; inp.status('✓ 해석 완료', 'ok'); }
+      catch (e) { paneError(inp, e); return; }
+      if (!spec || !spec.paths) { info.innerHTML = '<div class="note err">paths가 없습니다. OpenAPI/Swagger 명세가 맞는지 확인하세요.</div>'; return; }
+      ops = OpenApi.operations(spec);
+      const i = spec.info || {};
+      info.innerHTML = `<div class="card card-pad"><div class="row"><b style="font-size:15px">${esc(i.title || 'API')}</b><span class="badge">${esc(i.version || '')}</span><span class="badge info">${spec.openapi ? 'OpenAPI ' + esc(spec.openapi) : 'Swagger ' + esc(spec.swagger || '')}</span><span class="dim">API ${ops.length}개</span><span class="sp"></span><span class="mono dim">${esc(OpenApi.baseUrl(spec))}</span></div>${i.description ? `<div class="dim" style="margin-top:6px;white-space:pre-wrap;font-size:12px">${esc(String(i.description).slice(0, 600))}</div>` : ''}</div>`;
+      if (ops.length > 15) inp.el.classList.add('hidden');
+      render();
+    }
+    function render() {
+      list.innerHTML = '';
+      const qs = q.value.trim().toLowerCase();
+      const fs = ops.filter(o => !qs || (o.method + ' ' + o.path + ' ' + (o.op.summary || '') + ' ' + (o.op.operationId || '') + ' ' + o.tags.join(' ')).toLowerCase().includes(qs));
+      const byTag = new Map(); fs.forEach(o => o.tags.forEach(t => { if (!byTag.has(t)) byTag.set(t, []); byTag.get(t).push(o); }));
+      byTag.forEach((arr, tag) => {
+        const tdesc = ((spec.tags || []).find(t => t.name === tag) || {}).description;
+        list.appendChild(h(`<div class="section-title" style="margin:10px 0 6px">${esc(tag)} <span class="faint">${arr.length}</span>${tdesc ? ` <span class="faint" style="font-weight:400">— ${esc(tdesc)}</span>` : ''}</div>`));
+        arr.forEach(o => list.appendChild(opEl(o)));
+      });
+      if (!fs.length) list.appendChild(h('<div class="empty-state">일치하는 API가 없습니다</div>'));
+    }
+    function opEl(o) {
+      const m = o.method.toLowerCase();
+      const el = h(`<div class="op${o.op.deprecated ? ' op-dep' : ''}"><div class="op-head"><span class="op-m ${['get', 'post', 'put', 'patch', 'delete'].includes(m) ? m : 'other'}">${o.method}</span><span class="op-path"></span><span class="op-sum"></span><span class="sp"></span></div></div>`);
+      $('.op-path', el).textContent = o.path; $('.op-sum', el).textContent = o.op.summary || o.op.operationId || '';
+      const go = btn('HTTP 테스터로', e => { e.stopPropagation(); toTester(o); }, 'xs'); $('.op-head', el).appendChild(go);
+      on($('.op-head', el), 'click', () => {
+        let b = $('.op-body', el); if (b) { b.remove(); return; }
+        b = h('<div class="op-body"></div>');
+        if (o.op.description) b.appendChild(h(`<div class="dim" style="white-space:pre-wrap;font-size:12.5px">${esc(o.op.description)}</div>`));
+        const ps = o.params.filter(p => p.in !== 'body');
+        if (ps.length) {
+          const t = h('<div class="tbl-wrap"></div>');
+          t.innerHTML = `<table class="tbl"><thead><tr><th>파라미터</th><th>위치</th><th>타입</th><th>필수</th><th>설명</th></tr></thead><tbody>${ps.map(p => `<tr><td class="mono"><b>${esc(p.name)}</b></td><td>${esc(p.in)}</td><td class="mono">${esc(OpenApi.typeStr(spec, p.schema || p))}</td><td>${p.required ? '<span class="t-err">필수</span>' : ''}</td><td class="dim">${esc(p.description || '')}</td></tr>`).join('')}</tbody></table>`;
+          b.appendChild(t);
+        }
+        const rb = OpenApi.requestBody(spec, o);
+        if (rb && rb.ex !== undefined) {
+          b.appendChild(h(`<div class="section-title">요청 본문 <span class="faint">${esc(rb.ct)}${rb.schema ? ' · ' + esc(OpenApi.typeStr(spec, rb.schema)) : ''}</span></div>`));
+          const pre = h('<pre class="code" style="border:1px solid var(--border);border-radius:6px;padding:8px;max-height:300px;overflow:auto"></pre>'); pre.innerHTML = HL.json(JSON.stringify(rb.ex, null, 2)); b.appendChild(pre);
+        }
+        const rs = o.op.responses || {};
+        if (Object.keys(rs).length) {
+          b.appendChild(h('<div class="section-title">응답</div>'));
+          Object.entries(rs).forEach(([code, r]) => {
+            r = OpenApi.deref(spec, r);
+            let sch = r.schema; if (r.content) { const ct = Object.keys(r.content).find(c => /json/.test(c)) || Object.keys(r.content)[0]; sch = ct && r.content[ct].schema; }
+            const row = h(`<div class="row"><span class="badge ${statusClass(+code || 200)}">${esc(code)}</span><span class="dim">${esc(r.description || '')}</span>${sch ? `<span class="mono faint">${esc(OpenApi.typeStr(spec, sch))}</span>` : ''}</div>`);
+            if (sch) { const eb = btn('예제', () => { const ex = OpenApi.example(spec, sch); openModal({ title: `${o.method} ${o.path} → ${code}`, body: `<pre class="code" style="white-space:pre-wrap">${HL.json(JSON.stringify(ex, null, 2))}</pre>` }); }, 'xs ghost'); row.appendChild(eb); }
+            b.appendChild(row);
+          });
+        }
+        el.appendChild(b);
+      });
+      return el;
+    }
+    function toTester(o) {
+      const base = OpenApi.baseUrl(spec);
+      const query = o.params.filter(p => p.in === 'query').map(p => ({ k: p.name, v: p.example != null ? String(p.example) : (p.schema && p.schema.example != null ? String(p.schema.example) : (p.schema && p.schema.default != null ? String(p.schema.default) : '')), req: p.required }))
+        .filter(p => p.req || p.v !== '').map(p => ({ on: true, k: p.k, v: p.v }));
+      const headers = o.params.filter(p => p.in === 'header').map(p => ({ on: !!p.required, k: p.name, v: '' }));
+      const rb = OpenApi.requestBody(spec, o);
+      const qstr = HttpUtil.buildQuery(query);
+      const req = { method: o.method, url: base + o.path + (qstr ? '?' + qstr : ''), headers: [{ on: true, k: 'Accept', v: 'application/json' }].concat(headers), bodyType: 'none', body: '' };
+      if (rb) {
+        if (rb.form) { req.bodyType = 'form'; req.form = rb.form.map(p => ({ on: true, k: p.name, v: '' })); }
+        else if (/json/.test(rb.ct)) { req.bodyType = 'json'; req.body = JSON.stringify(rb.ex, null, 2); }
+        else if (/xml/.test(rb.ct)) { req.bodyType = 'xml'; }
+        else if (/multipart/.test(rb.ct)) { req.bodyType = 'multipart'; }
+        else { req.bodyType = 'text'; req.body = typeof rb.ex === 'string' ? rb.ex : JSON.stringify(rb.ex); }
+      }
+      openTool('http');
+      TOOL_MAP.http.inst._load(req);
+      toast(`${o.method} ${o.path} 를 HTTP 테스터로 보냈습니다${/\{\w+\}/.test(o.path) ? ' — 경로의 {변수}를 실제 값으로 바꾸세요' : ''}`, 'ok', 3500);
+    }
+    on(q, 'input', debounce(render, 200));
+    if (inp.get()) load();
+    return { run: load, receive(slot, t) { inp.set(t); inp.el.classList.remove('hidden'); load(); } };
+  },
+});
+const SAMPLE_OAS = {
+  openapi: '3.0.1', info: { title: '사용자 관리 API', version: 'v1', description: 'Dev Utility Hub 예제 명세' }, servers: [{ url: 'http://localhost:8080' }],
+  tags: [{ name: 'User', description: '사용자' }],
+  paths: {
+    '/api/users': {
+      get: { tags: ['User'], summary: '사용자 목록', parameters: [{ name: 'page', in: 'query', schema: { type: 'integer', default: 1 } }, { name: 'keyword', in: 'query', schema: { type: 'string' } }],
+        responses: { 200: { description: '성공', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/User' } } } } } } },
+      post: { tags: ['User'], summary: '사용자 등록', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserCreate' } } } }, responses: { 201: { description: '생성됨' }, 400: { description: '검증 실패' } } },
+    },
+    '/api/users/{id}': {
+      parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer', format: 'int64' } }],
+      get: { tags: ['User'], summary: '사용자 상세', responses: { 200: { description: '성공', content: { 'application/json': { schema: { $ref: '#/components/schemas/User' } } } }, 404: { description: '없음' } } },
+      delete: { tags: ['User'], summary: '사용자 삭제', responses: { 204: { description: '삭제됨' } } },
+    },
+  },
+  components: { schemas: {
+    User: { type: 'object', properties: { id: { type: 'integer', format: 'int64', example: 1 }, name: { type: 'string', example: '홍길동' }, email: { type: 'string', format: 'email' }, roles: { type: 'array', items: { type: 'string', enum: ['ADMIN', 'USER'] } }, createdAt: { type: 'string', format: 'date-time' } } },
+    UserCreate: { type: 'object', required: ['name'], properties: { name: { type: 'string', example: '홍길동' }, email: { type: 'string', format: 'email' }, deptCode: { type: 'string', example: 'D01' } } },
+  } },
+};
 
 /* =====================================================================
  * 해시 (순수 JS 구현 — WebCrypto가 없는 http:// 환경에서도 동작)
@@ -4528,18 +4870,22 @@ const RegexRunner = (() => {
       postMessage({ ok: true, ms: ms, rep: rep });
     } catch (err) { postMessage({ ok: false, error: err.message }); }
   };`;
-  let worker = null, url = null, workerOk = true;
+  let url = null, workerOk = true, current = null;
   function exec(p, f, text, rep, timeout = 2000) {
     return new Promise(resolve => {
+      // 진행 중인 실행은 취소 (결과는 버려짐)
+      if (current) { clearTimeout(current.timer); current.w.terminate(); current.resolve({ ok: false, cancelled: true }); current = null; }
       if (workerOk) {
         try {
           if (!url) url = URL.createObjectURL(new Blob([SRC], { type: 'text/javascript' }));
-          if (worker) worker.terminate();
-          worker = new Worker(url);
-          const timer = setTimeout(() => { worker.terminate(); worker = null; resolve({ ok: false, timeout: true, error: `${timeout / 1000}초 안에 끝나지 않아 중단했습니다 (치명적 백트래킹 가능성: (a+)+ 같은 중첩 반복을 확인하세요)` }); }, timeout);
-          worker.onmessage = e => { clearTimeout(timer); resolve(e.data); };
-          worker.onerror = e => { clearTimeout(timer); workerOk = false; e.preventDefault(); resolve(run()); };
-          worker.postMessage({ p, f, text, rep });
+          const w = new Worker(url);
+          const job = { w, resolve };
+          const done = r => { clearTimeout(job.timer); w.terminate(); if (current === job) current = null; resolve(r); };
+          job.timer = setTimeout(() => done({ ok: false, timeout: true, error: `${timeout / 1000}초 안에 끝나지 않아 중단했습니다 (치명적 백트래킹 가능성: (a+)+ 같은 중첩 반복을 확인하세요)` }), timeout);
+          w.onmessage = e => done(e.data);
+          w.onerror = e => { e.preventDefault(); workerOk = false; clearTimeout(job.timer); w.terminate(); if (current === job) current = null; resolve(run()); };
+          current = job;
+          w.postMessage({ p, f, text, rep });
           return;
         } catch (e) { workerOk = false; }
       }
@@ -4599,7 +4945,7 @@ defineTool({
       const text = txt.get();
       if (!p) { msg.innerHTML = '<span class="dim">패턴을 입력하세요</span>'; $('.regex-view', view).textContent = text; tbl.innerHTML = ''; repOut.set(''); return; }
       const r = await RegexRunner.exec(p, f, text, rep.value ? rep.value : null);
-      if (my !== seq) return;
+      if (my !== seq || r.cancelled) return;
       if (!r.ok) { msg.innerHTML = `<span class="badge err">${r.timeout ? '시간 초과' : '패턴 오류'}</span> <span class="t-err">${esc(r.error)}</span>`; tbl.innerHTML = ''; return; }
       msg.innerHTML = `<span class="badge ${r.ms.length ? 'ok' : 'warn'}">${fmtNum(r.ms.length)}건 일치</span><span class="mono">/${esc(p)}/${esc(f)}</span>${notes.map(n => `<span class="badge info">${esc(n)}</span>`).join('')}`;
       let html = '', last = 0;
@@ -5174,7 +5520,8 @@ defineTool({
       const frag = document.createDocumentFragment(); const end = Math.min(filtered.length, shown + 500);
       for (let i = shown; i < end; i++) {
         const e = filtered[i];
-        const msg = e.ts ? e.head.slice(e.ts.len).replace(/^[\]\s]+/, '') : e.head;
+        let msg = e.ts ? e.head.slice(e.ts.len).replace(/^[\]\s]+/, '') : e.head;
+        if (e.level !== 'NONE') msg = msg.replace(/^\[?\s*(TRACE|DEBUG|INFO|WARN|WARNING|ERROR|FATAL|SEVERE|FINEST|FINER|FINE|CONFIG)\s*\]?\s+/, '');
         const d = h(`<div class="log-e"><span class="tg">${e.more.length ? '▸' : ''}</span><span class="ts">${e.ts ? esc(fmtTime(e.ts.t)) : `<span class="faint">#${e.n}</span>`}</span><span class="lv lv-${e.level}">${e.level === 'NONE' ? '' : e.level}</span><span class="m">${hlQ(msg)}${e.more.length ? ` <span class="faint">(+${e.more.length}줄)</span>` : ''}${e.ex ? ` <span class="badge err" title="${esc(e.ex.type + (e.ex.at ? ' @ ' + e.ex.at : ''))}">${esc(e.ex.type.split('.').pop())}</span>` : ''}</span></div>`);
         d._e = e; frag.appendChild(d);
       }
@@ -5533,6 +5880,353 @@ defineTool({
       out.status(r.warn.length ? '⚠ ' + r.warn.slice(0, 3).join(' / ') : `${r.kind} → ${target}${docs.length > 1 ? ` (문서 ${docs.length}개)` : ''}`, r.warn.length ? 'warn' : 'ok');
     }
     return { run: () => conv(detect(inp.get()) === 'yaml' ? 'properties' : 'yaml'), receive(slot, t) { inp.set(t); conv(detect(t) === 'yaml' ? 'properties' : 'yaml'); } };
+  },
+});
+
+/* =====================================================================
+ * 날짜 · 시간 변환
+ * ===================================================================== */
+const DateX = (() => {
+  const TZ = { kst: 9 * 60, utc: 0 };
+  const offOf = (tz, ms) => (tz === 'local' ? -new Date(ms).getTimezoneOffset() : TZ[tz]);
+  /** 표시용 필드 (tz 기준) */
+  function fields(ms, tz) {
+    const off = offOf(tz, ms); const d = new Date(ms + off * 60000);
+    return { y: d.getUTCFullYear(), M: d.getUTCMonth() + 1, d: d.getUTCDate(), H: d.getUTCHours(), m: d.getUTCMinutes(), s: d.getUTCSeconds(), S: d.getUTCMilliseconds(), dow: d.getUTCDay(), off };
+  }
+  function fromFields(y, M, d, H = 0, m = 0, s = 0, S = 0, tz = 'kst') {
+    if (tz === 'local') return new Date(y, M - 1, d, H, m, s, S).getTime();
+    return Date.UTC(y, M - 1, d, H, m, s, S) - TZ[tz] * 60000;
+  }
+  const DOW_KO = ['일', '월', '화', '수', '목', '금', '토'], DOW_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], DOW_EN_F = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MON_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const offStr = (off, colon = true) => { const s = off >= 0 ? '+' : '-'; const a = Math.abs(off); return s + pad(Math.floor(a / 60)) + (colon ? ':' : '') + pad(a % 60); };
+  /** Java SimpleDateFormat / DateTimeFormatter 패턴 일부 지원 */
+  function format(ms, pattern, tz = 'kst') {
+    const f = fields(ms, tz);
+    return pattern.replace(/'([^']*)'|y{1,4}|M{1,4}|d{1,2}|H{1,2}|h{1,2}|m{1,2}|s{1,2}|S{1,3}|E{1,4}|a|X{1,3}|Z{1,2}|z|u/g, (t, lit) => {
+      if (lit !== undefined) return lit === '' ? "'" : lit;
+      switch (t) {
+        case 'yyyy': case 'yyy': case 'y': return String(f.y); case 'yy': return pad(f.y % 100);
+        case 'MMMM': return ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'][f.M - 1]; case 'MMM': return MON_EN[f.M - 1]; case 'MM': return pad(f.M); case 'M': return String(f.M);
+        case 'dd': return pad(f.d); case 'd': return String(f.d);
+        case 'HH': return pad(f.H); case 'H': return String(f.H);
+        case 'hh': return pad(f.H % 12 || 12); case 'h': return String(f.H % 12 || 12);
+        case 'mm': return pad(f.m); case 'm': return String(f.m); case 'ss': return pad(f.s); case 's': return String(f.s);
+        case 'SSS': return pad(f.S, 3); case 'SS': return pad(Math.floor(f.S / 10)); case 'S': return String(Math.floor(f.S / 100));
+        case 'EEEE': return DOW_KO[f.dow] + '요일'; case 'EEE': case 'EE': case 'E': return DOW_KO[f.dow];
+        case 'a': return f.H < 12 ? '오전' : '오후'; case 'u': return String(f.dow || 7);
+        case 'XXX': return f.off === 0 ? 'Z' : offStr(f.off); case 'XX': case 'X': return f.off === 0 ? 'Z' : offStr(f.off, false);
+        case 'ZZ': case 'Z': return offStr(f.off, false); case 'z': return tz === 'kst' ? 'KST' : tz === 'utc' ? 'UTC' : 'GMT' + offStr(f.off);
+      }
+      return t;
+    });
+  }
+  /** 다양한 입력 → ms */
+  function parse(input, tz = 'kst') {
+    const s = input.trim();
+    if (!s) return { ms: Date.now(), kind: '현재 시각' };
+    let m;
+    if (/^-?\d+(\.\d+)?$/.test(s)) {
+      const digits = s.replace(/^-/, '').split('.')[0];
+      if (/^(19|20)\d{6}$/.test(s)) return { ms: fromFields(+s.slice(0, 4), +s.slice(4, 6), +s.slice(6, 8), 0, 0, 0, 0, tz), kind: 'yyyyMMdd' };
+      if (/^(19|20)\d{10}$/.test(s)) return { ms: fromFields(+s.slice(0, 4), +s.slice(4, 6), +s.slice(6, 8), +s.slice(8, 10), +s.slice(10, 12), 0, 0, tz), kind: 'yyyyMMddHHmm' };
+      if (/^(19|20)\d{12}$/.test(s)) return { ms: fromFields(+s.slice(0, 4), +s.slice(4, 6), +s.slice(6, 8), +s.slice(8, 10), +s.slice(10, 12), +s.slice(12, 14), 0, tz), kind: 'yyyyMMddHHmmss' };
+      if (/^(19|20)\d{15}$/.test(s)) return { ms: fromFields(+s.slice(0, 4), +s.slice(4, 6), +s.slice(6, 8), +s.slice(8, 10), +s.slice(10, 12), +s.slice(12, 14), +s.slice(14, 17), tz), kind: 'yyyyMMddHHmmssSSS' };
+      const n = Number(s);
+      if (digits.length <= 11) return { ms: Math.round(n * 1000), kind: 'Unix 초' };
+      if (digits.length <= 14) return { ms: Math.round(n), kind: 'Unix 밀리초' };
+      if (digits.length <= 17) return { ms: Math.round(n / 1000), kind: 'Unix 마이크로초' };
+      return { ms: Math.round(n / 1e6), kind: 'Unix 나노초' };
+    }
+    // ISO 8601 (오프셋 포함)
+    if ((m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:[.,](\d{1,9}))?)?\s*(Z|[+-]\d{2}:?\d{2})$/i.exec(s))) {
+      const off = /z/i.test(m[8]) ? 0 : (m[8][0] === '-' ? -1 : 1) * (+m[8].slice(1, 3) * 60 + +m[8].slice(-2));
+      return { ms: Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0), m[7] ? Math.round(+('0.' + m[7]) * 1000) : 0) - off * 60000, kind: 'ISO 8601 (오프셋 포함)' };
+    }
+    // 오프셋 없는 날짜시간 → 선택 시간대로 해석
+    if ((m = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:[T ]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,](\d{1,9}))?)?)?$/.exec(s)))
+      return { ms: fromFields(+m[1], +m[2], +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0), m[7] ? Math.round(+('0.' + m[7]) * 1000) : 0, tz), kind: `날짜시간 (${tz.toUpperCase()}로 해석)` };
+    // 한국어 표기
+    if ((m = /^(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일(?:\s*\(?[월화수목금토일]?\)?)?(?:\s*(오전|오후)?\s*(\d{1,2})\s*시(?:\s*(\d{1,2})\s*분)?(?:\s*(\d{1,2})\s*초)?)?$/.exec(s))) {
+      let H = +(m[5] || 0); if (m[4] === '오후' && H < 12) H += 12; if (m[4] === '오전' && H === 12) H = 0;
+      return { ms: fromFields(+m[1], +m[2], +m[3], H, +(m[6] || 0), +(m[7] || 0), 0, tz), kind: '한국어 날짜' };
+    }
+    // Java Date.toString(): Wed Oct 28 09:15:22 KST 2026
+    if ((m = /^[A-Za-z]{3} ([A-Za-z]{3}) (\d{1,2}) (\d{2}):(\d{2}):(\d{2}) ([A-Z]{2,5}) (\d{4})$/.exec(s))) {
+      const zones = { KST: 540, UTC: 0, GMT: 0, JST: 540, PST: -480, PDT: -420, EST: -300, EDT: -240, CST: -360, CET: 60 };
+      const off = zones[m[6]]; if (off === undefined) throw new Error(`알 수 없는 시간대: ${m[6]}`);
+      return { ms: Date.UTC(+m[7], MON_EN.indexOf(m[1]), +m[2], +m[3], +m[4], +m[5]) - off * 60000, kind: 'Java Date.toString()' };
+    }
+    const t = Date.parse(s);
+    if (!isNaN(t)) return { ms: t, kind: 'RFC 1123 / 기타 형식' };
+    throw new Error('날짜 형식을 인식하지 못했습니다');
+  }
+  function isoWeek(ms, tz) {
+    const f = fields(ms, tz); const d = new Date(Date.UTC(f.y, f.M - 1, f.d)); const day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return { year: d.getUTCFullYear(), week: Math.ceil(((d - y0) / 86400000 + 1) / 7) };
+  }
+  function dayOfYear(ms, tz) { const f = fields(ms, tz); return Math.round((Date.UTC(f.y, f.M - 1, f.d) - Date.UTC(f.y, 0, 1)) / 86400000) + 1; }
+  function human(diffMs) {
+    const neg = diffMs < 0; let s = Math.abs(diffMs) / 1000;
+    const d = Math.floor(s / 86400); s -= d * 86400; const hh = Math.floor(s / 3600); s -= hh * 3600; const mm = Math.floor(s / 60); s -= mm * 60;
+    return (neg ? '-' : '') + [d ? d + '일' : '', hh ? hh + '시간' : '', mm ? mm + '분' : '', (s ? +s.toFixed(3) + '초' : '')].filter(Boolean).join(' ') || '0초';
+  }
+  function add(ms, n, unit, tz) {
+    const f = fields(ms, tz);
+    switch (unit) {
+      case 's': return ms + n * 1000; case 'm': return ms + n * 60000; case 'h': return ms + n * 3600000; case 'd': return fromFields(f.y, f.M, f.d + n, f.H, f.m, f.s, f.S, tz); case 'w': return fromFields(f.y, f.M, f.d + n * 7, f.H, f.m, f.s, f.S, tz);
+      case 'M': { const last = new Date(Date.UTC(f.y, f.M - 1 + n + 1, 0)).getUTCDate(); return fromFields(f.y, f.M + n, Math.min(f.d, last), f.H, f.m, f.s, f.S, tz); }
+      case 'y': { const last = new Date(Date.UTC(f.y + n, f.M, 0)).getUTCDate(); return fromFields(f.y + n, f.M, Math.min(f.d, last), f.H, f.m, f.s, f.S, tz); }
+    }
+    return ms;
+  }
+  return { parse, format, fields, fromFields, isoWeek, dayOfYear, human, add, offStr, DOW_KO };
+})();
+DU.DateX = DateX;
+
+defineTool({
+  id: 'date', group: 'time', abbr: '⏱', name: '날짜 · 타임스탬프 변환',
+  desc: 'Unix Timestamp ↔ ISO 8601 · KST/UTC · yyyyMMddHHmmss · Java 패턴 포맷 · 날짜 계산',
+  keywords: 'date time timestamp epoch unix iso 8601 kst utc 날짜 시간 변환 타임스탬프 밀리초 simpledateformat datetimeformatter 날짜 계산 차이',
+  inputs: { input: '날짜/타임스탬프' },
+  init(root) {
+    const clock = h('<div class="card card-pad row" style="gap:16px"><span class="dim">현재</span><b class="mono" data-ref="s" style="font-size:15px"></b><span class="mono dim" data-ref="ms"></span><span class="mono" data-ref="k"></span><span class="sp"></span><button class="btn sm" data-ref="c" type="button">초 복사</button><button class="btn sm" data-ref="cm" type="button">밀리초 복사</button></div>');
+    const cr = refs(clock);
+    const inpEl = h('<input class="inp mono" style="flex:1;min-width:260px;font-size:14px;height:34px" placeholder="1761610522 · 1761610522123 · 2026-10-28 09:15:22 · 20261028091522 · 2026-10-28T00:15:22Z">');
+    bindPersist(inpEl, 'date:in');
+    const tz = sel([['kst', '오프셋 없는 입력: KST (UTC+9)'], ['utc', '오프셋 없는 입력: UTC'], ['local', '오프셋 없는 입력: 브라우저 로컬']], 'date:tz', 'kst');
+    const bar = h('<div class="toolbar"></div>');
+    bar.append(inpEl, btn('변환', run, 'primary', 'Ctrl+Enter'), btn('지금', () => { inpEl.value = String(Date.now()); run(); }), tz);
+    const kind = h('<div class="dim" style="font-size:12px;min-height:18px"></div>');
+    const res = h('<div></div>');
+    const fmtBox = h(`<div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">Java 패턴으로 포맷</h3>
+      <div class="row"><input class="inp mono" data-ref="pat" style="width:300px" value="yyyy-MM-dd HH:mm:ss.SSS"><select class="inp sm" data-ref="ptz"><option value="kst">KST</option><option value="utc">UTC</option><option value="local">로컬</option></select><b class="mono" data-ref="out"></b><span class="sp"></span><button class="btn xs" data-ref="cp" type="button">복사</button></div>
+      <div class="faint" style="font-size:11.5px">yyyy yy MM M dd d HH H hh h mm ss SSS a(오전/오후) E/EEEE(요일) XXX(+09:00) Z(+0900) z 'literal' — SimpleDateFormat · DateTimeFormatter 공통 문자</div></div>`);
+    const fr = refs(fmtBox); bindPersist(fr.pat, 'date:pat');
+    const calc = h(`<div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">날짜 계산</h3>
+      <div class="row"><span class="dim">위 시각</span><select class="inp sm" data-ref="sign"><option value="1">+</option><option value="-1">−</option></select><input class="inp sm" type="number" data-ref="n" value="30" style="width:90px">
+        <select class="inp sm" data-ref="unit"><option value="d">일</option><option value="w">주</option><option value="M">개월</option><option value="y">년</option><option value="h">시간</option><option value="m">분</option><option value="s">초</option></select><span>=</span><b class="mono" data-ref="addOut"></b></div>
+      <div class="row"><span class="dim">위 시각과</span><input class="inp sm mono" data-ref="other" style="width:230px" placeholder="비교할 날짜 (예: 2026-12-31)"><span>차이</span><b class="mono" data-ref="diffOut"></b></div></div>`);
+    const cc = refs(calc); bindPersist(cc.other, 'date:other');
+    const g = h('<div class="grid2"></div>'); g.append(fmtBox, calc);
+    root.append(clock, bar, kind, res, g);
+    let cur = null;
+    function run() {
+      try { const r = DateX.parse(inpEl.value, tz.value); cur = r.ms; kind.textContent = `인식된 형식: ${r.kind}`; kind.className = 'dim'; }
+      catch (e) { kind.textContent = '✕ ' + e.message; kind.className = 'msg-err'; res.innerHTML = ''; return; }
+      const ms = cur, Z = (p, t) => DateX.format(ms, p, t);
+      const lf = DateX.fields(ms, 'local');
+      const rows = [
+        ['Unix 초', String(Math.floor(ms / 1000))], ['Unix 밀리초', String(ms)],
+        ['KST', `${Z('yyyy-MM-dd HH:mm:ss', 'kst')} (${Z('EEEE', 'kst')})`], ['UTC', Z('yyyy-MM-dd HH:mm:ss', 'utc')],
+        ['ISO 8601 (KST)', Z("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", 'kst')], ['ISO 8601 (UTC)', new Date(ms).toISOString()],
+        ['RFC 1123 (HTTP)', new Date(ms).toUTCString()], ['yyyyMMddHHmmss (KST)', Z('yyyyMMddHHmmss', 'kst')], ['yyyyMMdd (KST)', Z('yyyyMMdd', 'kst')],
+        ['Oracle / Tibero', `TO_DATE('${Z('yyyy-MM-dd HH:mm:ss', 'kst')}', 'YYYY-MM-DD HH24:MI:SS')`],
+        ['Java', `LocalDateTime.of(${Z('yyyy, M, d, H, m, s', 'kst')})`],
+      ];
+      if (lf.off !== 540) rows.splice(4, 0, [`브라우저 로컬 (UTC${DateX.offStr(lf.off)})`, Z('yyyy-MM-dd HH:mm:ss', 'local')]);
+      const wk = DateX.isoWeek(ms, 'kst');
+      rows.push(['상대 시간', relTime(ms)], ['ISO 주차 / 연중 일수', `${wk.year}-W${pad(wk.week)} · ${DateX.dayOfYear(ms, 'kst')}일째`]);
+      res.innerHTML = ''; res.appendChild(kvList(rows));
+      updFmt(); updCalc();
+    }
+    function updFmt() { if (cur == null) return; fr.out.textContent = DateX.format(cur, fr.pat.value, fr.ptz.value); }
+    function updCalc() {
+      if (cur == null) return;
+      const r = DateX.add(cur, (+cc.n.value || 0) * +cc.sign.value, cc.unit.value, tz.value === 'local' ? 'local' : 'kst');
+      cc.addOut.textContent = `${DateX.format(r, 'yyyy-MM-dd HH:mm:ss (E)', 'kst')} KST`;
+      if (cc.other.value.trim()) { try { const o = DateX.parse(cc.other.value, tz.value).ms; const d = o - cur; cc.diffOut.textContent = `${DateX.human(d)}  (${fmtNum(Math.round(d / 1000))}초 · ${(d / 86400000).toFixed(2)}일)`; } catch (e) { cc.diffOut.textContent = '✕ ' + e.message; } }
+      else cc.diffOut.textContent = '';
+    }
+    on(inpEl, 'keydown', e => { if (e.key === 'Enter') run(); }); on(inpEl, 'input', debounce(run, 300)); on(tz, 'change', run);
+    [fr.pat, fr.ptz].forEach(x => on(x, 'input', updFmt)); on(fr.ptz, 'change', updFmt);
+    on(fr.cp, 'click', () => copyText(fr.out.textContent));
+    [cc.sign, cc.n, cc.unit, cc.other].forEach(x => { on(x, 'input', updCalc); on(x, 'change', updCalc); });
+    let timer = null;
+    const tick = () => { const n = Date.now(); cr.s.textContent = Math.floor(n / 1000); cr.ms.textContent = n; cr.k.textContent = DateX.format(n, 'yyyy-MM-dd HH:mm:ss (E) KST', 'kst'); };
+    on(cr.c, 'click', () => copyText(String(Math.floor(Date.now() / 1000)))); on(cr.cm, 'click', () => copyText(String(Date.now())));
+    tick(); run();
+    return {
+      run,
+      onShow() { clearInterval(timer); timer = setInterval(() => { if (currentTool && currentTool.id === 'date') tick(); else clearInterval(timer); }, 1000); },
+      receive(slot, t) { inpEl.value = t.trim(); run(); },
+    };
+  },
+});
+
+/* =====================================================================
+ * Cron 표현식
+ * ===================================================================== */
+const Cron = (() => {
+  const MON = { JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12 };
+  const DOW = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+  const MACROS = { '@yearly': '0 0 0 1 1 *', '@annually': '0 0 0 1 1 *', '@monthly': '0 0 0 1 * *', '@weekly': '0 0 0 * * 0', '@daily': '0 0 0 * * *', '@midnight': '0 0 0 * * *', '@hourly': '0 0 * * * *' };
+  const DOW_KO = ['일', '월', '화', '수', '목', '금', '토'];
+  function field(src, min, max, names, kind, dialect) {
+    const f = { src, any: false, vals: new Set(), last: false, lastOff: 0, lastWd: false, near: [], nth: [], lastDow: [] };
+    const dowConv = v => (kind === 'dow' ? (dialect === 'quartz' ? v - 1 : v % 7) : v);
+    const num = t => {
+      const u = t.toUpperCase();
+      if (names && u in names) return kind === 'dow' && dialect === 'quartz' ? names[u] + 1 : names[u];
+      if (!/^\d+$/.test(t)) throw new Error(`'${t}'는 올바른 값이 아닙니다`);
+      return +t;
+    };
+    const lo = kind === 'dow' ? (dialect === 'quartz' ? 1 : 0) : min, hi = kind === 'dow' ? 7 : max;
+    if (src === '*' || src === '?') { if (src === '?' && kind !== 'dom' && kind !== 'dow') throw new Error("'?'는 일(日)·요일 필드에서만 쓸 수 있습니다"); f.any = true; for (let v = min; v <= max; v++) f.vals.add(v); return f; }
+    for (const item of src.split(',')) {
+      if (!item) throw new Error('빈 항목이 있습니다 (쉼표 확인)');
+      let m;
+      if (kind === 'dom' && (m = /^L(?:-(\d+))?$/i.exec(item))) { f.last = true; f.lastOff = +(m[1] || 0); continue; }
+      if (kind === 'dom' && /^LW$/i.test(item)) { f.lastWd = true; continue; }
+      if (kind === 'dom' && (m = /^(\d+)W$/i.exec(item))) { f.near.push(+m[1]); continue; }
+      if (kind === 'dow' && (m = /^(\w+)#(\d)$/.exec(item))) { f.nth.push([dowConv(num(m[1])), +m[2]]); continue; }
+      if (kind === 'dow' && (m = /^(\w+)L$/i.exec(item))) { f.lastDow.push(dowConv(num(m[1]))); continue; }
+      if (kind === 'dow' && /^L$/i.test(item)) { f.vals.add(6); continue; }
+      const [range, stepS] = item.split('/');
+      const step = stepS === undefined ? 1 : +stepS;
+      if (stepS !== undefined && (!/^\d+$/.test(stepS) || step < 1)) throw new Error(`간격 '${stepS}'가 올바르지 않습니다`);
+      let a, b;
+      if (range === '*' || range === '?') { a = lo; b = hi; }
+      else if (range.includes('-')) { const [x, y] = range.split('-'); a = num(x); b = num(y); }
+      else { a = num(range); b = stepS !== undefined ? hi : a; }
+      if (a < lo || b > hi || a > hi || b < lo) throw new Error(`${a}${a !== b ? '-' + b : ''}는 범위(${lo}~${hi})를 벗어납니다`);
+      const add = v => f.vals.add(dowConv(v));
+      if (a <= b) for (let v = a; v <= b; v += step) add(v);
+      else { for (let v = a; v <= hi; v += step) add(v); for (let v = lo + ((step - ((hi - a + 1) % step)) % step); v <= b; v += step) add(v); }
+    }
+    return f;
+  }
+  function parse(expr, dialect = 'auto') {
+    let s = expr.trim().replace(/\s+/g, ' ');
+    if (MACROS[s.toLowerCase()]) s = MACROS[s.toLowerCase()];
+    let parts = s.split(' ');
+    if (dialect === 'auto') dialect = parts.length === 5 ? 'linux' : parts.length === 7 ? 'quartz' : 'spring';
+    if (dialect === 'linux' && parts.length !== 5) throw new Error(`Linux cron은 5개 필드(분 시 일 월 요일)입니다 — 현재 ${parts.length}개`);
+    if (dialect === 'spring' && parts.length !== 6) throw new Error(`Spring cron은 6개 필드(초 분 시 일 월 요일)입니다 — 현재 ${parts.length}개`);
+    if (dialect === 'quartz' && (parts.length < 6 || parts.length > 7)) throw new Error(`Quartz cron은 6~7개 필드(초 분 시 일 월 요일 [연도])입니다 — 현재 ${parts.length}개`);
+    if (dialect === 'linux') parts = ['0'].concat(parts);
+    const names = ['초', '분', '시', '일', '월', '요일', '연도'];
+    const mk = (i, min, max, nm, kind) => { try { return field(parts[i], min, max, nm, kind, dialect); } catch (e) { throw new Error(`${names[i]} 필드 '${parts[i]}': ${e.message}`); } };
+    const c = { dialect, parts, sec: mk(0, 0, 59), min: mk(1, 0, 59), hour: mk(2, 0, 23), dom: mk(3, 1, 31, null, 'dom'), mon: mk(4, 1, 12, MON), dow: mk(5, 0, 6, DOW, 'dow'), year: parts[6] ? mk(6, 1970, 2199) : null };
+    if (dialect === 'quartz' && !(parts[3] === '?' || parts[5] === '?')) throw new Error("Quartz에서는 일 또는 요일 중 하나를 '?'로 지정해야 합니다");
+    return c;
+  }
+  const domRestricted = c => !c.dom.any;
+  const dowRestricted = c => !c.dow.any;
+  function dayMatch(c, y, mo, d) {
+    const last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+    const dow = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
+    const D = c.dom, W = c.dow;
+    let domOk = D.vals.has(d) || (D.last && d === last - D.lastOff);
+    if (!domOk && D.lastWd) { let x = last; while ([0, 6].includes(new Date(Date.UTC(y, mo - 1, x)).getUTCDay())) x--; domOk = d === x; }
+    if (!domOk && D.near.length) domOk = D.near.some(n => { if (n > last) return false; let x = n; const wd = new Date(Date.UTC(y, mo - 1, x)).getUTCDay(); if (wd === 6) x = x === 1 ? 3 : x - 1; else if (wd === 0) x = x === last ? x - 2 : x + 1; return d === x; });
+    const dowOk = W.vals.has(dow) || W.nth.some(([w, k]) => w === dow && Math.ceil(d / 7) === k) || W.lastDow.some(w => w === dow && d + 7 > last);
+    if (c.dialect === 'linux' && domRestricted(c) && dowRestricted(c)) return domOk || dowOk;
+    return domOk && dowOk;
+  }
+  function next(c, fromMs, count = 10, tz = 'kst') {
+    const out = []; let t = Math.floor(fromMs / 1000) * 1000 + 1000;
+    const F = ms => DateX.fields(ms, tz), mk = (y, mo, d, H, mi, s) => DateX.fromFields(y, mo, d, H, mi, s, 0, tz);
+    const limit = fromMs + 50 * 366 * 86400000; let it = 0;
+    while (out.length < count && t < limit && it++ < 500000) {
+      const f = F(t);
+      if (c.year && !c.year.vals.has(f.y)) { const ny = Array.from(c.year.vals).filter(y => y > f.y).sort((a, b) => a - b)[0]; if (!ny) break; t = mk(ny, 1, 1, 0, 0, 0); continue; }
+      if (!c.mon.vals.has(f.M)) { t = mk(f.y, f.M + 1, 1, 0, 0, 0); continue; }
+      if (!dayMatch(c, f.y, f.M, f.d)) { t = mk(f.y, f.M, f.d + 1, 0, 0, 0); continue; }
+      if (!c.hour.vals.has(f.H)) { t = mk(f.y, f.M, f.d, f.H + 1, 0, 0); continue; }
+      if (!c.min.vals.has(f.m)) { t = mk(f.y, f.M, f.d, f.H, f.m + 1, 0); continue; }
+      if (!c.sec.vals.has(f.s)) { t = mk(f.y, f.M, f.d, f.H, f.m, f.s + 1); continue; }
+      out.push(t); t += 1000;
+    }
+    return out;
+  }
+  function descTime(src, unit, unitStep) {
+    if (src === '*' || src === '?') return null;
+    return src.split(',').map(it => {
+      const [r, st] = it.split('/');
+      if (st) return r === '*' || r === '0' ? `${st}${unitStep}마다` : r.includes('-') ? `${r.replace('-', '~')}${unit} 사이 ${st}${unitStep}마다` : `${r}${unit}부터 ${st}${unitStep}마다`;
+      return r.includes('-') ? `${r.replace('-', '~')}${unit}` : `${r}${unit}`;
+    }).join(', ');
+  }
+  function describe(c) {
+    const p = c.parts; const out = [];
+    const single = x => /^\d+$/.test(x);
+    // 날짜 부분
+    if (p[4] !== '*' && p[4] !== '?') out.push(p[4].split(',').map(x => x.toUpperCase().replace(/[A-Z]{3}/g, m => MON[m] || m).replace('-', '~')).join(', ').replace(/\/(\d+)/, ' $1개월마다') + '월');
+    const domS = p[3], dowS = p[5];
+    if (domS !== '*' && domS !== '?') out.push(/^L$/i.test(domS) ? '매월 마지막 날' : /^L-(\d+)$/i.test(domS) ? `매월 말일 ${domS.slice(2)}일 전` : /^LW$/i.test(domS) ? '매월 마지막 평일' : /W$/i.test(domS) ? `매월 ${domS.slice(0, -1)}일에 가장 가까운 평일` : `매월 ${domS.replace(/-/g, '~').replace(/\/(\d+)/, '일부터 $1일마다').replace(/,/g, ', ')}${/\//.test(domS) ? '' : '일'}`);
+    if (dowS !== '*' && dowS !== '?') {
+      const nm = v => { const u = v.toUpperCase(); if (u in DOW) return DOW_KO[DOW[u]]; const n = +v; return DOW_KO[c.dialect === 'quartz' ? (n - 1) % 7 : n % 7]; };
+      const d = dowS.split(',').map(it => { let m; if ((m = /^(\w+)#(\d)$/.exec(it))) return `${m[2]}번째 ${nm(m[1])}요일`; if ((m = /^(\w+)L$/i.exec(it))) return `마지막 ${nm(m[1])}요일`; if (it.includes('-')) { const [a, b] = it.split('-'); return `${nm(a)}~${nm(b)}요일`; } return nm(it) + '요일'; }).join(', ');
+      out.push(`매주 ${d}`);
+    }
+    if (c.dialect === 'linux' && domS !== '*' && dowS !== '*') out.push('(일·요일 중 하나라도 맞으면)');
+    if (!out.length) out.push('매일');
+    // 시간 부분
+    const [s, mi, hr] = [p[0], p[1], p[2]];
+    if (single(s) && single(mi) && single(hr)) out.push(`${pad(+hr)}:${pad(+mi)}${c.dialect === 'linux' ? '' : ':' + pad(+s)}`);
+    else {
+      const linux = c.dialect === 'linux';
+      const secTxt = linux || s === '0' ? '' : descTime(s, '초', '초') || '매초';
+      const minTxt = mi === '*' ? (linux || s === '0' || (single(s) && s !== '0') ? '매분' : '') : mi === '0' ? '정각' : descTime(mi, '분', '분');
+      const hrTxt = hr === '*' ? (mi === '0' ? '매시' : '') : descTime(hr, '시', '시간');
+      out.push([hrTxt, minTxt, secTxt].filter(Boolean).join(' '));
+    }
+    if (c.year) out.push(`(${p[6]}년)`);
+    return out.join(' ').replace(/\s+/g, ' ') + ' 실행';
+  }
+  return { parse, next, describe };
+})();
+DU.Cron = Cron;
+
+defineTool({
+  id: 'cron', group: 'time', abbr: 'CRN', name: 'Cron 표현식',
+  desc: 'Linux · Spring @Scheduled · Quartz cron 해석 · 다음 실행 시각 · 한국어 설명',
+  keywords: 'cron crontab scheduled spring quartz schedule 스케줄 배치 크론 실행 시각 주기',
+  inputs: { input: '표현식' },
+  help: `<table class="tbl"><tr><th>방언</th><th>필드</th><th>요일 숫자</th></tr>
+    <tr><td>Linux crontab</td><td class="mono">분 시 일 월 요일</td><td>0~7 (0·7 = 일요일)</td></tr>
+    <tr><td>Spring <code>@Scheduled(cron=…)</code></td><td class="mono">초 분 시 일 월 요일</td><td>0~7 (0·7 = 일요일), MON~SUN</td></tr>
+    <tr><td>Quartz</td><td class="mono">초 분 시 일 월 요일 [연도]</td><td><b>1~7 (1 = 일요일)</b>, 일/요일 중 하나는 <code>?</code></td></tr></table>
+    <br>특수 문자: <code>*</code> 모든 값, <code>,</code> 목록, <code>-</code> 범위, <code>/</code> 간격, <code>L</code> 마지막, <code>W</code> 가장 가까운 평일, <code>#</code> n번째 요일 (예: <code>MON#2</code>). Linux에서 일과 요일을 둘 다 지정하면 <b>둘 중 하나</b>만 맞아도 실행됩니다.`,
+  init(root) {
+    const expr = bindPersist(h('<input class="inp mono" style="flex:1;min-width:240px;font-size:15px;height:36px" placeholder="0 0/5 9-18 * * MON-FRI" value="0 0/5 9-18 * * MON-FRI">'), 'cron:e');
+    const dia = sel([['auto', '방언 자동 (필드 수)'], ['linux', 'Linux crontab (5)'], ['spring', 'Spring (6)'], ['quartz', 'Quartz (6~7)']], 'cron:d', 'auto');
+    const tz = sel([['kst', 'KST'], ['utc', 'UTC'], ['local', '브라우저 로컬']], 'cron:tz', 'kst');
+    const cnt = sel([['10', '10회'], ['20', '20회'], ['50', '50회']], 'cron:n', '10');
+    const bar = h('<div class="toolbar"></div>'); bar.append(expr, btn('해석', run, 'primary', 'Ctrl+Enter'), dia, tz, cnt);
+    const presets = h('<div class="toolbar"></div>');
+    const P = [['0 * * * * *', '매분'], ['0 */5 * * * *', '5분마다'], ['0 0 * * * *', '매시 정각'], ['0 0 0 * * *', '매일 자정'], ['0 0 9 * * *', '매일 09시'], ['0 30 9 * * MON-FRI', '평일 09:30'], ['0 0 9-18 * * MON-FRI', '평일 업무시간 매시'],
+      ['0 0 2 * * SUN', '매주 일요일 02시'], ['0 0 0 1 * *', '매월 1일'], ['0 0 23 L * ?', '매월 말일 23시 (Quartz)'], ['0 0 10 ? * MON#1', '첫째 월요일 (Quartz)'], ['*/30 * * * *', '30분마다 (Linux)'], ['0 3 * * 1-5', '평일 03시 (Linux)']];
+    presets.appendChild(h('<span class="lbl">예제</span>'));
+    P.forEach(([e, l]) => presets.appendChild(btn(l, () => { expr.value = e; persistSet('cron:e', e); dia.value = 'auto'; run(); }, 'xs')));
+    const res = h('<div style="display:flex;flex-direction:column;gap:10px"></div>');
+    root.append(bar, presets, res);
+    function run() {
+      res.innerHTML = '';
+      if (!expr.value.trim()) { res.appendChild(h('<div class="empty-state">cron 표현식을 입력하세요</div>')); return; }
+      let c;
+      try { c = Cron.parse(expr.value, dia.value); } catch (e) { res.appendChild(h(`<div class="note err">✕ ${esc(e.message)}</div>`)); return; }
+      const names = c.dialect === 'linux' ? ['분', '시', '일', '월', '요일'] : ['초', '분', '시', '일', '월', '요일', '연도'];
+      const shown = c.dialect === 'linux' ? c.parts.slice(1) : c.parts;
+      res.appendChild(h(`<div class="card card-pad"><div class="row" style="gap:6px;margin-bottom:8px"><span class="badge info">${{ linux: 'Linux crontab', spring: 'Spring', quartz: 'Quartz' }[c.dialect]}</span><b style="font-size:15px">${esc(Cron.describe(c))}</b></div>
+        <div class="row" style="gap:6px">${shown.map((p, i) => `<div style="text-align:center;border:1px solid var(--border);border-radius:6px;padding:4px 10px;min-width:56px"><div class="mono" style="font-size:15px;font-weight:700">${esc(p)}</div><div class="faint" style="font-size:11px">${names[i]}</div></div>`).join('')}</div></div>`));
+      const runs = Cron.next(c, Date.now(), +cnt.value, tz.value);
+      if (!runs.length) { res.appendChild(h('<div class="note warn">앞으로 50년 안에 실행되는 시각이 없습니다 (예: 2월 30일)</div>')); return; }
+      const tw = h('<div class="tbl-wrap"></div>');
+      tw.innerHTML = `<table class="tbl"><thead><tr><th>#</th><th>다음 실행 (${tz.value.toUpperCase()})</th><th>요일</th><th>남은 시간</th><th>간격</th></tr></thead><tbody>${runs.map((t, i) => `<tr><td class="faint">${i + 1}</td><td class="mono">${DateX.format(t, 'yyyy-MM-dd HH:mm:ss', tz.value)}</td><td>${DateX.format(t, 'E', tz.value)}</td><td class="dim">${relTime(t)}</td><td class="dim mono">${i ? DateX.human(t - runs[i - 1]) : ''}</td></tr>`).join('')}</tbody></table>`;
+      res.appendChild(tw);
+      const java = c.dialect === 'linux' ? `0 ${c.parts.slice(1).join(' ')}` : c.parts.slice(0, 6).join(' ');
+      const sb = h(`<div class="row"><span class="dim">Spring 형식</span><code class="mono">@Scheduled(cron = "${esc(java)}"${tz.value === 'kst' ? ', zone = "Asia/Seoul"' : ''})</code></div>`);
+      sb.appendChild(copyBtn(`@Scheduled(cron = "${java}"${tz.value === 'kst' ? ', zone = "Asia/Seoul"' : ''})`));
+      if (c.dialect !== 'quartz') res.appendChild(sb);
+    }
+    on(expr, 'input', debounce(run, 300)); on(expr, 'keydown', e => { if (e.key === 'Enter') run(); });
+    [dia, tz, cnt].forEach(x => on(x, 'change', run));
+    run();
+    return { run, receive(slot, t) { expr.value = t.trim(); run(); } };
   },
 });
 
