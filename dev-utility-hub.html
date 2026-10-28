@@ -208,7 +208,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 .toast { background: #1f2430; color: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: var(--shadow); font-size: 12.5px; animation: toastIn .18s ease-out; max-width: 80vw; }
 .toast.err { background: #b32d2d; } .toast.ok { background: #1b7a44; } .toast.warn { background: #9a5c00; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(6px); } }
-.menu { position: fixed; z-index: 900; min-width: 180px; max-width: 320px; max-height: 60vh; overflow: auto; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; }
+.menu { position: fixed; z-index: 900; min-width: 180px; max-width: min(460px, 92vw); max-height: 60vh; overflow: auto; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; }
 .menu-item { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 6px 10px; border-radius: 5px; cursor: pointer; color: var(--text); white-space: nowrap; }
 .menu-item:hover, .menu-item.on { background: var(--bg-hover); }
 .menu-item .abbr { width: 28px; }
@@ -349,6 +349,40 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
 .findings .f { display: flex; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); align-items: baseline; font-size: 12.5px; }
 .findings .f:last-child { border-bottom: 0; }
 
+/* ---------- 작업 탭 ---------- */
+#tabbar { display: flex; gap: 2px; padding: 5px 10px 0; border-bottom: 1px solid var(--border); background: var(--bg-sunk); overflow-x: auto; overflow-y: hidden; min-height: 36px; align-items: flex-end; scrollbar-width: thin; flex: none; }
+.wtab { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 10px; border: 1px solid transparent; border-bottom: 0; border-radius: 7px 7px 0 0; background: transparent; cursor: pointer; white-space: nowrap; color: var(--text-dim); font-size: 12.5px; max-width: 210px; flex: none; user-select: none; }
+.wtab:hover { background: var(--bg-hover); }
+.wtab.on { background: var(--bg-elev); border-color: var(--border); color: var(--text); font-weight: 600; position: relative; top: 1px; }
+.wtab .abbr { width: 26px; height: 18px; font-size: 9px; }
+.wt-name { overflow: hidden; text-overflow: ellipsis; }
+.wt-x { border: 0; background: none; color: var(--text-faint); cursor: pointer; border-radius: 4px; width: 18px; height: 18px; font-size: 10px; padding: 0; flex: none; }
+.wt-x:hover { background: var(--bg-hover); color: var(--err); }
+.wt-plus { padding: 0 10px; font-size: 12px; }
+.smart-btn { margin-top: -2px; color: var(--accent); }
+.menu-item > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+/* ---------- Smart Paste / 레시피 ---------- */
+.sp-res { display: flex; flex-direction: column; gap: 8px; }
+.sp-item { border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; background: var(--bg-elev); display: flex; flex-direction: column; gap: 6px; }
+.sp-item.top { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.sp-item .sp-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sp-item .sp-d { color: var(--text-dim); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 4.6em; overflow: hidden; font-family: var(--mono); }
+.sp-score { font: 600 11px var(--mono); color: var(--text-faint); }
+.rc-wrap { display: grid; grid-template-columns: 230px minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; flex: 1; min-height: 420px; }
+.rc-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; gap: 8px; }
+.rc-ops { flex: 1; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); padding: 4px; }
+.rc-op { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; color: var(--text); font-size: 12.5px; }
+.rc-op:hover { background: var(--accent-weak); color: var(--accent); }
+.rc-steps { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+.rc-step { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elev); }
+.rc-step.sel { border-color: var(--accent); }
+.rc-step.err { border-color: var(--err); }
+.rc-step.off { opacity: .55; }
+.rc-step .rc-h { display: flex; align-items: center; gap: 6px; padding: 5px 6px 5px 10px; border-bottom: 1px solid var(--border); background: var(--bg-sunk); border-radius: 8px 8px 0 0; cursor: pointer; }
+.rc-step .rc-b { padding: 6px 10px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12px; }
+.rc-step .rc-s { font-size: 11px; color: var(--text-faint); padding: 0 10px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc-step .rc-s.err { color: var(--err); white-space: normal; }
+@media (max-width: 1100px) { .rc-wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .rc-wrap > .rc-col:first-child { grid-column: 1 / -1; max-height: 220px; } }
 @media (max-width: 960px) {
   .split, .http-cols, .grid3 { grid-template-columns: minmax(0, 1fr); }
   .split > .pane { min-height: 260px; }
@@ -375,6 +409,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
       <div><div class="brand-name">Dev Utility Hub</div><div class="brand-sub"><span class="dot"></span>오프라인 · 설치 불필요</div></div>
     </div>
     <button class="search-btn" id="openPalette" type="button"><span>⌕ 기능 검색…</span><span class="sp"></span><kbd>Ctrl K</kbd></button>
+    <button class="search-btn smart-btn" id="openSmart" type="button" title="붙여넣은 내용을 자동 감지해 알맞은 도구를 추천합니다"><span>⚡ Smart Paste</span><span class="sp"></span><kbd>Ctrl V</kbd></button>
     <nav id="nav"></nav>
     <div class="side-foot">
       <button class="btn sm ghost" id="themeBtn" type="button" title="테마 전환">◐ 테마</button>
@@ -383,6 +418,7 @@ mark, .mk { background: var(--mark); color: inherit; border-radius: 2px; }
     </div>
   </aside>
   <main id="main">
+    <div id="tabbar" role="tablist"></div>
     <header id="topbar">
       <button class="btn icon ghost" id="menuBtn" type="button" title="메뉴">☰</button>
       <h1 id="toolTitle">홈</h1>
@@ -511,6 +547,8 @@ const store = {
 const settings = Object.assign({ theme: 'auto', autosave: true, indent: '2' }, store.get('settings', {}));
 function saveSettings() { store.set('settings', settings); }
 const MAX_PERSIST = 300 * 1024;
+/** 작업 탭(같은 도구의 2번째 이후 인스턴스) 초기화 중이면 저장 키에 '#n'을 붙임 */
+let INIT_NS = '', INIT_KEYS = null;
 /** 입력값 자동 저장 (설정에서 끌 수 있음) */
 function persistGet(key, def) { return settings.autosave ? store.get('in:' + key, def) : def; }
 function persistSet(key, val) {
@@ -520,6 +558,7 @@ function persistSet(key, val) {
 }
 /** input/select/checkbox 값 유지 */
 function bindPersist(el, key, onLoad) {
+  key += INIT_NS; if (INIT_KEYS) INIT_KEYS.push('in:' + key);
   const isChk = el.type === 'checkbox';
   const v = persistGet(key, undefined);
   if (v !== undefined) { if (isChk) el.checked = !!v; else el.value = v; if (onLoad) onLoad(); }
@@ -604,6 +643,7 @@ function openModal({ title, body, wide, foot, onClose }) {
 
 /* ---------- 구문 강조 ---------- */
 const HL_LIMIT = 600 * 1024;
+const PREVIEW_MAX = 3 * 1048576, PREVIEW_HEAD = 1048576;
 const HL = {
   json(s) {
     const re = /("(?:[^"\\\n]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false)\b|\b(null)\b|([{}[\],])/g;
@@ -697,14 +737,27 @@ const SQL_KEYWORDS = new Set(('SELECT FROM WHERE AND OR NOT IN IS NULL LIKE BETW
  */
 function Pane(o) {
   o = Object.assign({ title: '', placeholder: '', readonly: false, lang: null, wrap: false, persist: null, actions: null, filename: 'output.txt', onInput: null, lines: true }, o);
-  const acts = o.actions || (o.readonly ? ['wrap', 'copy', 'download', 'send'] : ['open', 'wrap', 'copy', 'clear']);
+  if (o.persist) { o.persist += INIT_NS; if (INIT_KEYS) INIT_KEYS.push('in:pane:' + o.persist, 'snap:' + o.persist); }
+  const acts = o.actions || (o.readonly ? ['wrap', 'copy', 'download', 'send'] : ['open', 'wrap', 'copy', 'clear', 'hist']);
   const el = h(`<div class="pane">
     <div class="pane-head"><span class="pane-title"></span><span class="pane-extra" data-ref="extra"></span><span class="sp"></span><span class="pane-acts" data-ref="acts"></span></div>
     <div class="pane-body" data-ref="body"></div>
     <div class="pane-foot"><span data-ref="stat"></span><span class="sp"></span><span class="msg" data-ref="msg"></span></div></div>`);
   const r = refs(el);
   $('.pane-title', el).textContent = o.title;
-  let text = '', wrap = !!o.wrap, lang = o.lang, ta = null, pre = null, gut, gutIn, mark = null, lastLines = -1, inputCb = o.onInput ? [o.onInput] : [];
+  let text = '', shown = '', wrap = !!o.wrap, lang = o.lang, ta = null, pre = null, gut, gutIn, mark = null, lastLines = -1, inputCb = o.onInput ? [o.onInput] : [];
+  /* 입력 기록 (스냅샷): 편집 후 잠시 멈추거나, 덮어쓰기·지우기 직전에 자동 저장 */
+  const snapKey = o.persist ? 'snap:' + o.persist : null;
+  let snaps = snapKey && settings.autosave ? store.get(snapKey, []) : [];
+  function snapshot(why) {
+    if (!ta) return false;
+    const cur = ta.value; if (!cur.trim() || cur.length > 2e6) return false;
+    if (snaps[0] && snaps[0].text === cur) return false;
+    snaps.unshift({ t: Date.now(), why, text: cur }); if (snaps.length > 12) snaps.length = 12;
+    if (snapKey && settings.autosave) { if (!store.set(snapKey, snaps.filter(x => x.text.length <= 60000).slice(0, 8))) store.del(snapKey); }
+    return true;
+  }
+  const idleSnap = debounce(() => snapshot('편집'), 6000);
   if (!o.readonly) {
     gut = h('<div class="gutter"><div class="gutter-inner">1</div></div>'); gutIn = gut.firstChild;
     ta = h('<textarea class="code" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>');
@@ -712,7 +765,7 @@ function Pane(o) {
     r.body.append(gut, ta);
     on(ta, 'scroll', () => { gutIn.style.transform = `translateY(${-ta.scrollTop}px)`; if (mark) mark.style.transform = `translateY(${-ta.scrollTop}px)`; });
     const persistSave = o.persist ? debounce(() => persistSet('pane:' + o.persist, ta.value), 500) : null;
-    on(ta, 'input', () => { text = ta.value; refresh(); clearMark(); if (persistSave) persistSave(); inputCb.forEach(f => f(text)); });
+    on(ta, 'input', () => { text = ta.value; refresh(); clearMark(); if (persistSave) persistSave(); idleSnap(); inputCb.forEach(f => f(text)); });
     on(ta, 'keydown', e => {
       if (e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
@@ -738,7 +791,25 @@ function Pane(o) {
     clear: ['지우기', '내용 지우기', () => { api.set(''); inputCb.forEach(f => f('')); if (ta) ta.focus(); }],
     download: ['저장', '파일로 저장', () => { if (!api.get()) return toast('저장할 내용이 없습니다', 'warn'); download(o.filename, api.get()); }],
     send: ['보내기 ▾', '다른 도구로 보내기', ev => sendMenu(ev.currentTarget, () => api.get(), o.sendFrom)],
+    hist: ['기록 ▾', '입력 기록 — 이전 내용 복원 · 현재 내용과 비교', ev => histMenu(ev.currentTarget)],
   };
+  const tstr = t => { const d = new Date(t); return `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+  function histMenu(anchor) {
+    const items = [{ header: `입력 기록 ${snaps.length}개 (편집 멈춤 · 덮어쓰기 · 지우기 직전 자동 저장)` }];
+    snaps.forEach(x => items.push({ label: `${tstr(x.t)} · ${x.why} · ${fmtBytes(x.text.length)} · ${x.text.replace(/\s+/g, ' ').slice(0, 40)}`, onClick: () => snapModal(x) }));
+    if (!snaps.length) items.push({ label: '기록 없음', onClick: () => {} });
+    items.push({ sep: true }, { label: '지금 내용을 기록에 저장', onClick: () => toast(snapshot('수동') ? '기록에 저장했습니다' : '저장할 새 내용이 없습니다') });
+    if (snaps.length) items.push({ label: '기록 모두 지우기', onClick: () => { snaps = []; if (snapKey) store.del(snapKey); toast('기록을 지웠습니다'); } });
+    openMenu(anchor, items);
+  }
+  function snapModal(x) {
+    const pre2 = h('<pre class="code" style="max-height:52vh;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:8px;white-space:pre-wrap;word-break:break-all"></pre>');
+    pre2.textContent = x.text.length > 300000 ? x.text.slice(0, 300000) + '\n… (일부만 표시)' : x.text;
+    const foot = h('<div class="row"></div>');
+    const m = openModal({ title: `입력 기록 · ${tstr(x.t)} (${x.why})`, body: pre2, foot, wide: true });
+    foot.append(btn('현재 내용과 비교', () => { m.close(); compareTexts(x.text, api.get()); }),
+      btn('이 내용으로 복원', () => { api.set(x.text); inputCb.forEach(f => f(x.text)); if (o.persist) persistSet('pane:' + o.persist, x.text); m.close(); toast('복원했습니다 (복원 전 내용은 기록에 남아 있습니다)', 'ok'); }, 'primary'));
+  }
   acts.forEach(a => {
     const d = btns[a]; if (!d) return;
     const b = h(`<button class="btn xs ghost" type="button"></button>`); b.textContent = d[0]; b.title = d[1];
@@ -763,32 +834,38 @@ function Pane(o) {
     if (b) b.style.color = w ? 'var(--accent)' : '';
   }
   function refresh() {
-    const n = countLines(text) || 1;
+    const n = countLines(ta ? text : shown) || 1;
     if (o.lines && n !== lastLines) {
       lastLines = n; let s = ''; for (let i = 1; i <= n; i++) s += i + '\n';
       gutIn.textContent = s;
     }
-    r.stat.textContent = text ? `${fmtNum(text.length)}자 · ${fmtNum(n)}줄` : '';
+    const total = ta || shown === text ? n : countLines(text);
+    r.stat.textContent = text ? `${fmtNum(text.length)}자 · ${fmtNum(total)}줄${shown !== text && !ta ? ` · 앞 ${fmtBytes(shown.length)}만 표시 (복사·저장은 전체)` : ''}` : '';
   }
   function clearMark() { if (mark) { mark.remove(); mark = null; } }
   const api = {
     el, ta, pre, extra: r.extra, foot: r.msg,
     get: () => (ta ? ta.value : text),
     set(t, opt = {}) {
-      text = t == null ? '' : String(t);
+      const nt = t == null ? '' : String(t);
+      if (ta && opt.snap !== false && ta.value && ta.value !== nt) snapshot(nt ? '덮어쓰기 전' : '지우기 전');
+      text = nt;
       if (opt.lang !== undefined) lang = opt.lang;
       if (ta) { ta.value = text; ta.scrollTop = 0; }
       else {
         delete pre.dataset.empty;
+        // 대용량 출력은 앞부분만 렌더링 (전체 텍스트는 get()/복사/저장으로 사용)
+        shown = text.length > PREVIEW_MAX ? text.slice(0, PREVIEW_HEAD) : text;
         if (!text && o.placeholder) { pre.innerHTML = `<span class="t-dim">${esc(o.placeholder)}</span>`; }
-        else if (lang && HL[lang] && text.length <= HL_LIMIT) pre.innerHTML = HL[lang](text);
-        else pre.textContent = text;
+        else if (lang && HL[lang] && shown.length <= HL_LIMIT) pre.innerHTML = HL[lang](shown);
+        else pre.textContent = shown;
         pre.parentNode.scrollTop = 0;
       }
       clearMark(); refresh();
       return api;
     },
-    setHTML(html, raw) { text = raw; pre.innerHTML = html; clearMark(); refresh(); return api; },
+    setHTML(html, raw) { text = shown = raw; pre.innerHTML = html; clearMark(); refresh(); return api; },
+    snapshot,
     setTitle(t) { $('.pane-title', el).textContent = t; return api; },
     status(msg, type = 'info', html = false) {
       r.msg.className = 'msg msg-' + type;
@@ -901,14 +978,20 @@ function Seg(items, value, onChange) {
 
 /* ---------- 도구 레지스트리 / 라우팅 ---------- */
 const GROUPS = [
+  { id: 'auto', name: '자동화' },
   { id: 'json', name: 'JSON' },
+  { id: 'data', name: '데이터 · 문서' },
   { id: 'http', name: 'HTTP · API' },
   { id: 'encode', name: '인코딩 · 보안' },
+  { id: 'file', name: '파일 · 바이너리' },
   { id: 'format', name: '포매터' },
   { id: 'text', name: '텍스트' },
   { id: 'java', name: 'Java · 서버' },
   { id: 'time', name: '시간 · 스케줄' },
+  { id: 'misc', name: '기타 유틸' },
 ];
+/** 모듈별 추가 CSS (테마 토큰 var(--...) 사용) */
+function injectCss(css) { const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }
 const TOOLS = []; const TOOL_MAP = {};
 let currentTool = null;
 function defineTool(t) { t.keywords = t.keywords || ''; TOOLS.push(t); TOOL_MAP[t.id] = t; }
@@ -931,8 +1014,14 @@ function sendMenu(anchor, getText, fromId) {
 function sendTo(id, slot, text) {
   const t = TOOL_MAP[id]; if (!t) return;
   openTool(id);
-  if (t.inst && t.inst.receive) t.inst.receive(slot, text);
+  if (t.inst && t.inst.receive) t.inst.receive(slot || Object.keys(t.inputs || { input: 1 })[0], text);
   toast(`${t.name}(으)로 보냈습니다`, 'ok', 1400);
+}
+/** 두 텍스트 비교: 둘 다 JSON이면 JSON 비교, 아니면 텍스트 비교 */
+function compareTexts(a, b) {
+  const isJ = s => { try { JSONX.smartParse(s); return true; } catch (e) { return false; } };
+  const tool = isJ(a) && isJ(b) ? 'json-diff' : 'text-diff';
+  sendTo(tool, 'left', a); toolInst(tool).receive('right', b);
 }
 DU.sendTo = sendTo;
 
@@ -951,40 +1040,108 @@ function renderNav() {
   });
 }
 function setHeader(title, desc) { $('#toolTitle').textContent = title; $('#toolDesc').textContent = desc || ''; document.title = title === '홈' ? 'Dev Utility Hub' : `${title} · Dev Utility Hub`; }
-function openTool(id) {
+/* ---------- 작업 탭: 도구 인스턴스 (같은 도구를 여러 탭으로) ---------- */
+let currentRec = null;
+let OPEN_TABS = (store.get('tabs', []) || []).filter(x => x && TOOL_MAP && typeof x.n === 'number');
+function saveTabs() { store.set('tabs', OPEN_TABS); }
+function createInst(t, n) {
+  t.insts = t.insts || [];
+  const root = h(`<div class="tool" data-tool="${t.id}" data-inst="${n}"></div>`);
+  if (t.fill) root.classList.add('fill');
+  $('#view').appendChild(root);
+  const rec = { n, root, inst: {}, keys: [] };
+  INIT_NS = n > 1 ? '#' + n : ''; INIT_KEYS = rec.keys;
+  try { rec.inst = t.init(root) || {}; }
+  catch (e) { console.error(e); root.innerHTML = `<div class="note err">도구 초기화 오류: ${esc(e.message)}</div>`; }
+  finally { INIT_NS = ''; INIT_KEYS = null; }
+  t.insts.push(rec);
+  return rec;
+}
+/** 도구의 활성 인스턴스 (없으면 생성) */
+function toolInst(id) {
+  const t = TOOL_MAP[id]; if (!t) return null;
+  if (!t.insts || !t.insts.length) { const rec = createInst(t, 1); rec.root.classList.add('hidden'); t.curN = 1; t.inst = rec.inst; t.root = rec.root; }
+  return (t.insts.find(r => r.n === t.curN) || t.insts[0]).inst;
+}
+DU.toolInst = toolInst;
+function openTool(id, opt = {}) {
   const t = TOOL_MAP[id];
   if (!t) { showHome(); return; }
-  if (!t.root) {
-    t.root = h(`<div class="tool" data-tool="${t.id}"></div>`);
-    if (t.fill) t.root.classList.add('fill');
-    $('#view').appendChild(t.root);
-    try { t.inst = t.init(t.root) || {}; }
-    catch (e) { console.error(e); t.root.innerHTML = `<div class="note err">도구 초기화 오류: ${esc(e.message)}</div>`; t.inst = {}; }
+  t.insts = t.insts || [];
+  let n = opt.n;
+  if (opt.newInst) n = Math.max(0, ...OPEN_TABS.filter(x => x.id === id).map(x => x.n), ...t.insts.map(r => r.n)) + 1;
+  if (!n) n = t.curN || (OPEN_TABS.find(x => x.id === id) || {}).n || 1;
+  const rec = t.insts.find(r => r.n === n) || createInst(t, n);
+  t.curN = n; t.root = rec.root; t.inst = rec.inst;
+  if (!OPEN_TABS.some(x => x.id === id && x.n === n)) {
+    OPEN_TABS.push({ id, n });
+    while (OPEN_TABS.length > 24) { const old = OPEN_TABS.find(x => !(x.id === id && x.n === n)); closeTab(old.id, old.n, true); }
+    saveTabs();
   }
-  $$('#view > *').forEach(n => n.classList.toggle('hidden', n !== t.root));
-  $$('.nav-item').forEach(n => n.classList.toggle('on', n.dataset.id === id));
-  setHeader(t.name, t.desc);
+  $$('#view > *').forEach(el => el.classList.toggle('hidden', el !== rec.root));
+  $$('.nav-item').forEach(el => el.classList.toggle('on', el.dataset.id === id));
+  setHeader(t.name + (n > 1 ? ` (${n})` : ''), t.desc);
   const acts = $('#toolActions'); acts.innerHTML = '';
+  const nb = h('<button class="btn sm ghost" type="button" title="같은 도구를 새 작업 탭으로 하나 더 엽니다">＋ 새 탭</button>');
+  on(nb, 'click', () => openTool(id, { newInst: true })); acts.appendChild(nb);
   if (t.help) {
     const hb = h('<button class="btn sm ghost" type="button">? 도움말</button>');
     on(hb, 'click', () => openModal({ title: t.name + ' 도움말', body: `<div style="line-height:1.7">${t.help}</div>` }));
     acts.appendChild(hb);
   }
-  currentTool = t;
-  if (location.hash !== '#/' + id) history.replaceState(null, '', '#/' + id);
-  const rec = store.get('recent', []).filter(x => x !== id); rec.unshift(id); store.set('recent', rec.slice(0, 8));
-  if (t.inst.onShow) t.inst.onShow();
+  currentTool = t; currentRec = rec;
+  const hash = '#/' + id + (n > 1 ? '/' + n : '');
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+  const rc = store.get('recent', []).filter(x => x !== id); rc.unshift(id); store.set('recent', rc.slice(0, 8));
+  renderTabs();
+  if (rec.inst.onShow) rec.inst.onShow();
 }
 DU.openTool = openTool;
+function closeTab(id, n, silent) {
+  const i = OPEN_TABS.findIndex(x => x.id === id && x.n === n); if (i < 0) return;
+  OPEN_TABS.splice(i, 1); saveTabs();
+  const t = TOOL_MAP[id];
+  if (t && t.insts) {
+    const r = t.insts.find(x => x.n === n);
+    if (r) {
+      if (r.inst.onClose) { try { r.inst.onClose(); } catch (e) { /* ignore */ } }
+      r.root.remove(); t.insts.splice(t.insts.indexOf(r), 1);
+      if (n > 1) r.keys.forEach(k => store.del(k)); // 추가 탭의 저장 입력은 탭과 함께 삭제
+    }
+    if (t.curN === n) { const f = t.insts[0]; t.curN = f && f.n; t.root = f && f.root; t.inst = f && f.inst; }
+  }
+  if (silent) return;
+  if (currentTool && currentTool.id === id && currentRec && currentRec.n === n) {
+    const next = OPEN_TABS[Math.min(i, OPEN_TABS.length - 1)];
+    if (next) openTool(next.id, { n: next.n }); else { history.replaceState(null, '', location.pathname + location.search); showHome(); }
+  } else renderTabs();
+}
+function renderTabs() {
+  const bar = $('#tabbar'); if (!bar) return;
+  bar.innerHTML = '';
+  const home = h(`<button class="wtab${!currentTool ? ' on' : ''}" type="button" title="홈"><span>⌂ 홈</span></button>`);
+  on(home, 'click', () => { location.hash = ''; showHome(); }); bar.appendChild(home);
+  OPEN_TABS.forEach(x => {
+    const t = TOOL_MAP[x.id]; if (!t) return;
+    const isOn = currentTool === t && currentRec && currentRec.n === x.n;
+    const b = h(`<div class="wtab${isOn ? ' on' : ''}" role="tab"><span class="abbr">${esc(t.abbr)}</span><span class="wt-name"></span><button class="wt-x" type="button" title="탭 닫기 (마우스 가운데 클릭)">✕</button></div>`);
+    $('.wt-name', b).textContent = t.name + (x.n > 1 ? ' ' + x.n : ''); b.title = t.name + (x.n > 1 ? ` (${x.n})` : '');
+    on(b, 'click', e => { if (e.target.closest('.wt-x')) { closeTab(x.id, x.n); return; } openTool(x.id, { n: x.n }); });
+    on(b, 'auxclick', e => { if (e.button === 1) { e.preventDefault(); closeTab(x.id, x.n); } });
+    bar.appendChild(b);
+  });
+  if (OPEN_TABS.length > 1) { const ca = h('<button class="wtab wt-plus" type="button" title="모든 작업 탭 닫기">모두 닫기</button>'); on(ca, 'click', () => { if (!confirm('열린 작업 탭을 모두 닫을까요? (첫 번째 탭의 입력은 유지됩니다)')) return; OPEN_TABS.slice().forEach(x => closeTab(x.id, x.n, true)); location.hash = ''; showHome(); }); bar.appendChild(ca); }
+  const act = $('.wtab.on', bar); if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
 function route() {
-  const id = (location.hash.match(/^#\/([\w-]+)/) || [])[1];
-  if (id && TOOL_MAP[id]) openTool(id); else showHome();
+  const m = location.hash.match(/^#\/([\w-]+)(?:\/(\d+))?/);
+  if (m && TOOL_MAP[m[1]]) openTool(m[1], { n: m[2] ? +m[2] : undefined }); else showHome();
 }
 
 /* ---------- 홈 ---------- */
 let homeEl = null;
 function showHome() {
-  currentTool = null;
+  currentTool = null; currentRec = null;
   if (!homeEl) { homeEl = h('<div class="home"></div>'); $('#view').appendChild(homeEl); }
   $$('#view > *').forEach(n => n.classList.toggle('hidden', n !== homeEl));
   $$('.nav-item').forEach(n => n.classList.remove('on'));
@@ -995,7 +1152,7 @@ function showHome() {
   const sc = window.isSecureContext;
   homeEl.innerHTML = `
     <div class="hero"><div><h1>Dev Utility Hub</h1>
-      <p>JSON · HTTP · 인코딩 · 포매터 · 로그 분석 도구 ${TOOLS.length}종. 데이터는 이 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</p></div>
+      <p>JSON · HTTP · 인코딩 · 포매터 · Java 분석 도구 ${TOOLS.length}종. 데이터는 이 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</p></div>
       <span class="sp"></span><button class="btn" data-pal type="button">⌕ 기능 검색 <kbd>Ctrl K</kbd></button></div>
     ${recent.length ? `<div class="gcard"><h3>최근 사용</h3><div class="grid3">${recent.map(id => toolCard(TOOL_MAP[id])).join('')}</div></div>` : ''}
     <div class="home-grid">${GROUPS.map(g => {
@@ -1009,9 +1166,11 @@ function showHome() {
       <span class="badge">저장 데이터 ${fmtBytes(store.size())}</span>
       <span class="badge">v${VERSION}</span>
     </div>
-    <p class="dim" style="margin:8px 0 0;font-size:12px">단축키: <kbd>Ctrl</kbd>+<kbd>K</kbd> 기능 검색 · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 현재 도구 실행 · 패널에 파일을 끌어다 놓으면 열립니다 (UTF-8 / EUC-KR 자동 감지).</p></div>`;
+    <p class="dim" style="margin:8px 0 0;font-size:12px">단축키: <kbd>Ctrl</kbd>+<kbd>K</kbd> 기능 검색 · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 현재 도구 실행 · 입력 칸 밖에서 <kbd>Ctrl</kbd>+<kbd>V</kbd> → Smart Paste · 화면 아무 곳에 파일을 끌어다 놓으면 알맞은 도구를 추천합니다.</p></div>`;
   $$('[data-tool-link]', homeEl).forEach(b => on(b, 'click', () => { location.hash = '#/' + b.dataset.toolLink; }));
   on($('[data-pal]', homeEl), 'click', openPalette);
+  if (typeof SmartPaste !== 'undefined') homeEl.insertBefore(SmartPaste.card(), homeEl.children[1]);
+  renderTabs();
 }
 function toolCard(t) {
   return `<button class="gtool" type="button" data-tool-link="${t.id}"><span class="abbr">${esc(t.abbr)}</span><span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span></button>`;
@@ -1031,7 +1190,8 @@ function openPalette() {
   const extra = [
     { id: '@home', name: '홈', abbr: '⌂', desc: '대시보드로 이동', run: () => { location.hash = ''; showHome(); } },
     { id: '@theme', name: '테마 전환 (라이트/다크)', abbr: '◐', desc: '화면 테마 변경', run: cycleTheme },
-    { id: '@settings', name: '설정', abbr: '⚙', desc: '자동 저장 · 저장 데이터 삭제', run: openSettings },
+    { id: '@settings', name: '설정', abbr: '⚙', desc: '자동 저장 · 저장 데이터 삭제 · 내보내기/가져오기', run: openSettings },
+    { id: '@smart', name: 'Smart Paste (입력 자동 감지)', abbr: '⚡', desc: '붙여넣은 내용을 분석해 알맞은 도구 추천', kw: 'smart paste auto detect 자동 감지 붙여넣기', run: () => SmartPaste.open('') },
   ];
   const all = TOOLS.map(t => ({ id: t.id, name: t.name, abbr: t.abbr, desc: t.desc, group: (GROUPS.find(g => g.id === t.group) || {}).name, kw: t.keywords, run: () => { location.hash = '#/' + t.id; } })).concat(extra);
   const box = h('<div class="modal palette"><input type="text" placeholder="도구 이름 · 키워드 검색 (예: base64, 이스케이프, cron, 로그)"><div class="palette-list"></div></div>');
@@ -1079,7 +1239,10 @@ function openSettings() {
     <div class="row"><span class="dim">저장된 데이터: <b data-ref="size"></b></span><span class="sp"></span>
       <button class="btn sm" data-ref="clrIn" type="button">입력 내용만 삭제</button>
       <button class="btn sm danger" data-ref="clrAll" type="button">모든 저장 데이터 삭제</button></div>
-    <div class="row"><button class="btn sm" data-ref="exp" type="button">설정 · 환경변수 · 저장된 요청 내보내기</button><button class="btn sm" data-ref="imp" type="button">가져오기</button></div>
+    <div class="card card-pad" style="display:flex;flex-direction:column;gap:8px"><b>내보내기 / 가져오기 (프로젝트 프리셋)</b>
+      <div class="row" data-ref="cats"></div>
+      <div class="row"><button class="btn sm" data-ref="exp" type="button">선택 항목 JSON 파일로 내보내기</button><button class="btn sm" data-ref="imp" type="button">파일에서 가져오기</button></div>
+      <div class="faint" style="font-size:12px">브라우저 저장소는 지워질 수 있으니 중요한 환경변수·요청 컬렉션·레시피는 파일로 백업하세요. 다른 PC로 옮길 때도 사용합니다.</div></div>
     <div class="faint" style="font-size:12px">Dev Utility Hub v${VERSION} · 외부 라이브러리 / CDN / 웹폰트를 사용하지 않는 단일 HTML 파일입니다.</div></div>`);
   const r = refs(body);
   r.auto.checked = settings.autosave; r.theme.value = settings.theme;
@@ -1089,9 +1252,15 @@ function openSettings() {
   on(r.theme, 'change', () => { settings.theme = r.theme.value; saveSettings(); applyTheme(); });
   on(r.clrIn, 'click', () => { store.clear('in:'); upd(); toast('입력 내용을 삭제했습니다 (새로고침 후 반영)'); });
   on(r.clrAll, 'click', () => { if (!confirm('환경변수, 저장된 요청, 히스토리를 포함한 모든 저장 데이터를 삭제할까요?')) return; store.clear(''); upd(); toast('모두 삭제했습니다'); });
+  const CATS = [['settings', '화면 설정', k => k === 'settings'], ['http', 'HTTP 환경변수 · 저장된 요청 · 히스토리', k => k.startsWith('http:') || k.startsWith('runner:')],
+    ['recipe', '레시피', k => k.startsWith('recipe:')], ['input', '도구 입력 내용 · 입력 기록', k => k.startsWith('in:') || k.startsWith('snap:')], ['etc', '기타 (최근 사용, 작업 탭)', k => k === 'recent' || k === 'tabs']];
+  const catChk = {};
+  CATS.forEach(([id, label]) => { const c = chk(label, null, id !== 'input'); catChk[id] = c; r.cats.appendChild(c.el); });
   on(r.exp, 'click', () => {
-    const data = {}; store.keys().filter(k => !k.startsWith('in:')).forEach(k => { data[k] = store.get(k); });
-    download('devhub-settings.json', JSON.stringify({ app: 'devhub', version: VERSION, data }, null, 2), 'application/json');
+    const data = {};
+    store.keys().filter(k => CATS.some(([id, , f]) => catChk[id].get() && f(k))).forEach(k => { data[k] = store.get(k); });
+    if (!Object.keys(data).length) { toast('내보낼 항목이 없습니다', 'warn'); return; }
+    download(`devhub-preset-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: 'devhub', version: VERSION, exported: new Date().toISOString(), data }, null, 2), 'application/json');
   });
   on(r.imp, 'click', async () => {
     const f = await pickFile('.json'); if (!f) return;
@@ -1136,6 +1305,202 @@ function kvList(rows) {
   return el;
 }
 DU.util = { esc, decodeBytes, encodeCp949, b64ToBytes, bytesToB64, hexToBytes, bytesToHex, lineColOf, countLines };
+
+/* =====================================================================
+ * 공용 라이브러리 (외부 의존성 없음)
+ *  - Inflate: DEFLATE(RFC 1951) 해제 + zlib(RFC 1950) / gzip(RFC 1952)
+ *  - Zip: ZIP/JAR/WAR 읽기 (파일 전체를 메모리에 올리지 않고 필요한 부분만 읽음, ZIP64 지원)
+ *  - compress: CompressionStream 기반 gzip/deflate 압축 (지원 브라우저)
+ * ===================================================================== */
+const Inflate = (() => {
+  function Tree() { this.table = new Uint16Array(16); this.trans = new Uint16Array(288); }
+  const sltree = new Tree(), sdtree = new Tree(), ltree = new Tree(), dtree = new Tree(), ctree = new Tree();
+  const lbits = new Uint8Array(30), lbase = new Uint16Array(30), dbits = new Uint8Array(30), dbase = new Uint16Array(30);
+  const clcidx = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+  const lengths = new Uint8Array(288 + 32), offs = new Uint16Array(16);
+  function bitsBase(bits, base, delta, first) {
+    for (let i = 0; i < delta; i++) bits[i] = 0;
+    for (let i = 0; i < 30 - delta; i++) bits[i + delta] = (i / delta) | 0;
+    for (let sum = first, i = 0; i < 30; i++) { base[i] = sum; sum += 1 << bits[i]; }
+  }
+  bitsBase(lbits, lbase, 4, 3); bitsBase(dbits, dbase, 2, 1);
+  lbits[28] = 0; lbase[28] = 258;
+  (function fixed() {
+    for (let i = 0; i < 7; i++) sltree.table[i] = 0;
+    sltree.table[7] = 24; sltree.table[8] = 152; sltree.table[9] = 112;
+    for (let i = 0; i < 24; i++) sltree.trans[i] = 256 + i;
+    for (let i = 0; i < 144; i++) sltree.trans[24 + i] = i;
+    for (let i = 0; i < 8; i++) sltree.trans[24 + 144 + i] = 280 + i;
+    for (let i = 0; i < 112; i++) sltree.trans[24 + 144 + 8 + i] = 144 + i;
+    for (let i = 0; i < 5; i++) sdtree.table[i] = 0;
+    sdtree.table[5] = 32;
+    for (let i = 0; i < 32; i++) sdtree.trans[i] = i;
+  })();
+  function build(t, lens, off, num) {
+    t.table.fill(0);
+    for (let i = 0; i < num; i++) t.table[lens[off + i]]++;
+    t.table[0] = 0;
+    for (let sum = 0, i = 0; i < 16; i++) { offs[i] = sum; sum += t.table[i]; }
+    for (let i = 0; i < num; i++) if (lens[off + i]) t.trans[offs[lens[off + i]]++] = i;
+  }
+  function raw(src, expected) {
+    const d = { s: src, i: 0, tag: 0, bc: 0, out: new Uint8Array(expected > 0 ? expected : Math.max(1024, src.length * 4)), n: 0 };
+    const grow = need => { if (d.n + need <= d.out.length) return; let len = d.out.length * 2; while (len < d.n + need) len *= 2; const o = new Uint8Array(len); o.set(d.out.subarray(0, d.n)); d.out = o; };
+    const fill = () => { while (d.bc < 24) { d.tag |= (d.s[d.i++] | 0) << d.bc; d.bc += 8; } };
+    const getbit = () => { if (!d.bc--) { d.tag = d.s[d.i++] | 0; d.bc = 7; } const b = d.tag & 1; d.tag >>>= 1; return b; };
+    const bits = (num, base) => { if (!num) return base; fill(); const v = d.tag & (0xffff >>> (16 - num)); d.tag >>>= num; d.bc -= num; return v + base; };
+    const sym = t => {
+      fill(); let sum = 0, cur = 0, len = 0, tag = d.tag;
+      do { cur = 2 * cur + (tag & 1); tag >>>= 1; ++len; sum += t.table[len]; cur -= t.table[len]; } while (cur >= 0 && len < 16);
+      d.tag = tag; d.bc -= len;
+      return t.trans[sum + cur];
+    };
+    function trees() {
+      const hlit = bits(5, 257), hdist = bits(5, 1), hclen = bits(4, 4);
+      for (let i = 0; i < 19; i++) lengths[i] = 0;
+      for (let i = 0; i < hclen; i++) lengths[clcidx[i]] = bits(3, 0);
+      build(ctree, lengths, 0, 19);
+      for (let num = 0; num < hlit + hdist;) {
+        const s = sym(ctree);
+        if (s === 16) { const prev = lengths[num - 1]; for (let k = bits(2, 3); k; --k) lengths[num++] = prev; }
+        else if (s === 17) for (let k = bits(3, 3); k; --k) lengths[num++] = 0;
+        else if (s === 18) for (let k = bits(7, 11); k; --k) lengths[num++] = 0;
+        else lengths[num++] = s;
+      }
+      build(ltree, lengths, 0, hlit); build(dtree, lengths, hlit, hdist);
+    }
+    function block(lt, dt) {
+      for (;;) {
+        let s = sym(lt);
+        if (s === 256) return;
+        if (s < 256) { grow(1); d.out[d.n++] = s; continue; }
+        s -= 257;
+        if (s > 28) throw new Error('DEFLATE 데이터 오류 (길이 코드)');
+        const len = bits(lbits[s], lbase[s]); const ds = sym(dt);
+        if (ds > 29) throw new Error('DEFLATE 데이터 오류 (거리 코드)');
+        const from = d.n - bits(dbits[ds], dbase[ds]);
+        if (from < 0) throw new Error('DEFLATE 데이터 오류 (잘못된 거리)');
+        grow(len); const o = d.out;
+        for (let k = 0; k < len; k++) o[d.n++] = o[from + k];
+      }
+    }
+    function stored() {
+      d.i -= d.bc >> 3; d.bc = 0; d.tag = 0; // 바이트 경계 정렬
+      const s = d.s, len = s[d.i] | (s[d.i + 1] << 8), inv = s[d.i + 2] | (s[d.i + 3] << 8);
+      if (len !== (~inv & 0xffff)) throw new Error('DEFLATE 데이터 오류 (저장 블록 길이)');
+      d.i += 4; grow(len);
+      if (d.i + len > s.length) throw new Error('데이터가 중간에 잘렸습니다');
+      d.out.set(s.subarray(d.i, d.i + len), d.n); d.n += len; d.i += len;
+    }
+    let final;
+    do {
+      final = getbit();
+      const type = bits(2, 0);
+      if (type === 0) stored(); else if (type === 1) block(sltree, sdtree); else if (type === 2) { trees(); block(ltree, dtree); }
+      else throw new Error('DEFLATE 데이터 오류 (블록 형식 3)');
+      if (d.i > src.length + 4) throw new Error('데이터가 중간에 잘렸거나 DEFLATE 형식이 아닙니다');
+    } while (!final);
+    return { data: d.out.subarray(0, d.n), used: d.i - (d.bc >> 3) };
+  }
+  function gunzip(b) {
+    const parts = []; let p = 0;
+    while (p + 18 <= b.length && b[p] === 0x1f && b[p + 1] === 0x8b) {
+      if (b[p + 2] !== 8) throw new Error('지원하지 않는 gzip 압축 방식');
+      const fl = b[p + 3]; let i = p + 10;
+      if (fl & 4) i += 2 + (b[i] | (b[i + 1] << 8));
+      if (fl & 8) { while (b[i]) i++; i++; }
+      if (fl & 16) { while (b[i]) i++; i++; }
+      if (fl & 2) i += 2;
+      const r = raw(b.subarray(i));
+      parts.push(r.data); p = i + r.used + 8;
+    }
+    if (!parts.length) throw new Error('gzip 형식이 아닙니다 (1F 8B로 시작해야 함)');
+    if (parts.length === 1) return parts[0];
+    const out = new Uint8Array(parts.reduce((a, x) => a + x.length, 0)); let o = 0; parts.forEach(x => { out.set(x, o); o += x.length; }); return out;
+  }
+  function zlib(b) {
+    if ((b[0] & 0x0f) !== 8 || ((b[0] << 8) | b[1]) % 31) throw new Error('zlib 형식이 아닙니다');
+    return raw(b.subarray(b[1] & 0x20 ? 6 : 2)).data;
+  }
+  function kind(b) { if (b[0] === 0x1f && b[1] === 0x8b) return 'gzip'; if (b.length > 2 && (b[0] & 0x0f) === 8 && (b[0] >> 4) <= 7 && !(((b[0] << 8) | b[1]) % 31)) return 'zlib'; return 'raw'; }
+  /** 형식 자동 판별 해제 */
+  function auto(b) { const k = kind(b); return { data: k === 'gzip' ? gunzip(b) : k === 'zlib' ? zlib(b) : raw(b).data, kind: k }; }
+  return { raw: (b, n) => raw(b, n), gunzip, zlib, auto, kind };
+})();
+DU.Inflate = Inflate;
+
+/** CompressionStream 기반 압축 (Chrome/Edge 80+). format: gzip | deflate(zlib) | deflate-raw */
+async function compressBytes(bytes, format = 'gzip') {
+  if (typeof CompressionStream === 'undefined') throw new Error('이 브라우저는 압축(CompressionStream)을 지원하지 않습니다. 해제는 가능합니다');
+  const cs = new CompressionStream(format);
+  const out = new Response(new Blob([bytes]).stream().pipeThrough(cs));
+  return new Uint8Array(await out.arrayBuffer());
+}
+DU.compressBytes = compressBytes;
+
+const Zip = (() => {
+  function source(input) {
+    if (input instanceof Uint8Array) return { size: input.length, name: '', read: async (o, n) => input.subarray(o, o + n) };
+    return { size: input.size, name: input.name || '', read: async (o, n) => new Uint8Array(await input.slice(o, o + n).arrayBuffer()) };
+  }
+  const u16 = (b, o) => b[o] | (b[o + 1] << 8);
+  const u32 = (b, o) => (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+  const u64 = (b, o) => u32(b, o) + u32(b, o + 4) * 4294967296;
+  function dosDate(d, t) { if (!d) return null; return new Date(((d >> 9) & 0x7f) + 1980, ((d >> 5) & 0x0f) - 1, d & 0x1f, t >> 11, (t >> 5) & 0x3f, (t & 0x1f) * 2); }
+  function decodeName(bytes, utf8Flag) {
+    if (utf8Flag) return decodeUtf8(bytes);
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch (e) { /* 레거시 파일명 */ }
+    try { return new TextDecoder('euc-kr').decode(bytes); } catch (e) { return decodeUtf8(bytes); }
+  }
+  /** input: File/Blob/Uint8Array → { entries, read(entry) } */
+  async function open(input) {
+    const s = source(input);
+    if (s.size < 22) throw new Error('ZIP 파일이 너무 작습니다');
+    const tailLen = Math.min(s.size, 65557 + 20);
+    const tail = await s.read(s.size - tailLen, tailLen);
+    let e = -1;
+    for (let i = tail.length - 22; i >= 0; i--) if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 5 && tail[i + 3] === 6) { e = i; break; }
+    if (e < 0) throw new Error('ZIP 형식이 아닙니다 (중앙 디렉터리 끝 레코드를 찾을 수 없음)');
+    let count = u16(tail, e + 10), cdSize = u32(tail, e + 12), cdOff = u32(tail, e + 16);
+    const comment = decodeName(tail.subarray(e + 22, e + 22 + u16(tail, e + 20)));
+    if (count === 0xffff || cdOff === 0xffffffff || cdSize === 0xffffffff) {
+      const l = e - 20;
+      if (l >= 0 && u32(tail, l) === 0x07064b50) {
+        const z = await s.read(u64(tail, l + 8), 56);
+        if (u32(z, 0) === 0x06064b50) { count = u64(z, 32); cdSize = u64(z, 40); cdOff = u64(z, 48); }
+      }
+    }
+    const cd = await s.read(cdOff, cdSize);
+    const entries = []; let p = 0;
+    while (p + 46 <= cd.length && u32(cd, p) === 0x02014b50) {
+      const flags = u16(cd, p + 8), method = u16(cd, p + 10), time = u16(cd, p + 12), date = u16(cd, p + 14);
+      let csize = u32(cd, p + 20), usize = u32(cd, p + 24), off = u32(cd, p + 42);
+      const nl = u16(cd, p + 28), xl = u16(cd, p + 30), cl = u16(cd, p + 32);
+      const name = decodeName(cd.subarray(p + 46, p + 46 + nl), flags & 0x800);
+      let x = p + 46 + nl; const xend = x + xl;
+      while (x + 4 <= xend) {
+        const id = u16(cd, x), sz = u16(cd, x + 2); let q = x + 4;
+        if (id === 1) { if (usize === 0xffffffff) { usize = u64(cd, q); q += 8; } if (csize === 0xffffffff) { csize = u64(cd, q); q += 8; } if (off === 0xffffffff) { off = u64(cd, q); } }
+        x += 4 + sz;
+      }
+      entries.push({ name, dir: name.endsWith('/'), method, csize, usize, offset: off, crc: u32(cd, p + 16), date: dosDate(date, time), encrypted: !!(flags & 1) });
+      p += 46 + nl + xl + cl;
+    }
+    async function read(en) {
+      if (en.encrypted) throw new Error(`암호화된 항목입니다: ${en.name}`);
+      const lh = await s.read(en.offset, 30);
+      if (u32(lh, 0) !== 0x04034b50) throw new Error(`로컬 헤더가 올바르지 않습니다: ${en.name}`);
+      const start = en.offset + 30 + u16(lh, 26) + u16(lh, 28);
+      const comp = await s.read(start, en.csize);
+      if (en.method === 0) return comp;
+      if (en.method === 8) return Inflate.raw(comp, en.usize).data;
+      throw new Error(`지원하지 않는 압축 방식(${en.method}): ${en.name}`);
+    }
+    return { entries, read, size: s.size, comment, count };
+  }
+  return { open, dosDate };
+})();
+DU.Zip = Zip;
 
 /* =====================================================================
  * JSON 엔진 — 자체 파서
@@ -2470,6 +2835,7 @@ defineTool({
     const cfg = Object.assign({ mode: 'direct', proxyUrl: 'http://127.0.0.1:8099/proxy', proxyToken: '', timeout: 30, redirect: 'follow', credentials: 'omit', insecure: false, saveSensitive: false }, store.get('http:cfg', {}));
     const saveCfg = () => store.set('http:cfg', cfg);
     let respHist = [], current = null, inflight = null;
+    const uid = Math.random().toString(36).slice(2, 8);
 
     /* ---- 레이아웃 ---- */
     const top = h(`<div class="toolbar">
@@ -2535,7 +2901,7 @@ defineTool({
     const ar = refs(authBox);
     Object.values(ar).forEach(x => on(x, 'input', saveDraft));
     const setBox = h(`<div style="display:flex;flex-direction:column;gap:10px">
-      <div class="field"><span>요청 방식</span><div class="row"><label class="chk"><input type="radio" name="hmode" value="direct"> 브라우저 직접 요청 (fetch)</label><label class="chk"><input type="radio" name="hmode" value="proxy"> 로컬 프록시 경유</label></div></div>
+      <div class="field"><span>요청 방식</span><div class="row"><label class="chk"><input type="radio" name="hmode${uid}" value="direct"> 브라우저 직접 요청 (fetch)</label><label class="chk"><input type="radio" name="hmode${uid}" value="proxy"> 로컬 프록시 경유</label></div></div>
       <div class="grid2"><label class="field"><span>프록시 URL</span><input class="inp mono" data-ref="pxUrl"></label><label class="field"><span>프록시 토큰 (프록시 실행 시 출력됨)</span><input class="inp mono" data-ref="pxTok" autocomplete="off"></label></div>
       <div class="row"><label class="chk"><input type="checkbox" data-ref="insecure"> 인증서 검증 안 함 (프록시 모드, 자체 서명 인증서용)</label><button class="btn xs" data-ref="pxTest" type="button">프록시 연결 확인</button><span class="dim" data-ref="pxRes" style="font-size:12px"></span></div>
       <div class="grid3"><label class="field"><span>타임아웃 (초)</span><input class="inp" type="number" min="1" max="600" data-ref="timeout"></label>
@@ -2545,7 +2911,7 @@ defineTool({
       <div class="note" style="font-size:12px"><b>직접 요청</b>은 서버의 CORS 허용이 필요하고 Cookie·Host 같은 금지 헤더는 브라우저가 무시합니다.
         <b>로컬 프록시</b>는 <code>proxy/DevHubProxy.java</code>를 실행해야 합니다: <code>java DevHubProxy.java</code> (JDK 11+, 127.0.0.1:8099).</div></div>`);
     const sr = refs(setBox);
-    $$('input[name=hmode]', setBox).forEach(x => { x.checked = x.value === cfg.mode; on(x, 'change', () => { cfg.mode = x.value; saveCfg(); updMode(); }); });
+    $$(`input[name=hmode${uid}]`, setBox).forEach(x => { x.checked = x.value === cfg.mode; on(x, 'change', () => { cfg.mode = x.value; saveCfg(); updMode(); }); });
     sr.pxUrl.value = cfg.proxyUrl; sr.pxTok.value = cfg.proxyToken; sr.insecure.checked = cfg.insecure; sr.timeout.value = cfg.timeout; sr.redirect.value = cfg.redirect; sr.cred.value = cfg.credentials; sr.saveSens.checked = cfg.saveSensitive;
     on(sr.pxUrl, 'input', () => { cfg.proxyUrl = sr.pxUrl.value.trim(); saveCfg(); });
     on(sr.pxTok, 'input', () => { cfg.proxyToken = sr.pxTok.value.trim(); saveCfg(); });
@@ -2886,7 +3252,7 @@ defineTool({
           if (respHist.length < 2) { toast('비교할 이전 응답이 없습니다', 'warn'); return; }
           const [cur, prev] = respHist;
           const tool = isJson && (() => { try { JSONX.parse(prev.text.trim()); return true; } catch (e) { return false; } })() ? 'json-diff' : 'text-diff';
-          sendTo(tool, 'left', prev.text); TOOL_MAP[tool].inst.receive('right', cur.text);
+          sendTo(tool, 'left', prev.text); toolInst(tool).receive('right', cur.text);
         }, 'sm', '직전 응답(왼쪽)과 현재 응답(오른쪽)을 비교'),
         btn('복사', () => copyText(current.text), 'sm'),
         btn('응답 저장', () => {
@@ -3339,7 +3705,7 @@ defineTool({
         else { req.bodyType = 'text'; req.body = typeof rb.ex === 'string' ? rb.ex : JSON.stringify(rb.ex); }
       }
       openTool('http');
-      TOOL_MAP.http.inst._load(req);
+      toolInst('http')._load(req);
       toast(`${o.method} ${o.path} 를 HTTP 테스터로 보냈습니다${/\{\w+\}/.test(o.path) ? ' — 경로의 {변수}를 실제 값으로 바꾸세요' : ''}`, 'ok', 3500);
     }
     on(q, 'input', debounce(render, 200));
@@ -3974,7 +4340,7 @@ defineTool({
       }).join('')}${Array.from(s).length > 300 ? '<tr><td colspan="7" class="faint">… 앞 300자만 표시</td></tr>' : ''}</tbody></table>`;
     }
     inp.onInput(debounce(analyze, 300)); analyze();
-    return { run: () => conv(Uni.fromEscapes), receive(slot, t) { inp.set(t); analyze(); } };
+    return { run: () => conv(Uni.fromEscapes), fix, receive(slot, t) { inp.set(t); analyze(); } };
   },
 });
 
@@ -4029,7 +4395,7 @@ defineTool({
     inp.onInput(debounce(run, 250));
     [enc, key].forEach(x => on(x, 'input', run)); on(enc, 'change', run); on(fmt, 'change', render); on(cmp, 'input', render);
     if (inp.get()) run();
-    return { run, receive(slot, t) { inp.set(t); run(); } };
+    return { run, hashFile, receive(slot, t) { inp.set(t); run(); } };
   },
 });
 
@@ -4075,6 +4441,7 @@ defineTool({
   id: 'uuid', group: 'encode', abbr: 'ID', name: 'UUID · 랜덤 문자열',
   desc: 'UUID v4 / v7 대량 생성 · UUID 분석 · 안전한 랜덤 문자열 · 비밀번호',
   keywords: 'uuid guid v4 v7 generator 생성 랜덤 random password 비밀번호 문자열 token',
+  inputs: { input: 'UUID 분석' },
   init(root) {
     const ver = sel([['v4', 'UUID v4 (랜덤)'], ['v7', 'UUID v7 (시간 순서)']], 'uuid:ver', 'v4');
     const cnt = bindPersist(h('<input class="inp sm" type="number" min="1" max="10000" value="10" style="width:80px">'), 'uuid:cnt');
@@ -4112,7 +4479,7 @@ defineTool({
       try { rr.out.value = Array.from({ length: clamp(+rr.n.value || 1, 1, 1000) }, () => Uuid.randomString(clamp(+rr.len.value || 16, 1, 4096), cs)).join('\n'); } catch (e) { toast(e.message, 'err'); }
     });
     gen();
-    return { run: gen };
+    return { run: gen, receive(slot, t) { ar.u.value = t.trim(); ar.go.click(); } };
   },
 });
 
@@ -6231,13 +6598,597 @@ defineTool({
 });
 
 /* =====================================================================
+ * Smart Paste — 붙여넣은 텍스트 / 끌어다 놓은 파일을 자동 감지해 도구 추천
+ *
+ * 감지기 등록 (다른 모듈에서도 추가 가능):
+ *   defineDetector({ id, test(text, ctx) → null | 결과 | 결과[] })
+ *     결과: { key, score(0~100), label, detail?, actions: [동작] }
+ *     같은 key의 결과는 하나로 합쳐짐 (점수는 최댓값, 동작은 이어 붙임)
+ *   defineFileDetector({ id, test(file, head(Uint8Array 앞 64KB), ext) → null | 결과 })
+ *   동작: { label, tool, slot?, text?, after?('run' 등 인스턴스 메서드), recipe?: [단계], run?(text|file) }
+ *   ctx: { text, t(trim), lines, json(→ {node, levels} | null, 지연 계산), bytes }
+ * ===================================================================== */
+const DETECTORS = [], FILE_DETECTORS = [];
+function defineDetector(d) { DETECTORS.push(d); }
+function defineFileDetector(d) { FILE_DETECTORS.push(d); }
+
+const SmartPaste = (() => {
+  function makeCtx(text) {
+    const c = { text, t: text.trim() };
+    c.lines = c.t.split(/\r?\n/);
+    c.oneLine = c.lines.length === 1;
+    let jd = false, jv = null;
+    Object.defineProperty(c, 'json', { get() { if (!jd) { jd = true; if (c.t.length < 30e6 && /^["'{[\\]/.test(c.t)) { try { jv = JSONX.smartParse(c.t); } catch (e) { jv = null; } } } return jv; } });
+    return c;
+  }
+  function detect(text) {
+    if (!text || !text.trim()) return [];
+    const ctx = makeCtx(text); const map = new Map();
+    for (const d of DETECTORS) {
+      let r = null;
+      try { r = d.test(text, ctx); } catch (e) { console.warn('detector', d.id, e); }
+      (Array.isArray(r) ? r : r ? [r] : []).forEach(x => merge(map, x, d.id));
+    }
+    return Array.from(map.values()).sort((a, b) => b.score - a.score);
+  }
+  function merge(map, x, id) {
+    const k = x.key || id; const ex = map.get(k);
+    if (!ex) { map.set(k, Object.assign({}, x, { key: k, actions: (x.actions || []).slice(), _ls: x.score })); return; }
+    ex.score = Math.max(ex.score, x.score);
+    if (x.label && x.score > ex._ls) { ex.label = x.label; ex._ls = x.score; if (x.detail) ex.detail = x.detail; }
+    else if (!ex.detail && x.detail) ex.detail = x.detail;
+    (x.actions || []).forEach(a => { if (!ex.actions.some(b => b.label === a.label)) ex.actions.push(a); });
+  }
+  function runAction(a, payload) {
+    if (a.run) return a.run(payload);
+    const text = a.text != null ? a.text : payload;
+    if (a.recipe) { Recipe.openWith(a.recipe, text); return; }
+    sendTo(a.tool, a.slot, text);
+    if (a.after) { const inst = toolInst(a.tool); if (inst && inst[a.after]) inst[a.after](); }
+  }
+  function itemEl(r, i, payload, onPick) {
+    const el = h(`<div class="sp-item${i === 0 ? ' top' : ''}"><div class="sp-h"><b></b><span class="sp-score">확신도 ${Math.round(r.score)}%</span></div>${r.detail ? '<div class="sp-d"></div>' : ''}<div class="row"></div></div>`);
+    $('b', el).textContent = r.label; if (r.detail) $('.sp-d', el).textContent = r.detail;
+    const row = $('.row', el);
+    r.actions.slice(0, 7).forEach((a, k) => row.appendChild(btn(a.label, () => { if (onPick) onPick(); runAction(a, payload); }, 'sm' + (i === 0 && k === 0 ? ' primary' : ''))));
+    return el;
+  }
+  function render(box, text, onPick, max = 8) {
+    box.innerHTML = '';
+    const res = detect(text).slice(0, max);
+    if (!text.trim()) return res;
+    if (!res.length) box.appendChild(h('<div class="empty-state">알맞은 도구를 찾지 못했습니다 — 기능 검색(Ctrl+K)을 사용하세요</div>'));
+    res.forEach((r, i) => box.appendChild(itemEl(r, i, text, onPick)));
+    return res;
+  }
+  function open(text = '') {
+    const body = h(`<div style="display:flex;flex-direction:column;gap:10px">
+      <textarea class="inp" rows="6" placeholder="분석할 내용을 붙여넣으세요 — JSON, 이스케이프 문자열, JWT, Base64, cURL, 로그, 스택 트레이스, SQL, cron, 타임스탬프, 인증서 …"></textarea>
+      <div class="sp-res"></div></div>`);
+    const ta = $('textarea', body), box = $('.sp-res', body);
+    ta.value = text.length > 2e6 ? text.slice(0, 2e6) : text;
+    let full = text;
+    const m = openModal({ title: '⚡ Smart Paste — 입력 자동 감지', body, wide: true });
+    const go = () => render(box, full, () => m.close());
+    on(ta, 'input', debounce(() => { full = ta.value; go(); }, 250));
+    on(ta, 'keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); const b = $('.sp-item .btn', box); if (b) b.click(); } });
+    if (full) go(); ta.focus();
+    if (text.length > 2e6) box.insertAdjacentHTML('beforebegin', `<div class="note warn">큰 입력(${fmtBytes(text.length)})입니다. 미리보기는 앞부분만 표시하지만 도구로는 전체가 전달됩니다.</div>`);
+  }
+  function card() {
+    const el = h(`<div class="gcard" style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0">⚡ Smart Paste <span class="faint" style="font-weight:400">— 아무 내용이나 붙여넣으면 형식을 감지해 알맞은 도구와 변환을 추천합니다</span></h3>
+      <textarea class="inp" rows="3" placeholder="예) &quot;{\\&quot;user\\&quot;:{\\&quot;id\\&quot;:1}}&quot; · eyJhbGciOi… · H4sIAAAA… · curl -X POST … · 0 0/5 * * * ? · 1761610522 · -----BEGIN CERTIFICATE-----"></textarea><div class="sp-res"></div></div>`);
+    const ta = $('textarea', el), box = $('.sp-res', el);
+    on(ta, 'input', debounce(() => render(box, ta.value, null, 4), 250));
+    return el;
+  }
+  /** 파일 → 감지 */
+  async function openFile(file) {
+    const head = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
+    const ext = (file.name.match(/\.([\w-]+)$/) || [])[1] || '';
+    const map = new Map();
+    for (const d of FILE_DETECTORS) { let r = null; try { r = await d.test(file, head, ext.toLowerCase()); } catch (e) { console.warn('file detector', d.id, e); } (Array.isArray(r) ? r : r ? [r] : []).forEach(x => merge(map, x, d.id)); }
+    let textRes = [], text = null;
+    const binary = guessKind('', head) === 'binary' || sniffMime(head);
+    if (!binary && file.size <= 50 * 1048576) {
+      text = decodeBytes(new Uint8Array(await file.arrayBuffer())).text;
+      textRes = detect(text).slice(0, 5);
+    }
+    const results = Array.from(map.values()).sort((a, b) => b.score - a.score);
+    const body = h(`<div style="display:flex;flex-direction:column;gap:10px"><div class="row"><b></b><span class="badge"></span><span class="dim"></span></div><div class="sp-res"></div></div>`);
+    $('b', body).textContent = file.name; $('.badge', body).textContent = fmtBytes(file.size); $('.dim', body).textContent = file.type || (binary ? '바이너리' : '텍스트');
+    const box = $('.sp-res', body);
+    const m = openModal({ title: '⚡ 파일 자동 감지', body, wide: true });
+    const all = results.map(r => ({ r, pay: file })).concat(textRes.map(r => ({ r, pay: text }))).sort((x, y) => y.r.score - x.r.score);
+    all.forEach((x, i) => box.appendChild(itemEl(x.r, i, x.pay, () => m.close())));
+    if (!results.length && !textRes.length) box.appendChild(h(`<div class="empty-state">${binary ? '알 수 없는 바이너리 파일입니다' : file.size > 50 * 1048576 ? '50MB를 넘는 텍스트 파일입니다. 로그 분석기의 [파일 열기]를 사용하세요' : '알맞은 도구를 찾지 못했습니다'}</div>`));
+  }
+  return { detect, open, card, openFile, runAction };
+})();
+DU.SmartPaste = SmartPaste;
+
+/* ---------- 기본 감지기 (기존 도구) ---------- */
+const spAct = (label, tool, extra = {}) => Object.assign({ label, tool }, extra);
+const spPreview = (s, n = 160) => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
+const printableRatio = b => { let ok = 0; const n = Math.min(b.length, 4000); if (!n) return 0; const t = new TextDecoder('utf-8').decode(b.subarray(0, n)); for (const ch of t) { const c = ch.charCodeAt(0); if (c >= 32 || c === 9 || c === 10 || c === 13) if (ch !== '\uFFFD') ok++; } return ok / Array.from(t).length; };
+
+defineDetector({ id: 'json', test(text, c) {
+  const j = c.json; if (!j) return null;
+  const n = j.node, out = [];
+  if (j.levels > 0) {
+    const pretty = JSONX.stringify(n, { indent: 2 });
+    out.push({ key: 'json-escaped', score: 97, label: `이스케이프된 JSON 문자열 (${j.levels}단계)`, detail: spPreview(pretty),
+      actions: [spAct('이스케이프 해제 + 정렬', 'json-format'), spAct('단계별 해제 보기', 'json-escape'), { label: '정렬된 JSON 복사', run: () => copyText(pretty) }] });
+  }
+  if (n.T === 'O' || n.T === 'A') {
+    const st = JSONX.stats(n);
+    const isOas = n.T === 'O' && (JSONX.get(n, 'openapi') || JSONX.get(n, 'swagger')) && JSONX.get(n, 'paths');
+    if (isOas) out.push({ key: 'openapi', score: 99, label: `OpenAPI / Swagger 명세 (API ${JSONX.get(n, 'paths').p.length}개 경로)`, actions: [spAct('OpenAPI 뷰어', 'openapi')] });
+    const acts = [spAct('JSON 포매터 · 트리', 'json-format'), spAct('JSONPath 검색', 'json-path')];
+    const arr = n.T === 'A' ? n : findArray(n) ? findArray(n).node : null;
+    if (arr && arr.v.length) acts.push(spAct('컬렉션 도구', 'json-array'));
+    if (arr && arr.v.length && arr.v.every(x => x.T === 'O')) acts.push(spAct('CSV · 표 변환', 'csv'));
+    acts.push(spAct('JSON 비교 (왼쪽)', 'json-diff', { slot: 'left' }));
+    if (j.levels === 0) out.push({ key: 'json', score: isOas ? 80 : 95, label: `JSON ${JSONX.typeName(n)} — ${n.T === 'A' ? `항목 ${n.v.length}개` : `키 ${n.p.length}개`} · 깊이 ${st.depth}`, detail: spPreview(c.t, 120), actions: acts });
+    else out[0].actions.push(...acts.slice(1));
+  } else if (n.T === 'S' && j.levels === 0 && /\\[nrt"\\u]/.test(c.t)) {
+    out.push({ key: 'json-string', score: 72, label: 'JSON 문자열 리터럴 (이스케이프 포함)', detail: spPreview(n.v), actions: [spAct('이스케이프 해제', 'json-escape'), { label: '해제된 값 복사', run: () => copyText(n.v) }] });
+  }
+  return out;
+} });
+defineDetector({ id: 'jwt', test(text, c) {
+  if (!c.oneLine || !/^(Bearer\s+)?eyJ[\w-]*\.[\w-]+\.[\w-]*$/.test(c.t)) return null;
+  let detail = ''; try { const d = Jwt.decode(c.t); detail = `alg=${d.headerJs.alg} · ${spPreview(d.payload.text, 120)}${typeof d.payloadJs.exp === 'number' ? ` · 만료 ${relTime(d.payloadJs.exp * 1000)}` : ''}`; } catch (e) { return null; }
+  return { score: 99, label: 'JWT 토큰', detail, actions: [spAct('JWT 디코더 · 서명 검증', 'jwt')] };
+} });
+defineDetector({ id: 'curl', test(text, c) {
+  if (!/^curl(\.exe)?\s/i.test(c.t)) return null;
+  let d = ''; try { const r = HttpUtil.parseCurl(c.t); d = `${r.method} ${r.url}`; } catch (e) { d = e.message; }
+  return { score: 99, label: 'cURL 명령', detail: d, actions: [spAct('HTTP 테스터로 가져오기', 'http', { slot: 'curl' })] };
+} });
+defineDetector({ id: 'url', test(text, c) {
+  const out = [];
+  if (c.oneLine && /^(https?|ftp|wss?):\/\/\S+$/i.test(c.t)) {
+    const q = HttpUtil.parseQuery(HttpUtil.splitUrl(c.t).query);
+    out.push({ key: 'url', score: 90, label: `URL${q.length ? ` (쿼리 파라미터 ${q.length}개)` : ''}`, detail: c.t, actions: [spAct('URL 분석 · 쿼리 편집', 'url', { slot: 'url' }), spAct('HTTP 테스터로 (GET)', 'http', { slot: 'url' })] });
+  }
+  const pct = (c.t.match(/%[0-9A-Fa-f]{2}/g) || []).length;
+  if (pct >= 2 && c.t.length < 200000) {
+    const d = UrlCodec.decode(c.t, 'auto', !/^https?:/i.test(c.t));
+    if (d.text !== c.t) {
+      const isJ = /^\s*[{[]/.test(d.text);
+      out.push({ key: 'urlenc', score: pct >= 6 ? 88 : 78, label: `URL 인코딩된 문자열 (${d.encoding})`, detail: spPreview(d.text),
+        actions: [spAct('URL 디코딩', 'url'), ...(isJ ? [{ label: '디코딩 + JSON 정렬', recipe: [{ op: 'url-decode' }, { op: 'json-pretty' }] }] : []), { label: '디코딩 결과 복사', run: () => copyText(d.text) }] });
+    }
+  }
+  return out;
+} });
+defineDetector({ id: 'base64', test(text, c) {
+  const s = c.t.replace(/\s+/g, '');
+  if (s.length < 16 || s.length > 50e6 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(s) || s.length % 4 === 1) return null;
+  if (/^[0-9a-fA-F]+$/.test(s) || /^\d+$/.test(s)) return null;
+  if (!/[A-Z]/.test(s) || !/[a-z]/.test(s)) return null;
+  let b; try { b = b64ToBytes(s.slice(0, 4e6)); } catch (e) { return null; }
+  const isGz = b[0] === 0x1f && b[1] === 0x8b, isZl = Inflate.kind(b) === 'zlib' && b.length > 4;
+  if (isGz || isZl) {
+    let inner = ''; try { inner = decodeBytes(Inflate.auto(b).data).text; } catch (e) { inner = ''; }
+    const steps = [{ op: 'b64-decode' }, { op: 'gunzip' }, { op: 'text-decode' }];
+    if (/^\s*[{[]/.test(inner)) steps.push({ op: 'json-pretty' });
+    return { key: 'base64', score: 97, label: `Base64 + ${isGz ? 'GZIP' : 'zlib'} 압축 데이터`, detail: inner ? spPreview(inner) : '(압축 해제 실패)', actions: [{ label: '디코드 → 압축 해제' + (steps.length > 3 ? ' → JSON 정렬' : ''), recipe: steps }, spAct('Base64 도구', 'base64')] };
+  }
+  const mime = sniffMime(b);
+  if (mime) return { key: 'base64', score: 92, label: `Base64 인코딩된 ${mime[0]}`, detail: `${fmtBytes(b.length)}`, actions: [spAct('Base64 디코드 · 미리보기', 'base64')] };
+  const pr = printableRatio(b);
+  if (pr < 0.92) return { key: 'base64', score: 35, label: 'Base64 (바이너리 데이터)', detail: `${fmtBytes(b.length)}`, actions: [spAct('Base64 디코드', 'base64')] };
+  const dec = decodeBytes(b).text;
+  if (/^\s*[{[]/.test(dec)) return { key: 'base64', score: 93, label: 'Base64 인코딩된 JSON', detail: spPreview(dec), actions: [{ label: '디코드 + JSON 정렬', recipe: [{ op: 'b64-decode' }, { op: 'text-decode' }, { op: 'json-pretty' }] }, spAct('Base64 도구', 'base64')] };
+  return { key: 'base64', score: s.length >= 24 ? 78 : 60, label: 'Base64 인코딩된 텍스트', detail: spPreview(dec), actions: [spAct('Base64 디코드', 'base64'), { label: '디코딩 결과 복사', run: () => copyText(dec) }] };
+} });
+defineDetector({ id: 'hex', test(text, c) {
+  const s = c.t.replace(/^0x/i, '').replace(/[\s:,-]|0x/gi, '');
+  if (s.length < 8 || s.length % 2 || !/^[0-9a-fA-F]+$/.test(s) || /^\d+$/.test(s) || /^[0-9a-f]{32}$|^[0-9a-f]{40}$|^[0-9a-f]{64}$/i.test(s)) {
+    if (/^[0-9a-f]{32}$|^[0-9a-f]{40}$|^[0-9a-f]{64}$|^[0-9a-f]{128}$/i.test(c.t)) return { key: 'hash', score: 70, label: `해시 값으로 보임 (${{ 32: 'MD5', 40: 'SHA-1', 64: 'SHA-256', 128: 'SHA-512' }[c.t.length]} ${c.t.length / 2}바이트)`, actions: [spAct('해시 도구 (비교용)', 'hash')] };
+    return null;
+  }
+  let b; try { b = hexToBytes(s); } catch (e) { return null; }
+  const pr = printableRatio(b);
+  const dec = pr > 0.9 ? decodeBytes(b).text : '';
+  return { key: 'hex', score: pr > 0.9 ? 82 : 55, label: `16진수(Hex) 바이트 ${fmtNum(b.length)}개${dec ? ' → 텍스트' : ''}`, detail: dec ? spPreview(dec) : '', actions: [{ label: 'Hex → 텍스트', recipe: [{ op: 'hex-decode' }, { op: 'text-decode' }] }, spAct('유니코드 · 문자셋 도구', 'unicode')] };
+} });
+defineDetector({ id: 'unicode', test(text, c) {
+  const n = (c.t.match(/\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+\}|&#x?[0-9a-fA-F]+;|%u[0-9a-fA-F]{4}/g) || []).length;
+  const out = [];
+  if (n >= 2 && !c.json) { const d = Uni.fromEscapes(c.t); out.push({ key: 'unicode', score: 88, label: `유니코드 이스케이프 (${n}개)`, detail: spPreview(d), actions: [spAct('\\uXXXX → 한글 변환', 'unicode', { after: 'run' }), { label: '변환 결과 복사', run: () => copyText(d) }] }); }
+  const ent = (c.t.match(/&(?:[a-z]{2,8}|#\d+|#x[0-9a-f]+);/gi) || []).length;
+  if (ent >= 2 && !/^\s*</.test(c.t)) { const t = document.createElement('textarea'); t.innerHTML = c.t; out.push({ key: 'entity', score: 75, label: `HTML 엔티티 (${ent}개)`, detail: spPreview(t.value), actions: [{ label: '엔티티 디코딩', recipe: [{ op: 'html-decode' }] }, spAct('HTML 도구', 'html')] }); }
+  if (/[ÃÂ][\x80-\xBF]|[ìíëê][\x80-\xBF]/.test(c.t)) { const f = Uni.fixMojibake(c.t); if (f.length) out.push({ key: 'mojibake', score: 86, label: '깨진 한글 (인코딩 오해석)', detail: `${f[0].how}: ${spPreview(f[0].text, 100)}`, actions: [spAct('깨진 한글 복구', 'unicode', { after: 'fix' }), { label: '첫 번째 후보 복사', run: () => copyText(f[0].text) }] }); }
+  return out;
+} });
+defineDetector({ id: 'markup', test(text, c) {
+  if (!/^</.test(c.t) || !/>$/.test(c.t)) return null;
+  if (/^<!DOCTYPE html|^<html[\s>]/i.test(c.t)) return { key: 'html', score: 92, label: 'HTML 문서', actions: [spAct('HTML 포매터', 'html')] };
+  const v = XmlFmt.validate(c.t);
+  if (!v.ok) return /<\/?[a-z][\w:-]*[\s>]/i.test(c.t) ? { key: 'xml', score: 55, label: `XML/HTML 조각 (형식 오류: ${v.message})`, actions: [spAct('XML 포매터', 'xml'), spAct('HTML 포매터', 'html')] } : null;
+  const root = v.doc.documentElement.nodeName;
+  const label = /mapper$/i.test(root) ? 'MyBatis 매퍼 XML' : /Envelope$/.test(root) ? 'SOAP 메시지' : /^beans$/.test(root) ? 'Spring 빈 설정 XML' : /^project$/.test(root) ? 'Maven pom.xml' : `XML (루트 <${root}>)`;
+  return { key: 'xml', score: 92, label, actions: [spAct('XML 포매터 · XPath', 'xml')] };
+} });
+defineDetector({ id: 'sql', test(text, c) {
+  const out = [];
+  if (/Preparing:/.test(c.text) && /Parameters:/.test(c.text)) out.push({ key: 'sqllog', score: 97, label: 'MyBatis SQL 로그 (Preparing / Parameters)', actions: [spAct('바인드 값 치환', 'sql-bind', { slot: 'sql' })] });
+  if (/Hibernate:/.test(c.text) && /binding parameter/.test(c.text)) out.push({ key: 'sqllog', score: 96, label: 'Hibernate SQL 로그', actions: [spAct('바인드 값 치환', 'sql-bind', { slot: 'sql' })] });
+  if (/^\s*(SELECT|INSERT|UPDATE|DELETE|WITH|MERGE|CREATE|ALTER|DROP|TRUNCATE|GRANT)\b/i.test(c.t) && !out.length) {
+    const binds = /\?|#\{|:\w+/.test(c.t);
+    out.push({ key: 'sql', score: 88, label: `SQL ${c.t.split(/\s/)[0].toUpperCase()} 문`, detail: spPreview(c.t, 120), actions: [spAct('SQL 정렬', 'sql'), ...(binds ? [spAct('바인드 치환', 'sql-bind', { slot: 'sql' })] : [])] });
+  }
+  return out;
+} });
+defineDetector({ id: 'stack', test(text, c) {
+  const frames = (c.text.match(/^\s*at\s+[\w$.<>/@-]+\(.*\)\s*$/gm) || []).length + (c.text.match(/\\n\\tat /g) || []).length;
+  if (frames < 1 || !/(Exception|Error|Throwable)\b/.test(c.text)) return null;
+  const s = StackTrace.summary(c.text, []);
+  const logLines = c.lines.slice(0, 300).filter(l => LogParse.matchTs(l)).length;
+  return { key: 'stack', score: logLines > 5 ? 84 : 93, label: `Java 스택 트레이스 (프레임 ${frames}개)`, detail: s ? `근본 원인: ${s.type}${s.msg ? ': ' + s.msg.split('\n')[0] : ''}${s.at ? ' @ ' + s.at : ''}` : '', actions: [spAct('스택 트레이스 분석', 'stacktrace'), ...(logLines > 1 ? [spAct('로그 분석기', 'log')] : [])] };
+} });
+defineDetector({ id: 'log', test(text, c) {
+  if (c.lines.length < 3) return null;
+  const sample = c.lines.slice(0, 300); const ts = sample.filter(l => LogParse.matchTs(l)).length;
+  if (ts < 3 || ts < sample.length * 0.25) return null;
+  const lv = (c.text.slice(0, 200000).match(/\b(ERROR|WARN|SEVERE|FATAL)\b/g) || []).length;
+  return { key: 'log', score: 86, label: `애플리케이션 로그 (${fmtNum(c.lines.length)}줄)`, detail: lv ? `ERROR/WARN 표시 ${lv}건 이상` : '', actions: [spAct('로그 분석기', 'log')] };
+} });
+defineDetector({ id: 'cron', test(text, c) {
+  if (!c.oneLine || c.t.length > 120) return null;
+  const f = c.t.split(/\s+/);
+  if (!/^@\w+$/.test(c.t) && (f.length < 5 || f.length > 7 || !f.every(x => /^[\d*/,?LW#A-Za-z-]+$/.test(x)) || !f.some(x => /[*?/]/.test(x)))) return null;
+  try { const cr = Cron.parse(c.t); return { key: 'cron', score: 93, label: `Cron 표현식 (${{ linux: 'Linux', spring: 'Spring', quartz: 'Quartz' }[cr.dialect]})`, detail: Cron.describe(cr), actions: [spAct('Cron 해석 · 다음 실행 시각', 'cron')] }; } catch (e) { return null; }
+} });
+defineDetector({ id: 'date', test(text, c) {
+  if (!c.oneLine || c.t.length > 60 || /^[0-9a-f]{8}-/i.test(c.t)) return null;
+  if (!/^\d{8,19}(\.\d+)?$/.test(c.t) && !/\d{4}[-./년]\s?\d{1,2}|[A-Z][a-z]{2},? \d|\d{2}:\d{2}/.test(c.t)) return null;
+  let r; try { r = DateX.parse(c.t, 'kst'); } catch (e) { return null; }
+  const y = new Date(r.ms).getUTCFullYear(); if (y < 1990 || y > 2100) return null;
+  return { key: 'date', score: /^\d+$/.test(c.t) ? 90 : 85, label: `날짜 / 타임스탬프 (${r.kind})`, detail: DateX.format(r.ms, 'yyyy-MM-dd HH:mm:ss.SSS (E) KST', 'kst') + ` · ${relTime(r.ms)}`, actions: [spAct('날짜 변환', 'date')] };
+} });
+defineDetector({ id: 'uuid', test(text, c) {
+  if (!c.oneLine || !/^[{"']?[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}[}"']?$/i.test(c.t)) return null;
+  let d = ''; try { d = Uuid.inspect(c.t).slice(1, 2).map(x => x[1]).join(); } catch (e) { return null; }
+  return { key: 'uuid', score: 95, label: 'UUID', detail: d, actions: [spAct('UUID 분석', 'uuid')] };
+} });
+defineDetector({ id: 'config', test(text, c) {
+  const ls = c.lines.filter(l => l.trim() && !/^\s*[#!]/.test(l));
+  if (ls.length < 2) return null;
+  const out = [];
+  const props = ls.filter(l => /^[\w.\-[\]]+\s*=/.test(l)).length;
+  if (props >= ls.length * 0.7 && props >= 2) out.push({ key: 'config', score: 82, label: `.properties 설정 (${props}개 키)`, actions: [spAct('Properties → YAML · JSON', 'props')] });
+  const yml = ls.filter(l => /^\s*(- )?[\w."'-]+:(\s|$)/.test(l) || /^\s*- /.test(l)).length;
+  if (yml >= ls.length * 0.7 && ls.some(l => /^\s+\S/.test(l)) && !c.json && !/^\s*[A-Za-z-]+: .+\n[A-Za-z-]+: /.test(c.t.slice(0, 200)) ) out.push({ key: 'config', score: 80, label: 'YAML 설정', actions: [spAct('YAML → Properties · JSON', 'props')] });
+  return out;
+} });
+defineDetector({ id: 'headers', test(text, c) {
+  if (c.lines.length < 2) return null;
+  const first = /^(HTTP\/[\d.]+\s+\d{3}|[A-Z]+\s+\S+\s+HTTP\/[\d.]+)/.test(c.lines[0]);
+  const known = c.lines.filter(l => { const m = /^:?([A-Za-z][\w-]*):\s/.exec(l); return m && HDR_DOC[m[1].toLowerCase()]; }).length;
+  if (!first && known < 2) return null;
+  return { key: 'headers', score: first ? 92 : 80, label: `HTTP ${first && /^HTTP/.test(c.lines[0]) ? '응답' : '요청/응답'} 헤더 (${known}개 인식)`, actions: [spAct('헤더 · 쿠키 분석', 'headers')] };
+} });
+defineDetector({ id: 'csv', test(text, c) {
+  if (c.lines.length < 2 || c.json) return null;
+  const sample = c.lines.slice(0, 6); const d = Csv.detectDelim(c.t.slice(0, 5000));
+  const counts = sample.map(l => Csv.parse(l, d)[0] ? Csv.parse(l, d)[0].length : 0);
+  if (counts[0] < 2 || !counts.every(n => n === counts[0])) return null;
+  return { key: 'csv', score: d === '\t' ? 82 : 68, label: `${d === '\t' ? 'TSV (엑셀에서 복사한 표)' : 'CSV'} · ${counts[0]}열 × ${fmtNum(c.lines.length)}행`, actions: [spAct('CSV → JSON · SQL INSERT', 'csv')] };
+} });
+defineDetector({ id: 'text', test(text, c) {
+  const acts = [spAct('문자열 도구', 'string'), spAct('텍스트 비교 (왼쪽)', 'text-diff', { slot: 'left' }), { label: '레시피로 변환', recipe: [] }, spAct('정규식 테스트', 'regex', { slot: 'text' })];
+  return { key: 'text', score: 15, label: c.lines.length > 1 ? `일반 텍스트 (${fmtNum(c.lines.length)}줄)` : '일반 텍스트', actions: acts };
+} });
+
+/* ---------- 기본 파일 감지기 ---------- */
+defineFileDetector({ id: 'any', test(file) {
+  return { key: 'file-any', score: 10, label: '파일 해시 · 체크섬', actions: [{ label: 'MD5 · SHA-256 체크섬 계산', run: f => { openTool('hash'); toolInst('hash').hashFile(f); } }] };
+} });
+
+/* =====================================================================
+ * 레시피 파이프라인 — 여러 변환을 순서대로 연결해 한 번에 실행 (CyberChef 방식)
+ *
+ * 연산 등록 (다른 모듈에서도 추가 가능):
+ *   defineOp({ id, name, group, desc?, input: 'text'|'bytes'|'any',
+ *              params: [{ k, label, type: 'text'|'select'|'bool'|'num', def, options: [[값, 라벨]], secret? }],
+ *              run(값, 파라미터) → string | Uint8Array | Promise })
+ *   값은 단계 사이에 문자열 또는 Uint8Array로 전달됩니다. input:'text'이면 바이트가 자동으로 텍스트로 해석됩니다(UTF-8/EUC-KR 감지).
+ * ===================================================================== */
+const OPS = [], OP_MAP = {};
+function defineOp(o) { o.params = o.params || []; o.input = o.input || 'text'; o.group = o.group || '기타'; OPS.push(o); OP_MAP[o.id] = o; }
+const asText = v => (typeof v === 'string' ? v : decodeBytes(v).text);
+const asBytes = v => (typeof v === 'string' ? utf8(v) : v);
+
+const Recipe = (() => {
+  function defaults(op) { const p = {}; op.params.forEach(x => { p[x.k] = x.def !== undefined ? x.def : x.type === 'bool' ? false : x.type === 'num' ? 0 : x.type === 'select' ? x.options[0][0] : ''; }); return p; }
+  /** steps: [{op, p, on}] → [{ok, out, err, ms}] */
+  async function run(input, steps) {
+    const res = []; let v = input;
+    for (const st of steps) {
+      const op = OP_MAP[st.op];
+      if (!op) { res.push({ ok: false, err: `알 수 없는 연산: ${st.op}` }); break; }
+      if (st.on === false) { res.push({ ok: true, skip: true, out: v, ms: 0 }); continue; }
+      const t0 = performance.now();
+      try {
+        const inV = op.input === 'text' ? asText(v) : op.input === 'bytes' ? asBytes(v) : v;
+        v = await op.run(inV, Object.assign(defaults(op), st.p || {}));
+        if (v == null) v = '';
+        res.push({ ok: true, out: v, ms: performance.now() - t0 });
+      } catch (e) { res.push({ ok: false, err: e.message || String(e), ms: performance.now() - t0 }); break; }
+    }
+    return res;
+  }
+  function openWith(steps, input) {
+    openTool('recipe');
+    toolInst('recipe').load(steps.map(s => ({ op: s.op, p: Object.assign(defaults(OP_MAP[s.op] || { params: [] }), s.p || {}), on: true })), input);
+  }
+  return { run, openWith, defaults };
+})();
+DU.Recipe = Recipe;
+
+/* ---------- 기본 연산 ---------- */
+const CS_OPTS = [['auto', '자동(UTF-8/EUC-KR)'], ['utf-8', 'UTF-8'], ['euc-kr', 'EUC-KR'], ['utf-16le', 'UTF-16LE'], ['iso-8859-1', 'ISO-8859-1']];
+[
+  { id: 'b64-encode', name: 'Base64 인코딩', group: '인코딩', input: 'any', params: [{ k: 'url', label: 'URL-safe', type: 'bool' }], run: (v, p) => { let s = bytesToB64(asBytes(v)); if (p.url) s = s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); return s; } },
+  { id: 'b64-decode', name: 'Base64 디코딩', group: '인코딩', desc: '결과는 바이트 (다음 단계에서 텍스트로 해석)', run: v => b64ToBytes(v.trim().replace(/^data:[^,]*,/, '')) },
+  { id: 'url-encode', name: 'URL 인코딩', group: '인코딩', params: [{ k: 'mode', label: '방식', type: 'select', options: [['component', '컴포넌트'], ['uri', '전체 URL'], ['form', 'Java URLEncoder'], ['strict', 'RFC 3986']] }, { k: 'cs', label: '문자셋', type: 'select', options: [['utf-8', 'UTF-8'], ['euc-kr', 'EUC-KR']] }], run: (v, p) => UrlCodec.encode(v, p.mode, p.cs) },
+  { id: 'url-decode', name: 'URL 디코딩', group: '인코딩', params: [{ k: 'cs', label: '문자셋', type: 'select', options: [['auto', '자동'], ['utf-8', 'UTF-8'], ['euc-kr', 'EUC-KR']] }, { k: 'plus', label: '+ → 공백', type: 'bool', def: true }], run: (v, p) => UrlCodec.decode(v, p.cs, p.plus).text },
+  { id: 'hex-encode', name: 'Hex 인코딩', group: '인코딩', input: 'any', params: [{ k: 'sep', label: '구분', type: 'select', options: [['', '없음'], [' ', '공백'], [':', '콜론']] }, { k: 'upper', label: '대문자', type: 'bool' }], run: (v, p) => { const s = bytesToHex(asBytes(v), p.sep); return p.upper ? s.toUpperCase() : s; } },
+  { id: 'hex-decode', name: 'Hex 디코딩', group: '인코딩', desc: '결과는 바이트', run: v => hexToBytes(v) },
+  { id: 'text-decode', name: '바이트 → 텍스트 (문자셋)', group: '인코딩', input: 'any', params: [{ k: 'cs', label: '문자셋', type: 'select', options: CS_OPTS }], run: (v, p) => (typeof v === 'string' ? v : decodeBytes(v, p.cs).text) },
+  { id: 'text-encode', name: '텍스트 → 바이트 (문자셋)', group: '인코딩', params: [{ k: 'cs', label: '문자셋', type: 'select', options: [['utf-8', 'UTF-8'], ['euc-kr', 'EUC-KR'], ['iso-8859-1', 'ISO-8859-1']] }], run: (v, p) => encodeText(v, p.cs) },
+  { id: 'html-encode', name: 'HTML 엔티티 인코딩', group: '인코딩', run: v => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') },
+  { id: 'html-decode', name: 'HTML 엔티티 디코딩', group: '인코딩', run: v => { const t = document.createElement('textarea'); t.innerHTML = v; return t.value; } },
+  { id: 'unicode-escape', name: '텍스트 → \\uXXXX', group: '인코딩', params: [{ k: 'all', label: 'ASCII 포함', type: 'bool' }], run: (v, p) => Uni.toEscapes(v, p.all) },
+  { id: 'unicode-unescape', name: '\\uXXXX → 텍스트', group: '인코딩', run: v => Uni.fromEscapes(v) },
+  { id: 'fix-mojibake', name: '깨진 한글 복구 (첫 후보)', group: '인코딩', run: v => { const c = Uni.fixMojibake(v); if (!c.length) throw new Error('복구 후보가 없습니다'); return c[0].text; } },
+  { id: 'gunzip', name: '압축 해제 (gzip/zlib/deflate 자동)', group: '압축', input: 'bytes', run: v => Inflate.auto(v).data },
+  { id: 'gzip', name: '압축 (gzip/deflate)', group: '압축', input: 'bytes', params: [{ k: 'fmt', label: '형식', type: 'select', options: [['gzip', 'gzip'], ['deflate', 'zlib'], ['deflate-raw', 'raw deflate']] }], run: (v, p) => compressBytes(v, p.fmt) },
+  { id: 'json-pretty', name: 'JSON 정렬 (Pretty)', group: 'JSON', params: [{ k: 'indent', label: '들여쓰기', type: 'select', options: [['2', '2칸'], ['4', '4칸'], ['tab', '탭']] }, { k: 'sort', label: '키 정렬', type: 'bool' }], run: (v, p) => JSONX.stringify(JSONX.smartParse(v).node, { indent: indentOpt(p.indent), sortKeys: p.sort }) },
+  { id: 'json-minify', name: 'JSON 압축 (Minify)', group: 'JSON', run: v => JSONX.stringify(JSONX.smartParse(v).node) },
+  { id: 'json-unescape', name: 'JSON 문자열 이스케이프 1단계 해제', group: 'JSON', run: v => JSONX.unescapeOnce(v) },
+  { id: 'json-escape', name: 'JSON 문자열로 이스케이프', group: 'JSON', params: [{ k: 'q', label: '바깥 따옴표', type: 'bool', def: true }], run: (v, p) => { const s = JSONX.quote(v); return p.q ? s : s.slice(1, -1); } },
+  { id: 'json-expand', name: '중첩 JSON 문자열 펼치기', group: 'JSON', run: v => JSONX.stringify(JSONX.expandNested(JSONX.smartParse(v).node), { indent: 2 }) },
+  { id: 'jsonpath', name: 'JSONPath 추출', group: 'JSON', params: [{ k: 'expr', label: '경로', type: 'text', def: '$..id' }, { k: 'first', label: '첫 값만', type: 'bool' }], run: (v, p) => { const r = JSONPath.query(JSONX.smartParse(v).node, p.expr); if (p.first) { if (!r.length) throw new Error('일치하는 값이 없습니다'); const n = r[0].node; return n.T === 'S' ? n.v : JSONX.stringify(n, { indent: 2 }); } return JSONX.stringify({ T: 'A', v: r.map(x => x.node) }, { indent: 2, inline: true }); } },
+  { id: 'json-to-csv', name: 'JSON 배열 → CSV', group: 'JSON', run: v => { const t = Csv.tableFromJson(JSONX.smartParse(v).node); return [t.cols.map(c => Csv.cell(c, ',')).join(',')].concat(t.rows.map(r => r.map(x => Csv.cell(x, ',')).join(','))).join('\n'); } },
+  { id: 'csv-to-json', name: 'CSV/TSV → JSON 배열', group: 'JSON', run: v => { const rows = Csv.parse(v.replace(/\s+$/, ''), Csv.detectDelim(v)); const hd = rows.shift() || []; return JSON.stringify(rows.map(r => { const o = {}; hd.forEach((k, i) => { o[k] = Csv.infer(r[i] === undefined ? '' : r[i]); }); return o; }), null, 2); } },
+  { id: 'jwt-decode', name: 'JWT 디코드', group: 'JSON', params: [{ k: 'part', label: '부분', type: 'select', options: [['payload', 'Payload'], ['header', 'Header'], ['both', '둘 다']] }], run: (v, p) => { const d = Jwt.decode(v); const f = n => JSONX.stringify(n, { indent: 2 }); return p.part === 'header' ? f(d.header.json) : p.part === 'both' ? `${f(d.header.json)}\n${f(d.payload.json)}` : f(d.payload.json); } },
+  { id: 'regex-replace', name: '정규식 치환', group: '텍스트', params: [{ k: 're', label: '패턴', type: 'text', def: '\\s+' }, { k: 'flags', label: '플래그', type: 'text', def: 'g' }, { k: 'to', label: '바꿀 값', type: 'text', def: ' ' }], run: (v, p) => v.replace(new RegExp(p.re, p.flags), p.to.replace(/\\n/g, '\n').replace(/\\t/g, '\t')) },
+  { id: 'regex-extract', name: '정규식 추출', group: '텍스트', params: [{ k: 're', label: '패턴', type: 'text', def: '\\d+' }, { k: 'flags', label: '플래그', type: 'text', def: 'g' }, { k: 'group', label: '그룹', type: 'num', def: 0 }], run: (v, p) => { const re = new RegExp(p.re, p.flags.includes('g') ? p.flags : p.flags + 'g'); const out = []; let m; while ((m = re.exec(v)) && out.length < 100000) { out.push(m[+p.group || 0] || ''); if (m[0] === '') re.lastIndex++; } return out.join('\n'); } },
+  { id: 'replace', name: '찾아 바꾸기 (일반 문자열)', group: '텍스트', params: [{ k: 'from', label: '찾기', type: 'text' }, { k: 'to', label: '바꾸기', type: 'text' }], run: (v, p) => (p.from ? v.split(p.from).join(p.to) : v) },
+  { id: 'grep', name: '줄 필터 (grep)', group: '텍스트', params: [{ k: 're', label: '정규식', type: 'text', def: 'ERROR' }, { k: 'inv', label: '제외', type: 'bool' }, { k: 'ci', label: '대소문자 무시', type: 'bool', def: true }], run: (v, p) => { const re = new RegExp(p.re, p.ci ? 'i' : ''); return v.split(/\r?\n/).filter(l => re.test(l) !== p.inv).join('\n'); } },
+  { id: 'trim-lines', name: '줄 앞뒤 공백 제거', group: '텍스트', run: v => v.split(/\r?\n/).map(l => l.trim()).join('\n') },
+  { id: 'remove-blank', name: '빈 줄 제거', group: '텍스트', run: v => v.split(/\r?\n/).filter(l => l.trim()).join('\n') },
+  { id: 'sort-lines', name: '줄 정렬', group: '텍스트', params: [{ k: 'desc', label: '내림차순', type: 'bool' }], run: (v, p) => { const a = v.split(/\r?\n/).sort(StrOps.cmp); return (p.desc ? a.reverse() : a).join('\n'); } },
+  { id: 'unique-lines', name: '중복 줄 제거', group: '텍스트', run: v => Array.from(new Set(v.split(/\r?\n/))).join('\n') },
+  { id: 'reverse-lines', name: '줄 순서 뒤집기', group: '텍스트', run: v => v.split(/\r?\n/).reverse().join('\n') },
+  { id: 'case', name: '대소문자 · 표기법 변환', group: '텍스트', params: [{ k: 'to', label: '변환', type: 'select', options: [['upper', 'UPPER'], ['lower', 'lower'], ['camel', 'camelCase'], ['pascal', 'PascalCase'], ['snake', 'snake_case'], ['constant', 'CONSTANT_CASE'], ['kebab', 'kebab-case']] }], run: (v, p) => (p.to === 'upper' ? v.toUpperCase() : p.to === 'lower' ? v.toLowerCase() : StrOps.perLine(v, StrOps.CASE[p.to])) },
+  { id: 'wrap-lines', name: '각 줄 감싸기', group: '텍스트', params: [{ k: 'pre', label: '앞', type: 'text', def: "'" }, { k: 'suf', label: '뒤', type: 'text', def: "'," }], run: (v, p) => v.split(/\r?\n/).filter(l => l.trim()).map(l => p.pre + l.trim() + p.suf).join('\n') },
+  { id: 'join-lines', name: '줄 합치기', group: '텍스트', params: [{ k: 'sep', label: '구분자', type: 'text', def: ', ' }], run: (v, p) => v.split(/\r?\n/).filter(l => l.trim()).map(l => l.trim()).join(p.sep.replace(/\\n/g, '\n').replace(/\\t/g, '\t')) },
+  { id: 'split', name: '구분자로 나누기', group: '텍스트', params: [{ k: 'sep', label: '구분자', type: 'text', def: ',' }], run: (v, p) => v.split(p.sep.replace(/\\n/g, '\n').replace(/\\t/g, '\t')).map(x => x.trim()).join('\n') },
+  { id: 'take-lines', name: '줄 범위 자르기', group: '텍스트', params: [{ k: 'from', label: '시작 줄', type: 'num', def: 1 }, { k: 'count', label: '줄 수', type: 'num', def: 100 }], run: (v, p) => v.split(/\r?\n/).slice(Math.max(0, (+p.from || 1) - 1), Math.max(0, (+p.from || 1) - 1) + (+p.count || 0)).join('\n') },
+  { id: 'ts-to-date', name: '타임스탬프 → 날짜 (텍스트 안 숫자)', group: '텍스트', desc: '10자리(초) · 13자리(밀리초) 숫자를 날짜로 바꿉니다', params: [{ k: 'tz', label: '시간대', type: 'select', options: [['kst', 'KST'], ['utc', 'UTC']] }], run: (v, p) => v.replace(/\b(1[5-9]\d{8}|2[01]\d{8})(\d{3})?\b/g, (m, s, ms) => DateX.format(ms ? +m : +s * 1000, ms ? 'yyyy-MM-dd HH:mm:ss.SSS' : 'yyyy-MM-dd HH:mm:ss', p.tz)) },
+  { id: 'hash', name: '해시', group: '해시', input: 'any', params: [{ k: 'alg', label: '알고리즘', type: 'select', options: [['sha256', 'SHA-256'], ['md5', 'MD5'], ['sha1', 'SHA-1'], ['sha384', 'SHA-384'], ['sha512', 'SHA-512'], ['crc32', 'CRC32']] }, { k: 'out', label: '출력', type: 'select', options: [['hex', 'hex'], ['HEX', 'HEX'], ['b64', 'Base64']] }],
+    run: (v, p) => { const b = Hash.digest(p.alg, asBytes(v)); return p.out === 'b64' ? bytesToB64(b) : p.out === 'HEX' ? bytesToHex(b).toUpperCase() : bytesToHex(b); } },
+  { id: 'hmac', name: 'HMAC', group: '해시', input: 'any', params: [{ k: 'alg', label: '알고리즘', type: 'select', options: [['sha256', 'SHA-256'], ['sha1', 'SHA-1'], ['sha512', 'SHA-512'], ['md5', 'MD5']] }, { k: 'key', label: '키', type: 'text', secret: true }, { k: 'out', label: '출력', type: 'select', options: [['hex', 'hex'], ['b64', 'Base64']] }],
+    run: (v, p) => { const b = Hash.hmac(p.alg, utf8(p.key), asBytes(v)); return p.out === 'b64' ? bytesToB64(b) : bytesToHex(b); } },
+  { id: 'xml-pretty', name: 'XML 정렬', group: '포맷', run: v => XmlFmt.pretty(v) },
+  { id: 'xml-minify', name: 'XML 압축', group: '포맷', run: v => XmlFmt.minify(v) },
+  { id: 'sql-format', name: 'SQL 정렬', group: '포맷', params: [{ k: 'case', label: '키워드', type: 'select', options: [['upper', '대문자'], ['lower', '소문자'], ['keep', '유지']] }], run: (v, p) => SqlFmt.format(v, { case: p.case, indent: '    ' }) },
+  { id: 'sql-minify', name: 'SQL 한 줄로', group: '포맷', run: v => SqlFmt.minify(v) },
+].forEach(defineOp);
+
+const RECIPE_EXAMPLES = [
+  { name: '예제: Base64 → GZIP 해제 → JSON 정렬', steps: [{ op: 'b64-decode' }, { op: 'gunzip' }, { op: 'text-decode' }, { op: 'json-pretty' }], input: 'H4sIAAAAAAAAA6tWKi1OLVKyqlbKTFGyMtRRykvMTVWyUvLOzFXSUUpJLShRslJ6tWHO6w1z3vY0KNXqKGWWpOYWK1lFG+oY6RjH6ijlZytZlRSVptYCAM4hxqNLAAAA' },
+  { name: '예제: 이중 이스케이프 JSON 해제 → 정렬', steps: [{ op: 'json-unescape' }, { op: 'json-unescape' }, { op: 'json-pretty' }], input: '"{\\\\\\"name\\\\\\":\\\\\\"홍길동\\\\\\",\\\\\\"age\\\\\\":30}"' },
+  { name: '예제: EUC-KR URL 디코딩 → 쿼리 줄 나누기', steps: [{ op: 'url-decode', p: { cs: 'euc-kr' } }, { op: 'split', p: { sep: '&' } }], input: 'name=%C8%AB%B1%E6%B5%BF&dept=%B0%B3%B9%DF%C6%C0&id=42' },
+  { name: '예제: 로그에서 ERROR 줄만 → 타임스탬프 변환', steps: [{ op: 'grep', p: { re: 'ERROR' } }, { op: 'ts-to-date' }], input: '1761610522 INFO start\n1761610530 ERROR 사용자 조회 실패\n1761610599 WARN 지연\n1761610640123 ERROR DB 연결 실패' },
+  { name: '예제: 컬럼 목록 → camelCase → Java 필드', steps: [{ op: 'case', p: { to: 'camel' } }, { op: 'wrap-lines', p: { pre: 'private String ', suf: ';' } }], input: 'USER_ID\nUSER_NAME\nREG_DT' },
+];
+
+defineTool({
+  id: 'recipe', group: 'auto', abbr: '⇉', name: '레시피 파이프라인',
+  desc: 'Base64 → 압축 해제 → JSON 정렬처럼 여러 변환을 연결해 한 번에 실행 · 레시피 저장',
+  keywords: 'recipe pipeline cyberchef chain 레시피 파이프라인 연속 변환 자동화 워크플로우 디코드 체인',
+  inputs: { input: '입력' }, fill: true,
+  help: `왼쪽 연산 목록에서 클릭해 단계를 추가하면 입력이 위에서 아래로 차례로 변환됩니다. 각 단계를 클릭하면 그 단계까지의 결과를 볼 수 있습니다.<br>
+    값은 단계 사이에 <b>텍스트 또는 바이트</b>로 전달됩니다. 예를 들어 Base64 디코딩 결과(바이트)는 압축 해제로 그대로 넘어가고, 텍스트가 필요한 단계에서는 UTF-8/EUC-KR을 자동 판별합니다.<br>
+    자주 쓰는 레시피는 <b>저장</b>해 두고 같은 형식의 데이터가 오면 한 번에 처리하세요. 레시피는 파일로 내보내 팀원과 공유할 수 있습니다 (HMAC 키 같은 비밀값은 저장하지 않음).`,
+  init(root) {
+    let steps = (persistGet('rc:steps', null) || []).filter(s => OP_MAP[s.op]);
+    let selIdx = -1, results = [], seq = 0;
+    const saved = () => store.get('recipe:list', []);
+    const bar = h('<div class="toolbar"></div>');
+    const pick = h('<select class="inp sm" style="max-width:280px"></select>');
+    const oAuto = chk('자동 실행', 'rc:auto', true);
+    bar.append(pick, btn('저장', saveRecipe, 'sm'), btn('삭제', delRecipe, 'sm ghost'), btn('단계 비우기', () => { steps = []; selIdx = -1; renderSteps(); run(); }, 'sm ghost'),
+      h('<span class="sep"></span>'), btn('실행', () => run(true), 'primary', 'Ctrl+Enter'), oAuto.el, h('<span class="sp"></span>'), btn('내보내기', exportRecipes, 'sm ghost'), btn('가져오기', importRecipes, 'sm ghost'));
+    const wrap = h('<div class="rc-wrap"></div>');
+    const colOps = h('<div class="rc-col"><input class="inp sm" placeholder="연산 검색 (예: base64, gzip, json)"><div class="rc-ops"></div></div>');
+    const colSteps = h('<div class="rc-col"><div class="section-title">레시피 단계 <span class="faint" data-c></span></div><div class="rc-steps"></div></div>');
+    const colIO = h('<div class="rc-col"></div>');
+    const inp = Pane({ title: '입력', persist: 'rc', placeholder: '변환할 데이터를 붙여넣거나 파일을 끌어다 놓으세요', sendFrom: 'recipe' });
+    const out = Pane({ title: '결과', readonly: true, sendFrom: 'recipe', filename: 'recipe-output.txt' });
+    const binBtn = btn('바이트로 저장', () => { const r = shownResult(); if (r && r.out instanceof Uint8Array) download('output.bin', new Blob([r.out])); }, 'xs ghost hidden');
+    out.extra.appendChild(binBtn);
+    inp.el.style.flex = '1'; out.el.style.flex = '1.3';
+    colIO.append(inp.el, out.el);
+    wrap.append(colOps, colSteps, colIO);
+    root.append(bar, wrap);
+    const opSearch = $('input', colOps), opList = $('.rc-ops', colOps), stepBox = $('.rc-steps', colSteps);
+    let fileBytes = null;
+    inp.el.addEventListener('drop', async e => {
+      const f = e.dataTransfer.files[0]; if (!f) return;
+      const head = new Uint8Array(await f.slice(0, 4096).arrayBuffer());
+      if (guessKind('', head) === 'binary') { e.stopImmediatePropagation(); e.preventDefault(); inp.el.classList.remove('drop'); fileBytes = new Uint8Array(await f.arrayBuffer()); inp.set(`(바이너리 파일 ${f.name} · ${fmtBytes(f.size)} — 바이트 그대로 입력됨)`, { snap: false }); inp.status('바이너리 입력', 'info'); run(); }
+    }, true);
+    inp.onInput(() => { fileBytes = null; if (oAuto.get()) lazyRun(); });
+    function renderOps() {
+      const q = opSearch.value.trim().toLowerCase(); opList.innerHTML = '';
+      const groups = {};
+      OPS.filter(o => !q || (o.name + ' ' + o.id + ' ' + o.group + ' ' + (o.desc || '')).toLowerCase().includes(q)).forEach(o => (groups[o.group] = groups[o.group] || []).push(o));
+      Object.entries(groups).forEach(([g, os]) => {
+        opList.appendChild(h(`<div class="menu-label">${esc(g)}</div>`));
+        os.forEach(o => { const b = h('<button class="rc-op" type="button"></button>'); b.textContent = '+ ' + o.name; b.title = o.desc || o.name; on(b, 'click', () => { steps.push({ op: o.id, p: Recipe.defaults(o), on: true }); selIdx = -1; renderSteps(); run(); }); opList.appendChild(b); });
+      });
+    }
+    on(opSearch, 'input', renderOps);
+    on(opSearch, 'keydown', e => { if (e.key === 'Enter') { const b = $('.rc-op', opList); if (b) b.click(); } });
+    function renderSteps() {
+      $('[data-c]', colSteps).textContent = steps.length ? `(${steps.length}단계)` : '';
+      stepBox.innerHTML = '';
+      if (!steps.length) stepBox.appendChild(h('<div class="empty-state">왼쪽에서 연산을 클릭해 단계를 추가하세요<br><span style="font-size:12px">또는 위의 목록에서 예제 레시피를 선택하세요</span></div>'));
+      steps.forEach((st, i) => {
+        const op = OP_MAP[st.op];
+        const card = h(`<div class="rc-step${st.on === false ? ' off' : ''}${i === selIdx ? ' sel' : ''}"><div class="rc-h"><span class="faint mono">${i + 1}</span><b style="flex:1"></b>
+          <button class="btn xs ghost" data-a="up" type="button" title="위로">▲</button><button class="btn xs ghost" data-a="down" type="button" title="아래로">▼</button>
+          <button class="btn xs ghost" data-a="tog" type="button" title="사용/건너뛰기">${st.on === false ? '켜기' : '끄기'}</button><button class="btn xs ghost" data-a="del" type="button" title="삭제">✕</button></div>
+          ${op.params.length ? '<div class="rc-b"></div>' : ''}<div class="rc-s"></div></div>`);
+        $('b', card).textContent = op.name;
+        const body = $('.rc-b', card);
+        op.params.forEach(pm => {
+          const v = st.p[pm.k];
+          let ctl;
+          if (pm.type === 'bool') { ctl = h('<label class="chk"><input type="checkbox"> <span></span></label>'); ctl.lastChild.textContent = pm.label; ctl.firstChild.checked = !!v; on(ctl.firstChild, 'change', () => { st.p[pm.k] = ctl.firstChild.checked; changed(); }); }
+          else {
+            const lab = h('<label class="row" style="gap:4px"><span class="dim"></span></label>'); lab.firstChild.textContent = pm.label;
+            const inpEl = pm.type === 'select' ? h('<select class="inp sm"></select>') : h(`<input class="inp sm mono" ${pm.type === 'num' ? 'type="number" style="width:80px"' : 'style="width:150px"'}${pm.secret ? ' autocomplete="off"' : ''}>`);
+            if (pm.type === 'select') pm.options.forEach(([ov, ol]) => { const o = document.createElement('option'); o.value = ov; o.textContent = ol; inpEl.appendChild(o); });
+            inpEl.value = v == null ? '' : v;
+            on(inpEl, pm.type === 'select' ? 'change' : 'input', () => { st.p[pm.k] = pm.type === 'num' ? +inpEl.value : inpEl.value; changed(); });
+            lab.appendChild(inpEl); ctl = lab;
+          }
+          body.appendChild(ctl);
+        });
+        on($('.rc-h', card), 'click', e => {
+          const a = e.target.closest('[data-a]');
+          if (!a) { selIdx = selIdx === i ? -1 : i; renderSteps(); showOut(); return; }
+          const k = a.dataset.a;
+          if (k === 'del') { steps.splice(i, 1); if (selIdx >= steps.length) selIdx = -1; }
+          else if (k === 'up' && i > 0) [steps[i - 1], steps[i]] = [steps[i], steps[i - 1]];
+          else if (k === 'down' && i < steps.length - 1) [steps[i + 1], steps[i]] = [steps[i], steps[i + 1]];
+          else if (k === 'tog') st.on = st.on === false;
+          renderSteps(); run();
+        });
+        stepBox.appendChild(card);
+      });
+      paintStatus();
+    }
+    function paintStatus() {
+      $$('.rc-step', stepBox).forEach((card, i) => {
+        const r = results[i], s = $('.rc-s', card);
+        card.classList.toggle('err', !!(r && !r.ok));
+        if (!r) { s.textContent = results.length && i >= results.length ? '— (앞 단계 오류로 실행 안 됨)' : ''; s.className = 'rc-s'; return; }
+        if (!r.ok) { s.textContent = '✕ ' + r.err; s.className = 'rc-s err'; return; }
+        s.className = 'rc-s';
+        s.textContent = r.skip ? '건너뜀' : `✓ ${r.out instanceof Uint8Array ? `바이트 ${fmtNum(r.out.length)}` : `텍스트 ${fmtNum(r.out.length)}자`} · ${r.ms.toFixed(1)}ms`;
+      });
+    }
+    function persistSteps() { persistSet('rc:steps', steps.map(s => ({ op: s.op, on: s.on, p: Object.fromEntries(Object.entries(s.p).filter(([k]) => !(OP_MAP[s.op].params.find(x => x.k === k) || {}).secret)) }))); }
+    const lazyRun = debounce(() => run(), 300);
+    function changed() { persistSteps(); if (oAuto.get()) lazyRun(); }
+    function shownResult() { if (!results.length) return null; if (selIdx >= 0 && results[selIdx]) return results[selIdx]; for (let i = results.length - 1; i >= 0; i--) if (results[i].ok) return results[i]; return null; }
+    function showOut() {
+      const r = shownResult(); const last = results[results.length - 1];
+      binBtn.classList.add('hidden');
+      if (!steps.length) { out.set(fileBytes ? hexDump(fileBytes) : inp.get()); out.setTitle('결과 (단계 없음 — 입력 그대로)'); out.status(''); return; }
+      if (!r) { out.set(''); out.setTitle('결과'); out.status(last && !last.ok ? `✕ ${results.length}단계 오류: ${last.err}` : '', 'err'); return; }
+      const idx = results.indexOf(r);
+      out.setTitle(selIdx >= 0 ? `${idx + 1}단계 결과 — ${OP_MAP[steps[idx].op].name}` : '최종 결과');
+      if (r.out instanceof Uint8Array) {
+        out.set(hexDump(r.out), { lang: null }); binBtn.classList.remove('hidden');
+        out.status(`바이트 ${fmtNum(r.out.length)}개 — 텍스트가 필요하면 "바이트 → 텍스트" 단계를 추가하세요`, 'info');
+      } else {
+        const t = r.out; out.set(t, { lang: /^\s*[{[]/.test(t) && t.length < 2e6 ? 'json' : /^\s*</.test(t) ? 'xml' : null });
+        out.status(last && !last.ok ? `⚠ ${results.length}단계 오류: ${last.err} (오류 전 결과 표시)` : `✓ ${steps.filter(s => s.on !== false).length}단계 완료`, last && !last.ok ? 'err' : 'ok');
+      }
+    }
+    async function run(force) {
+      const my = ++seq; persistSteps();
+      const input = fileBytes || inp.get();
+      if (!steps.length) { results = []; renderSteps(); showOut(); return; }
+      if (!fileBytes && !input) { results = []; paintStatus(); out.set(''); out.status('입력을 넣으세요', 'info'); return; }
+      const r = await Recipe.run(input, steps);
+      if (my !== seq) return;
+      results = r; paintStatus(); showOut();
+    }
+    function fillPick() {
+      pick.innerHTML = '<option value="">레시피 선택…</option>';
+      const og1 = document.createElement('optgroup'); og1.label = '저장된 레시피';
+      saved().forEach((r, i) => { const o = document.createElement('option'); o.value = 's' + i; o.textContent = r.name; og1.appendChild(o); });
+      if (og1.children.length) pick.appendChild(og1);
+      const og2 = document.createElement('optgroup'); og2.label = '예제';
+      RECIPE_EXAMPLES.forEach((r, i) => { const o = document.createElement('option'); o.value = 'e' + i; o.textContent = r.name; og2.appendChild(o); });
+      pick.appendChild(og2);
+    }
+    on(pick, 'change', () => {
+      const v = pick.value; if (!v) return;
+      const r = v[0] === 's' ? saved()[+v.slice(1)] : RECIPE_EXAMPLES[+v.slice(1)];
+      if (r) load(r.steps.map(s => ({ op: s.op, p: Object.assign(Recipe.defaults(OP_MAP[s.op]), s.p || {}), on: s.on !== false })), r.input);
+    });
+    function saveRecipe() {
+      if (!steps.length) { toast('저장할 단계가 없습니다', 'warn'); return; }
+      const cur = pick.value && pick.value[0] === 's' ? saved()[+pick.value.slice(1)] : null;
+      const name = prompt('레시피 이름', cur ? cur.name : ''); if (!name) return;
+      const list = saved().filter(r => r.name !== name);
+      list.unshift({ name, steps: steps.map(s => ({ op: s.op, on: s.on, p: Object.fromEntries(Object.entries(s.p).filter(([k]) => !(OP_MAP[s.op].params.find(x => x.k === k) || {}).secret)) })) });
+      store.set('recipe:list', list); fillPick(); pick.value = 's0'; toast('레시피를 저장했습니다 (비밀값 제외)', 'ok');
+    }
+    function delRecipe() {
+      if (!pick.value || pick.value[0] !== 's') { toast('삭제할 저장된 레시피를 선택하세요', 'warn'); return; }
+      const list = saved(); const r = list[+pick.value.slice(1)]; if (!r || !confirm(`'${r.name}' 레시피를 삭제할까요?`)) return;
+      list.splice(+pick.value.slice(1), 1); store.set('recipe:list', list); fillPick();
+    }
+    function exportRecipes() { const list = saved(); if (!list.length) { toast('저장된 레시피가 없습니다', 'warn'); return; } download('devhub-recipes.json', JSON.stringify({ app: 'devhub-recipe', version: 1, recipes: list }, null, 2), 'application/json'); }
+    async function importRecipes() {
+      const f = await pickFile('.json'); if (!f) return;
+      try {
+        const j = JSON.parse((await readFileText(f)).text);
+        if (j.app !== 'devhub-recipe' || !Array.isArray(j.recipes)) throw new Error('레시피 파일이 아닙니다');
+        const list = saved(); let n = 0;
+        j.recipes.forEach(r => { if (r && r.name && Array.isArray(r.steps) && r.steps.every(s => OP_MAP[s.op])) { const i = list.findIndex(x => x.name === r.name); if (i >= 0) list[i] = r; else list.push(r); n++; } });
+        store.set('recipe:list', list); fillPick(); toast(`레시피 ${n}개를 가져왔습니다`, 'ok');
+      } catch (e) { toast(e.message, 'err'); }
+    }
+    function load(st, input) {
+      steps = st.filter(s => OP_MAP[s.op]); selIdx = -1; fileBytes = null;
+      if (input != null) inp.set(input);
+      renderSteps(); run();
+    }
+    renderOps(); fillPick(); renderSteps(); run();
+    return { run: () => run(true), load, receive(slot, t) { fileBytes = null; inp.set(t); run(); } };
+  },
+});
+
+/* =====================================================================
  * 부팅
  * ===================================================================== */
 function boot() {
   applyTheme();
   if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); const f = () => { if (settings.theme === 'auto') applyTheme(); }; if (mq.addEventListener) mq.addEventListener('change', f); else if (mq.addListener) mq.addListener(f); }
+  OPEN_TABS = OPEN_TABS.filter(x => TOOL_MAP[x.id]);
   renderNav();
   on($('#openPalette'), 'click', openPalette);
+  on($('#openSmart'), 'click', () => SmartPaste.open(''));
+  // 입력 칸 밖에서 붙여넣기 → Smart Paste
+  on(document, 'paste', e => {
+    const t = e.target;
+    if ((t.closest && t.closest('input, textarea, select, [contenteditable]')) || $('.overlay')) return;
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (text && text.trim()) { e.preventDefault(); SmartPaste.open(text); }
+  });
+  // 패널 밖에 파일을 끌어다 놓으면 → 파일 자동 감지
+  on(document, 'dragover', e => { if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault(); });
+  on(document, 'drop', e => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return; e.preventDefault();
+    if (e.target.closest && e.target.closest('.pane, .dropzone')) return;
+    SmartPaste.openFile(f);
+  });
   on($('#themeBtn'), 'click', cycleTheme);
   on($('#settingsBtn'), 'click', openSettings);
   on($('[data-home]'), 'click', () => { location.hash = ''; showHome(); });
