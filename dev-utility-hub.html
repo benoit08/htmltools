@@ -1510,7 +1510,7 @@ DU.Zip = Zip;
  *  - 관대한 모드: 주석, 후행 쉼표, 작은따옴표, 따옴표 없는 키, True/False/None
  * AST: {T:'O', p:[[key,node]...]} | {T:'A', v:[node]} | {T:'S', v} | {T:'N', v:raw} | {T:'B', v} | {T:'Z'}
  * ===================================================================== */
-const JSONX = (() => {
+function jsonxFactory() {
   class JsonError extends Error {
     constructor(msg, pos, src) { super(msg); this.pos = pos; const lc = lineColOf(src, pos); this.line = lc.line; this.col = lc.col; }
   }
@@ -1837,8 +1837,51 @@ const JSONX = (() => {
     return path.map((k, j) => typeof k === 'number' ? `[${k}]` : /^[A-Za-z_$][\w$]*$/.test(k) ? (j ? '.' : '') + k : `[${JSON.stringify(k)}]`).join('') || '(root)';
   }
   return { parse, smartParse, stringify, toJS, fromJS, typeName, get, expandNested, unescapeLoose, unescapeOnce, quote, stats, pathStr, jsPath, JsonError };
-})();
+}
+const JSONX = jsonxFactory();
 DU.JSONX = JSONX;
+
+/** 대용량 JSON: 같은 엔진을 Web Worker에서 실행 (화면 멈춤 방지) */
+const JSON_BIG = 1.5 * 1048576;
+const JsonWorker = (() => {
+  let url = null, cur = null, ok = true;
+  const SRC = () => `${lineColOf.toString()}
+const JSONX = (${jsonxFactory.toString()})();
+onmessage = function (e) {
+  const d = e.data;
+  try {
+    const r = JSONX.smartParse(d.src, d.opt);
+    let node = r.node; const cnt = { n: 0 };
+    if (d.nested) node = JSONX.expandNested(node, cnt);
+    const text = d.mode === 'minify' ? JSONX.stringify(node, { sortKeys: d.fmt.sortKeys, ascii: d.fmt.ascii }) : JSONX.stringify(node, d.fmt);
+    postMessage({ ok: true, text, levels: r.levels, warnings: r.warnings, stats: JSONX.stats(node), nested: cnt.n,
+      info: { T: node.T, type: JSONX.typeName(node), count: node.T === 'A' ? node.v.length : node.T === 'O' ? node.p.length : 0 }, node: d.wantNode ? node : null });
+  } catch (err) { postMessage({ ok: false, error: { message: err.message, line: err.line, col: err.col, pos: err.pos } }); }
+};`;
+  /** 실패 시(Worker 미지원) 메인 스레드에서 동일 처리 */
+  function local(d) {
+    try {
+      const r = JSONX.smartParse(d.src, d.opt); let node = r.node; const cnt = { n: 0 };
+      if (d.nested) node = JSONX.expandNested(node, cnt);
+      const text = d.mode === 'minify' ? JSONX.stringify(node, { sortKeys: d.fmt.sortKeys, ascii: d.fmt.ascii }) : JSONX.stringify(node, d.fmt);
+      return { ok: true, text, levels: r.levels, warnings: r.warnings, stats: JSONX.stats(node), nested: cnt.n, info: { T: node.T, type: JSONX.typeName(node), count: node.T === 'A' ? node.v.length : node.T === 'O' ? node.p.length : 0 }, node: d.wantNode ? node : null };
+    } catch (err) { return { ok: false, error: { message: err.message, line: err.line, col: err.col, pos: err.pos } }; }
+  }
+  function run(d) {
+    return new Promise(resolve => {
+      if (cur) { cur.w.terminate(); cur.resolve({ ok: false, cancelled: true }); cur = null; }
+      if (!ok) { setTimeout(() => resolve(local(d)), 0); return; }
+      try {
+        if (!url) url = URL.createObjectURL(new Blob([SRC()], { type: 'text/javascript' }));
+        const w = new Worker(url); const job = { w, resolve }; cur = job;
+        w.onmessage = e => { w.terminate(); if (cur === job) cur = null; resolve(e.data); };
+        w.onerror = e => { e.preventDefault(); w.terminate(); if (cur === job) cur = null; ok = false; resolve(local(d)); };
+        w.postMessage(d);
+      } catch (e) { ok = false; resolve(local(d)); }
+    });
+  }
+  return { run };
+})();
 
 /* ---------- JSONPath (AST 대상) ----------
  * 지원: $ . .. * [n] [-1] [a,b] [s:e:step] ['key'] [?(@.a > 1 && @.b == 'x')] =~ /re/ .length
@@ -2182,52 +2225,70 @@ defineTool({
     const tree = JsonTree();
     tree.el.classList.add('hidden');
     out.el.insertBefore(tree.el, out.el.querySelector('.pane-foot'));
-    let view = 'text', lastNode = null, treeDirty = true;
+    let view = 'text', lastNode = null, treeDirty = true, lastBig = false;
     const viewSeg = Seg([['text', '텍스트'], ['tree', '트리']], 'text', v => {
       view = v; tree.el.classList.toggle('hidden', v !== 'tree'); out.el.querySelector('.pane-body').classList.toggle('hidden', v === 'tree');
-      if (v === 'tree' && treeDirty) { tree.render(lastNode); treeDirty = false; }
+      if (v === 'tree' && treeDirty) { if (!lastNode && lastBig) { run(); return; } tree.render(lastNode); treeDirty = false; }
     });
     viewSeg.el.style.marginLeft = '8px';
     out.extra.appendChild(viewSeg.el);
     split.append(inp.el, out.el);
     root.append(bar, split, summary);
 
+    let bigSeq = 0;
     function run(m = mode) {
       if (m !== 'validate') { mode = m === 'repair' ? 'pretty' : m; persistSet('jf:mode', mode); }
       const src = inp.get();
       summary.innerHTML = '';
       if (!src.trim()) { out.set(''); inp.status(''); out.status(''); lastNode = null; treeDirty = true; if (view === 'tree') { tree.render(null); treeDirty = false; } return; }
-      let r;
-      try { r = JSONX.smartParse(src, { lenient: m === 'repair', autoUnescape: oUnesc.get() }); }
-      catch (e) {
-        paneError(inp, e, src); out.status('입력에 오류가 있습니다', 'err');
-        const fix = btn('관대한 파싱으로 복구 시도', () => run('repair'), 'xs');
-        summary.append(h('<span class="badge err">유효하지 않은 JSON</span>'), fix);
+      const outMode = m === 'validate' ? mode : m;
+      const fmt = { indent: indentOpt(indent.value), sortKeys: oSort.get(), ascii: oAscii.get(), inline: oInline.get() };
+      const opt = { lenient: m === 'repair', autoUnescape: oUnesc.get() };
+      if (src.length > JSON_BIG) {
+        // 대용량: Worker에서 처리 (트리 보기일 때만 AST를 받아옴)
+        const my = ++bigSeq;
+        inp.status(`대용량 JSON(${fmtBytes(src.length)}) 백그라운드 처리 중…`, 'info'); out.status('처리 중…', 'info');
+        JsonWorker.run({ src, opt, nested: oNested.get(), mode: outMode, fmt, wantNode: view === 'tree' }).then(res => {
+          if (my !== bigSeq || res.cancelled) return;
+          if (!res.ok) { fail(Object.assign(new Error(res.error.message), res.error), src); return; }
+          finish(m, Object.assign(res, { src, big: true, text: m === 'validate' && out.get() ? null : res.text }));
+        });
         return;
       }
+      let r;
+      try { r = JSONX.smartParse(src, opt); } catch (e) { fail(e, src); return; }
       let node = r.node; const cnt = { n: 0 };
       if (oNested.get()) node = JSONX.expandNested(node, cnt);
-      const st = JSONX.stats(node);
-      const badges = [`<span class="badge ok">✓ 유효한 JSON</span>`, `<span>타입 <b>${JSONX.typeName(node)}</b></span>`,
-        node.T === 'A' ? `<span>항목 <b>${fmtNum(node.v.length)}</b></span>` : node.T === 'O' ? `<span>최상위 키 <b>${fmtNum(node.p.length)}</b></span>` : '',
-        `<span>전체 키 <b>${fmtNum(st.keys)}</b></span>`, `<span>깊이 <b>${st.depth}</b></span>`, `<span>입력 <b>${fmtBytes(utf8(src).length)}</b></span>`];
+      const text = m === 'validate' && out.get() ? null : outMode === 'minify' ? JSONX.stringify(node, { sortKeys: fmt.sortKeys, ascii: fmt.ascii }) : JSONX.stringify(node, fmt);
+      finish(m, { levels: r.levels, warnings: r.warnings, stats: JSONX.stats(node), nested: cnt.n, node, text, src,
+        info: { T: node.T, type: JSONX.typeName(node), count: node.T === 'A' ? node.v.length : node.T === 'O' ? node.p.length : 0 } });
+    }
+    function fail(e, src) {
+      paneError(inp, e, src); out.status('입력에 오류가 있습니다', 'err');
+      const fix = btn('관대한 파싱으로 복구 시도', () => run('repair'), 'xs');
+      summary.append(h('<span class="badge err">유효하지 않은 JSON</span>'), fix);
+    }
+    function finish(m, r) {
+      const st = r.stats, info = r.info;
+      const badges = [`<span class="badge ok">✓ 유효한 JSON</span>`, `<span>타입 <b>${info.type}</b></span>`,
+        info.T === 'A' ? `<span>항목 <b>${fmtNum(info.count)}</b></span>` : info.T === 'O' ? `<span>최상위 키 <b>${fmtNum(info.count)}</b></span>` : '',
+        `<span>전체 키 <b>${fmtNum(st.keys)}</b></span>`, `<span>깊이 <b>${st.depth}</b></span>`, `<span>입력 <b>${fmtBytes(r.big ? r.src.length : utf8(r.src).length)}</b></span>`];
+      if (r.big) badges.push('<span class="badge info">대용량 모드 (Worker)</span>');
       if (r.levels) badges.push(`<span class="badge info">이스케이프 ${r.levels}단계 자동 해제</span>`);
-      if (cnt.n) badges.push(`<span class="badge info">중첩 JSON ${cnt.n}개 펼침</span>`);
+      if (r.nested) badges.push(`<span class="badge info">중첩 JSON ${r.nested}개 펼침</span>`);
       if (m === 'repair') badges.push(`<span class="badge warn">관대한 파싱으로 복구됨</span>`);
       r.warnings.slice(0, 5).forEach(w => badges.push(`<span class="badge warn" title="${esc(w)}">⚠ ${esc(w.length > 60 ? w.slice(0, 60) + '…' : w)}</span>`));
       summary.innerHTML = badges.filter(Boolean).join('');
-      lastNode = node; treeDirty = true;
-      if (m !== 'validate' || !out.get()) {
+      lastNode = r.node; treeDirty = true; lastBig = !!r.big;
+      if (r.text != null) {
+        out.set(r.text);
         const outMode = m === 'validate' ? mode : m;
-        const text = outMode === 'minify' ? JSONX.stringify(node, { sortKeys: oSort.get(), ascii: oAscii.get() })
-          : JSONX.stringify(node, { indent: indentOpt(indent.value), sortKeys: oSort.get(), ascii: oAscii.get(), inline: oInline.get() });
-        out.set(text);
-        out.status(outMode === 'minify' ? `압축 · ${fmtBytes(utf8(text).length)}` : `정렬 · ${fmtBytes(utf8(text).length)}`, 'info');
+        out.status(`${outMode === 'minify' ? '압축' : '정렬'} · ${fmtBytes(r.big ? r.text.length : utf8(r.text).length)}`, 'info');
       }
       inp.status(m === 'repair' ? '복구 완료 — 결과를 확인하세요' : '✓ 유효한 JSON', 'ok');
-      if (view === 'tree') { tree.render(node); treeDirty = false; }
+      if (view === 'tree' && lastNode) { tree.render(lastNode); treeDirty = false; }
     }
-    const live = debounce(() => { if (oLive.get() && inp.get().length < 3 * 1048576) run(); }, 350);
+    const live = debounce(() => { if (oLive.get() && inp.get().length <= JSON_BIG) run(); }, 350);
     inp.onInput(live);
     [indent, oSort.input, oUnesc.input, oNested.input, oAscii.input, oInline.input].forEach(c => on(c, 'change', () => run()));
     if (inp.get()) run();
